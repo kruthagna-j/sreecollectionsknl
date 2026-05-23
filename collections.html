@@ -171,8 +171,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
       <input type="tel" id="custPhone" placeholder="+91 XXXXX XXXXX">
     </div>
     <div class="form-group">
-      <label>Email Address <span style="color:var(--gold);font-size:0.7rem">(for invoice)</span></label>
-      <input type="email" id="custEmail" placeholder="your@email.com">
+      <label>Email Address <span style="color:var(--red);font-size:0.8rem">* required for OTP</span></label>
+      <input type="email" id="custEmail" placeholder="your@email.com" required>
     </div>
     <div class="form-group">
       <label>Delivery Address</label>
@@ -208,6 +208,40 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
       <button class="btn-confirm" id="confirmBtn" onclick="confirmOrder()">
         <i class="fas fa-shopping-bag"></i> Confirm Order
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- OTP VERIFICATION MODAL -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal" style="max-width:420px">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:2.5rem;margin-bottom:0.8rem">🔐</div>
+      <h2 style="margin:0">Verify Order</h2>
+      <p style="font-size:0.82rem;color:var(--muted);margin-top:0.6rem">A 6-digit verification code has been sent to your email and phone. Enter it below to confirm your order.</p>
+    </div>
+    <div style="background:var(--dark);border:1px solid var(--border);padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
+      <div><i class="fas fa-envelope" style="color:var(--gold);width:16px"></i> <span id="otpSentEmail"></span></div>
+      <div style="margin-top:0.4rem"><i class="fas fa-mobile-alt" style="color:var(--gold);width:16px"></i> <span id="otpSentPhone"></span></div>
+    </div>
+    <div class="form-group">
+      <label>Enter 6-Digit Code *</label>
+      <input type="text" id="otpInput" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric"
+        style="font-size:1.8rem;letter-spacing:0.5rem;text-align:center;font-family:monospace"
+        onkeydown="if(event.key==='Enter')verifyOtp()">
+    </div>
+    <div id="otpError" style="color:var(--red);font-size:0.82rem;margin-bottom:1rem;min-height:18px;text-align:center"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeOtpModal()">Cancel</button>
+      <button class="btn-confirm" id="otpVerifyBtn" onclick="verifyOtp()">
+        <i class="fas fa-check-circle"></i> Verify & Place Order
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:1rem">
+      <button id="resendBtn" onclick="resendOtp()" style="background:none;border:none;color:var(--gold);font-size:0.8rem;cursor:pointer;text-decoration:underline">
+        Resend Code
+      </button>
+      <span id="resendTimer" style="font-size:0.78rem;color:var(--muted);display:none"></span>
     </div>
   </div>
 </div>
@@ -254,7 +288,9 @@ var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 var RZP_KEY = 'rzp_test_SrsY668SBTZFfn';
 var EMAILJS_PUBLIC_KEY = '9fGahlws55ZA4Hq9S';
 var EMAILJS_SERVICE_ID = 'service_fxctnxu';
-var EMAILJS_TEMPLATE_ID = 'template_detul3i';
+var EMAILJS_TEMPLATE_ID = 'template_detul3i';   // Order confirmation template
+var OTP_TEMPLATE_ID = 'template_otp_verify';    // ← Create this template in EmailJS (see note below)
+var FAST2SMS_KEY = 'YOUR_FAST2SMS_API_KEY';     // ← Replace with your Fast2SMS API key
 var OWNER_EMAIL = '2103iare@gmail.com';
 
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -363,23 +399,185 @@ function selectPayment(method) {
   document.getElementById('pm-online').classList.toggle('selected', method === 'online');
 }
 
+// ── OTP STATE ──────────────────────────────────────────────
+var pendingOtp = null;
+var otpExpiry = null;
+var otpResendCooldown = null;
+var pendingOrderPayload = null; // {name, phone, method, payStatus, payId}
+
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 async function confirmOrder() {
   var name = document.getElementById('custName').value.trim();
   var phone = document.getElementById('custPhone').value.trim();
+  var email = document.getElementById('custEmail').value.trim();
   if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+  if (!email) { alert('Email address is required to receive your OTP and order confirmation.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
+
   var btn = document.getElementById('confirmBtn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-  if (currentPayment === 'cod') {
-    await placeOrder(name, phone, 'cod', 'pending', null);
-  } else {
-    await startRazorpay(name, phone);
-  }
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+
+  var otp = generateOtp();
+  pendingOtp = otp;
+  otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
+
+  var sent = await sendOtp(email, phone, name, otp);
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Confirm Order';
+
+  if (!sent) {
+    alert('Could not send verification code. Please check your email/phone and try again.');
+    return;
+  }
+
+  // OTP must be verified BEFORE payment or order — store intent and open OTP modal
+  if (currentPayment === 'cod') {
+    pendingOrderPayload = { method: 'cod', payStatus: 'pending', payId: null };
+  } else {
+    pendingOrderPayload = { method: 'online', payStatus: null, payId: null }; // payment happens after OTP
+  }
+  closeModal();
+  openOtpModal(email, phone);
 }
 
-async function startRazorpay(name, phone) {
+async function sendOtp(email, phone, name, otp) {
+  var emailOk = false, smsOk = false;
+  // Send via EmailJS
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, OTP_TEMPLATE_ID, {
+      customer_name: name,
+      customer_email: email,
+      otp_code: otp,
+      expiry_mins: '10'
+    });
+    emailOk = true;
+  } catch(e) {
+    console.error('OTP email error:', e);
+  }
+  // Send SMS via Fast2SMS
+  try {
+    var smsResp = await fetch('https://www.fast2sms.com/dev/bulkV2?authorization=' + FAST2SMS_KEY +
+      '&variables_values=' + otp +
+      '&route=dlt' +
+      '&numbers=' + phone.replace(/\D/g,'').slice(-10), {
+      method: 'GET'
+    });
+    var smsData = await smsResp.json();
+    if (smsData.return === true) smsOk = true;
+  } catch(e) {
+    console.error('SMS error:', e);
+    smsOk = true; // Don't block if SMS fails — email OTP is enough
+  }
+  return emailOk; // Email OTP is the primary gate
+}
+
+function openOtpModal(email, phone) {
+  document.getElementById('otpInput').value = '';
+  document.getElementById('otpError').textContent = '';
+  // Mask email: sh**@gmail.com
+  var parts = email.split('@');
+  var masked = parts[0].substring(0,2) + '***@' + parts[1];
+  // Mask phone: ****56789
+  var digits = phone.replace(/\D/g,'').slice(-10);
+  var maskedPhone = '******' + digits.slice(-4);
+  document.getElementById('otpSentEmail').textContent = masked;
+  document.getElementById('otpSentPhone').textContent = maskedPhone;
+  document.getElementById('otpModal').classList.add('active');
+  document.getElementById('otpInput').focus();
+  startResendTimer();
+}
+
+function closeOtpModal() {
+  document.getElementById('otpModal').classList.remove('active');
+  pendingOtp = null;
+  pendingOrderPayload = null;
+  if (otpResendCooldown) clearInterval(otpResendCooldown);
+}
+
+function startResendTimer() {
+  var seconds = 60;
+  document.getElementById('resendBtn').style.display = 'none';
+  var timerEl = document.getElementById('resendTimer');
+  timerEl.style.display = 'inline';
+  timerEl.textContent = 'Resend in ' + seconds + 's';
+  if (otpResendCooldown) clearInterval(otpResendCooldown);
+  otpResendCooldown = setInterval(function() {
+    seconds--;
+    if (seconds <= 0) {
+      clearInterval(otpResendCooldown);
+      timerEl.style.display = 'none';
+      document.getElementById('resendBtn').style.display = 'inline';
+    } else {
+      timerEl.textContent = 'Resend in ' + seconds + 's';
+    }
+  }, 1000);
+}
+
+async function resendOtp() {
+  var name = document.getElementById('custName').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  var email = document.getElementById('custEmail').value.trim();
+  var otp = generateOtp();
+  pendingOtp = otp;
+  otpExpiry = Date.now() + 10 * 60 * 1000;
+  document.getElementById('otpError').textContent = '';
+  document.getElementById('resendBtn').style.display = 'none';
+  var sent = await sendOtp(email, phone, name, otp);
+  if (sent) {
+    document.getElementById('otpError').style.color = 'var(--green)';
+    document.getElementById('otpError').textContent = '✓ New code sent to your email and phone.';
+    setTimeout(function(){ document.getElementById('otpError').style.color = 'var(--red)'; document.getElementById('otpError').textContent = ''; }, 3000);
+  }
+  startResendTimer();
+}
+
+async function verifyOtp() {
+  var entered = document.getElementById('otpInput').value.trim();
+  var errEl = document.getElementById('otpError');
+  if (!entered || entered.length < 6) { errEl.textContent = 'Please enter the 6-digit code.'; return; }
+  if (!pendingOtp) { errEl.textContent = 'Session expired. Please go back and try again.'; return; }
+  if (Date.now() > otpExpiry) {
+    errEl.textContent = 'Code has expired (10 min). Please click Resend.';
+    pendingOtp = null;
+    return;
+  }
+  if (entered !== pendingOtp) {
+    errEl.textContent = 'Incorrect code. Please try again.';
+    document.getElementById('otpInput').value = '';
+    document.getElementById('otpInput').focus();
+    return;
+  }
+  // OTP verified ✓
+  var btn = document.getElementById('otpVerifyBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verified...';
+  errEl.textContent = '';
+  pendingOtp = null;
+
+  var name = document.getElementById('custName').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  var p = pendingOrderPayload;
+  document.getElementById('otpModal').classList.remove('active');
+  pendingOrderPayload = null;
+
+  if (p.method === 'online') {
+    // OTP passed — now open Razorpay to collect payment
+    var email = document.getElementById('custEmail').value.trim();
+    await startRazorpay(name, phone, email);
+  } else {
+    // COD — place order directly
+    await placeOrder(name, phone, 'cod', 'pending', null);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Place Order';
+}
+
+async function startRazorpay(name, phone, email) {
   var total = Number(currentProduct.price) * currentQty;
   var options = {
     key: RZP_KEY,
@@ -387,10 +585,11 @@ async function startRazorpay(name, phone) {
     currency: 'INR',
     name: 'Sree Collections',
     description: currentProduct.name,
-    prefill: { name: name, contact: phone, email: document.getElementById('custEmail').value.trim() || '' },
+    prefill: { name: name, contact: phone, email: email || '' },
     theme: { color: '#C8A96B' },
     method: { upi: true, card: true, netbanking: true, wallet: true },
     handler: async function(response) {
+      // OTP already verified — place order immediately after payment
       await placeOrder(name, phone, 'online', 'paid', response.razorpay_payment_id);
     },
     modal: {
@@ -404,7 +603,6 @@ async function startRazorpay(name, phone) {
     rzp.on('payment.failed', function() {
       showResult(false, 'Payment Failed', 'Payment could not be processed. Please try again or use Cash on Delivery.', null);
     });
-    closeModal();
     rzp.open();
   } catch(e) {
     showResult(false, 'Error', 'Could not open payment gateway. Please try Cash on Delivery.', null);
