@@ -604,7 +604,7 @@ async function loadMyOrders() {
   if (!phone) { alert('Enter your phone number'); return; }
   const el = document.getElementById('myOrdersList');
   el.innerHTML = '<p style="color:var(--muted)">Loading...</p>';
-  const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(phone)}&order=created_at.desc`);
+  const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${phone}&order=created_at.desc`);
   if (!orders || orders.length === 0) {
     el.innerHTML = '<p style="color:var(--muted)">No orders found for this number.</p>';
     return;
