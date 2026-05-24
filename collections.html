@@ -612,7 +612,7 @@ if (!/^[6-9]\d{9}$/.test(clean)) {
 }
 const searchPhone = '+91' + clean;
 console.log('Searching for:', searchPhone);
-const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${searchPhone}&order=created_at.desc`);
+const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
     if (!orders || orders.length === 0) {
       el.innerHTML = '<p style="color:var(--muted)">No orders found for this number.</p>';
       return;
