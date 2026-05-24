@@ -504,6 +504,7 @@ async function startRazorpay(name, phone, email) {
 }
 
 async function placeOrder(name, phone, email, method, payStatus, payId) {
+  console.log('DEBUG email:', email);
   const address = document.getElementById('custAddress').value.trim();
   const total = Number(currentProduct.price) * currentQty;
   const orderData = {
