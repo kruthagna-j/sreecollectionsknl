@@ -452,6 +452,7 @@ async function updateOrderStatus(id, status) {
     });
   } catch(e) {
     console.error('Email error:', e);
+    alert('Email error: ' + JSON.stringify(e));
   }
 }
 
