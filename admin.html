@@ -416,6 +416,43 @@ async function clearAllOrders() {
 async function updateOrderStatus(id, status) {
   await sbFetch('PATCH', 'orders', { status }, `id=eq.${id}`);
   loadStats();
+  
+  // Get order details to send email
+  const orders = await sbFetch('GET', 'orders', null, `id=eq.${id}`);
+  if (!orders || !orders[0]) return;
+  const o = orders[0];
+  if (!o.customer_email) return;
+  
+  const statusMessages = {
+    processing: 'Your order is now being processed and will be delivered soon.',
+    delivered: 'Your order has been delivered! Thank you for shopping with us.',
+    cancelled: 'Your order has been cancelled. Please contact us for any queries.',
+    placed: 'Your order has been confirmed.'
+  };
+  
+  try {
+    await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: 'service_fxctnxu',
+        template_id: 'template_detul3i',
+        user_id: '9fGahlws55ZA4Hq9S',
+        template_params: {
+          customer_email: o.customer_email,
+          customer_name: o.customer_name,
+          customer_phone: o.customer_phone,
+          order_id: o.id.toString().substring(0,8).toUpperCase(),
+          product_name: o.product_name,
+          quantity: o.quantity,
+          total_amount: '₹' + (Number(o.product_price) * Number(o.quantity)).toLocaleString('en-IN'),
+          payment_method: statusMessages[status] || 'Order status updated.'
+        }
+      })
+    });
+  } catch(e) {
+    console.error('Email error:', e);
+  }
 }
 
 // Initial load
