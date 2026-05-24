@@ -299,6 +299,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
       <div class="footer-col">
         <h4>Quick Links</h4>
         <a href="./collections.html">All Products</a>
+        <a href="#myOrders">My Orders</a>
         <a href="tel:+917207186844">Contact Us</a>
         <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
         <a href="admin-login.html" style="color:rgba(255,255,255,0.3);font-size:0.8rem">Admin</a>
@@ -334,12 +335,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 <!-- MY ORDERS -->
-<section style="background:var(--dark);padding:5rem 2rem">
+<section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
   <div style="max-width:700px;margin:0 auto">
     <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter your phone number to view your orders.</p>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
     <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
-      <input type="tel" id="myOrdersPhone" placeholder="Enter 10-digit mobile" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
+      <input type="tel" id="myOrdersPhone" placeholder="+91 XXXXX XXXXX" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
       <button onclick="loadMyOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
     </div>
     <div id="myOrdersList"></div>
@@ -367,23 +368,26 @@ async function loadMyOrders() {
   if (!phone) { alert('Enter your phone number'); return; }
   const el = document.getElementById('myOrdersList');
   el.innerHTML = '<p style="color:var(--muted)">Loading...</p>';
-  const clean = phone.replace(/\D/g, '').slice(-10);
-  if (!/^[6-9]\d{9}$/.test(clean)) { alert('Invalid phone number'); return; }
+  const clean = phone.trim().replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
+  if (!/^[6-9]\d{9}$/.test(clean)) {
+    alert('Please enter a valid 10-digit Indian mobile number.');
+    return;
+  }
   const searchPhone = '+91' + clean;
   const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
-  if (!orders || orders.length === 0) { el.innerHTML = '<p style="color:var(--muted)">No orders found.</p>'; return; }
+  if (!orders || orders.length === 0) { el.innerHTML = '<p style="color:var(--muted)">No orders found for this number.</p>'; return; }
   el.innerHTML = orders.map(o => `
     <div style="background:var(--card-bg);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
       <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
         <span style="color:var(--gold);font-weight:700">${o.product_name}</span>
         <span style="color:var(--muted);font-size:0.8rem">${new Date(o.created_at).toLocaleDateString('en-IN')}</span>
       </div>
-      <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'COD' : 'Online'}</div>
+      <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
       <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
         <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">
-          ${o.status === 'cancelled' && o.cancelled_by === 'customer' ? 'Cancelled by you' : o.status}
-        </span></span>
-        ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer">Cancel</button>` : ''}
+  ${o.status === 'cancelled' && o.cancelled_by === 'customer' ? 'Cancelled by you' : o.status}
+</span></span>
+        ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
       </div>
     </div>
   `).join('');
