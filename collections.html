@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/sree-collections/collections.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,24 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop Gifts – Sree Collections Kurnool</title>
 <meta name="description" content="Shop premium gifts online at Sree Collections, Kurnool. Birthday, wedding, anniversary gifts with easy online ordering.">
-<link rel="canonical" href="https://sreecollectionsknl.vercel.app/collections.html">
-<meta property="og:url" content="https://sreecollectionsknl.vercel.app/collections.html">
-<meta name="robots" content="index,follow">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-:root{--gold:#C8A96B;--gold-light:#E8C98B;--dark:#0F0F0F;--charcoal:#1A1A1A;--card-bg:#1F1F1F;--text:#F5F0E8;--muted:#999;--border:rgba(200,169,107,0.2);--green:#27ae60;--red:#e74c3c}
+:root{--gold:#C8A96B;--gold-light:#E8C98B;--dark:#0F0F0F;--charcoal:#1A1A1A;--card-bg:#1F1F1F;--text:#F5F0E8;--muted:#999;--border:rgba(200,169,107,0.2)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif}
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(15,15,15,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--gold);text-decoration:none}
-.nav-links{display:flex;align-items:center;gap:1.5rem}
 .nav-back{color:var(--muted);text-decoration:none;font-size:0.85rem;display:flex;align-items:center;gap:0.4rem;transition:color 0.3s}
 .nav-back:hover{color:var(--gold)}
-.btn-my-orders{padding:0.45rem 1rem;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:0.78rem;font-family:'Manrope',sans-serif;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.3s}
-.btn-my-orders:hover{background:rgba(200,169,107,0.1)}
 .page-header{padding:7rem 2rem 3rem;text-align:center;background:var(--charcoal);border-bottom:1px solid var(--border)}
 .page-header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--gold)}
 .page-header p{color:var(--muted);margin-top:0.5rem}
@@ -47,7 +42,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 .btn-buy{width:100%;padding:0.8rem;background:var(--gold);color:var(--dark);border:none;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;transition:background 0.3s;font-family:'Manrope',sans-serif}
 .btn-buy:hover{background:var(--gold-light)}
 .no-products{text-align:center;padding:4rem;color:var(--muted)}
-/* ORDER MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.active{display:flex}
 .modal{background:var(--charcoal);border:1px solid var(--border);padding:2.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
@@ -76,7 +70,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 .btn-confirm:hover{background:var(--gold-light)}
 .btn-cancel{padding:0.9rem 1.5rem;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.9rem;cursor:pointer;font-family:'Manrope',sans-serif;transition:all 0.3s}
 .btn-cancel:hover{border-color:var(--muted);color:var(--text)}
-/* SUCCESS */
 .success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;align-items:center;justify-content:center}
 .success-overlay.active{display:flex}
 .success-box{background:var(--charcoal);border:1px solid rgba(200,169,107,0.4);padding:3rem;text-align:center;max-width:440px;width:90%}
@@ -88,38 +81,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 .btn-invoice{padding:0.8rem 1.5rem;background:var(--gold);color:var(--dark);border:none;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;display:flex;align-items:center;gap:0.4rem}
 .btn-done{padding:0.8rem 1.5rem;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.85rem;cursor:pointer;font-family:'Manrope',sans-serif}
 .email-status{font-size:0.78rem;color:var(--muted);margin-top:0.8rem;min-height:20px}
-/* MY ORDERS PANEL */
-.orders-panel{background:var(--charcoal);border:1px solid var(--border);padding:2rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
-.orders-panel h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:1.5rem}
-.phone-lookup{display:flex;gap:0.8rem;margin-bottom:1.5rem}
-.phone-lookup input{flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif}
-.phone-lookup input:focus{outline:none;border-color:var(--gold)}
-.phone-lookup button{padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;white-space:nowrap}
-.order-card{background:var(--card-bg);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem}
-.order-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem}
-.order-card-id{font-family:monospace;font-size:0.8rem;color:var(--muted)}
-.order-status-badge{padding:0.2rem 0.6rem;font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase}
-.status-placed{background:rgba(200,169,107,0.15);color:var(--gold);border:1px solid var(--border)}
-.status-processing{background:rgba(52,152,219,0.15);color:#3498db;border:1px solid rgba(52,152,219,0.3)}
-.status-delivered{background:rgba(39,174,96,0.15);color:var(--green);border:1px solid rgba(39,174,96,0.3)}
-.status-cancelled{background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.3)}
-.order-card-product{font-weight:600;font-size:0.95rem;margin-bottom:0.3rem}
-.order-card-details{font-size:0.82rem;color:var(--muted);line-height:1.7}
-.order-card-amount{font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:0.5rem}
-.orders-empty{text-align:center;padding:2rem;color:var(--muted);font-size:0.9rem}
-.orders-loading{text-align:center;padding:2rem;color:var(--gold)}
-@media(max-width:600px){.payment-methods{grid-template-columns:1fr}.modal,.orders-panel{padding:1.5rem}.phone-lookup{flex-direction:column}}
+@media(max-width:600px){.payment-methods{grid-template-columns:1fr}.modal{padding:1.5rem}}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html" class="logo">Sree Collections</a>
-  <div class="nav-links">
-    <!-- My Orders button -->
-    <button class="btn-my-orders" onclick="openMyOrders()">
-      <i class="fas fa-box"></i> My Orders
-    </button>
+  <div style="display:flex;align-items:center;gap:1.5rem">
     <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Home</a>
     <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
   </div>
@@ -127,18 +96,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 
 <div class="page-header">
   <h1 id="pageTitle">Our Gift Collections</h1>
-  <p>Premium gifts for every occasion &middot; Order online &middot; Pay securely</p>
+  <p>Premium gifts for every occasion · Order online · Pay securely</p>
 </div>
 
 <div class="filter-bar">
   <button class="filter-btn active" onclick="filterProducts('All',this)">All</button>
-  <button class="filter-btn" onclick="filterProducts('Birthday',this)">&#x1F382; Birthday</button>
-  <button class="filter-btn" onclick="filterProducts('Wedding',this)">&#x1F48D; Wedding</button>
-  <button class="filter-btn" onclick="filterProducts('Anniversary',this)">&#x2764; Anniversary</button>
-  <button class="filter-btn" onclick="filterProducts('Corporate',this)">&#x1F4BC; Corporate</button>
-  <button class="filter-btn" onclick="filterProducts('Festivals',this)">&#x1FA94; Festivals</button>
-  <button class="filter-btn" onclick="filterProducts('Baby Shower',this)">&#x1F476; Baby Shower</button>
-  <button class="filter-btn" onclick="filterProducts('Retirement',this)">&#x1F3C6; Retirement</button>
+  <button class="filter-btn" onclick="filterProducts('Birthday',this)">🎂 Birthday</button>
+  <button class="filter-btn" onclick="filterProducts('Wedding',this)">💍 Wedding</button>
+  <button class="filter-btn" onclick="filterProducts('Anniversary',this)">❤️ Anniversary</button>
+  <button class="filter-btn" onclick="filterProducts('Corporate',this)">💼 Corporate</button>
+  <button class="filter-btn" onclick="filterProducts('Festivals',this)">🪔 Festivals</button>
+  <button class="filter-btn" onclick="filterProducts('Baby Shower',this)">👶 Baby Shower</button>
+  <button class="filter-btn" onclick="filterProducts('Retirement',this)">🏆 Retirement</button>
 </div>
 
 <div class="products-section">
@@ -171,17 +140,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
       <input type="tel" id="custPhone" placeholder="+91 XXXXX XXXXX">
     </div>
     <div class="form-group">
-      <label>Email Address <span style="color:var(--red);font-size:0.8rem">* required for OTP</span></label>
-      <input type="email" id="custEmail" placeholder="your@email.com" required>
+      <label>Email Address <span style="color:var(--gold);font-size:0.7rem">* required for OTP</span></label>
+      <input type="email" id="custEmail" placeholder="your@email.com">
+      <button type="button" id="verifyBtn" onclick="sendVerificationCode()" style="display:none;margin-top:0.6rem;padding:0.6rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.82rem">
+        ✉ Send Verification Code
+      </button>
+    </div>
+
+    <div id="verifyEmailSection" style="display:none;margin-bottom:1.2rem">
+      <label style="display:block;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">Enter Verification Code</label>
+      <div style="display:flex;gap:0.5rem">
+        <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6" style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif">
+        <button onclick="verifyOTP()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">✓ Verify</button>
+      </div>
     </div>
     <div class="form-group">
       <label>Delivery Address</label>
-      <textarea id="custAddress" rows="2" placeholder="Enter address (optional)"></textarea>
+      <textarea id="custAddress" rows="2" placeholder="Enter address (optional – for delivery)"></textarea>
     </div>
     <div class="form-group">
       <label>Quantity</label>
       <div class="qty-control">
-        <button class="qty-btn" onclick="changeQty(-1)">&#8722;</button>
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
         <span class="qty-val" id="qtyVal">1</span>
         <button class="qty-btn" onclick="changeQty(1)">+</button>
       </div>
@@ -201,7 +181,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
     </div>
     <div class="modal-total">
       <span>Total Amount</span>
-      <strong id="modalTotal">Rs.0</strong>
+      <strong id="modalTotal">₹0</strong>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -212,66 +192,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
   </div>
 </div>
 
-<!-- OTP VERIFICATION MODAL -->
-<div class="modal-overlay" id="otpModal">
-  <div class="modal" style="max-width:420px">
-    <div style="text-align:center;margin-bottom:1.5rem">
-      <div style="font-size:2.5rem;margin-bottom:0.8rem">🔐</div>
-      <h2 style="margin:0">Verify Order</h2>
-      <p style="font-size:0.82rem;color:var(--muted);margin-top:0.6rem">A 6-digit verification code has been sent to your email and phone. Enter it below to confirm your order.</p>
-    </div>
-    <div style="background:var(--dark);border:1px solid var(--border);padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
-      <div><i class="fas fa-envelope" style="color:var(--gold);width:16px"></i> <span id="otpSentEmail"></span></div>
-      <div style="margin-top:0.4rem"><i class="fas fa-mobile-alt" style="color:var(--gold);width:16px"></i> <span id="otpSentPhone"></span></div>
-    </div>
-    <div class="form-group">
-      <label>Enter 6-Digit Code *</label>
-      <input type="text" id="otpInput" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric"
-        style="font-size:1.8rem;letter-spacing:0.5rem;text-align:center;font-family:monospace"
-        onkeydown="if(event.key==='Enter')verifyOtp()">
-    </div>
-    <div id="otpError" style="color:var(--red);font-size:0.82rem;margin-bottom:1rem;min-height:18px;text-align:center"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeOtpModal()">Cancel</button>
-      <button class="btn-confirm" id="otpVerifyBtn" onclick="verifyOtp()">
-        <i class="fas fa-check-circle"></i> Verify & Place Order
-      </button>
-    </div>
-    <div style="text-align:center;margin-top:1rem">
-      <button id="resendBtn" onclick="resendOtp()" style="background:none;border:none;color:var(--gold);font-size:0.8rem;cursor:pointer;text-decoration:underline">
-        Resend Code
-      </button>
-      <span id="resendTimer" style="font-size:0.78rem;color:var(--muted);display:none"></span>
-    </div>
-  </div>
-</div>
-
-<!-- MY ORDERS MODAL -->
-<div class="modal-overlay" id="myOrdersModal">
-  <div class="orders-panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2 style="margin:0">My Orders</h2>
-      <button onclick="closeMyOrders()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i class="fas fa-times"></i></button>
-    </div>
-    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.2rem">Enter the phone number you used when placing your order to see your order history.</p>
-    <div class="phone-lookup">
-      <input type="tel" id="lookupPhone" placeholder="e.g. 9876543210" onkeydown="if(event.key==='Enter')lookupOrders()">
-      <button onclick="lookupOrders()"><i class="fas fa-search"></i> Find Orders</button>
-    </div>
-    <div id="myOrdersList"></div>
-  </div>
-</div>
-
 <!-- SUCCESS -->
 <div class="success-overlay" id="successOverlay">
   <div class="success-box">
-    <div class="success-icon" id="successIcon">&#x2705;</div>
+    <div class="success-icon" id="successIcon">✅</div>
     <h2 id="successTitle">Order Placed!</h2>
     <p id="successMsg"></p>
     <div class="order-id-badge" id="successOrderId"></div>
-    <p style="font-size:0.78rem;color:var(--gold);margin-top:0.3rem">
-      <i class="fas fa-info-circle"></i> You can view this order in <strong>My Orders</strong> using your phone number.
-    </p>
     <div class="email-status" id="emailStatus"></div>
     <div class="success-actions">
       <button class="btn-invoice" id="invoiceBtn" onclick="downloadInvoice()" style="display:none">
@@ -283,337 +210,297 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 </div>
 
 <script>
-var SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
-var RZP_KEY = 'rzp_test_SrsY668SBTZFfn';
-var EMAILJS_PUBLIC_KEY = '9fGahlws55ZA4Hq9S';
-var EMAILJS_SERVICE_ID = 'service_fxctnxu';
-var EMAILJS_TEMPLATE_ID = 'template_detul3i';   // Order confirmation template
-var OTP_TEMPLATE_ID = 'template_otp_verify';    // ← Create this template in EmailJS (see note below)
-var FAST2SMS_KEY = 'YOUR_FAST2SMS_API_KEY';     // ← Replace with your Fast2SMS API key
-var OWNER_EMAIL = '2103iare@gmail.com';
+const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+const RZP_KEY = 'rzp_test_SrsY668SBTZFfn';
+const EMAILJS_PUBLIC_KEY = '9fGahlws55ZA4Hq9S';
+const EMAILJS_SERVICE_ID = 'service_fxctnxu';
+const EMAILJS_TEMPLATE_ID = 'template_detul3i';
+const OWNER_EMAIL = '2103iare@gmail.com';
 
 emailjs.init(EMAILJS_PUBLIC_KEY);
 
-var allProducts = [];
-var currentProduct = null;
-var currentQty = 1;
-var currentPayment = 'cod';
-var lastOrder = null;
+let allProducts = [];
+let currentProduct = null;
+let currentQty = 1;
+let currentPayment = 'cod';
+let lastOrder = null;
+let generatedOTP = '';
+let emailVerified = false;
 
 async function sbFetch(method, table, body, filter) {
-  var url = SUPABASE_URL + '/rest/v1/' + table;
-  if (filter) url += '?' + filter;
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
+  if (filter) url += `?${filter}`;
   try {
-    var headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json'
-    };
-    if (method === 'POST') headers['Prefer'] = 'return=representation';
-    var res = await fetch(url, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
     if (!res.ok) { console.error('Supabase:', res.status, await res.text()); return null; }
-    var text = await res.text();
+    const text = await res.text();
     return text ? JSON.parse(text) : [];
   } catch(e) { console.error('Fetch error:', e); return null; }
 }
 
 async function loadProducts() {
-  var loading = document.getElementById('loading');
-  var products = await sbFetch('GET', 'products', null, 'in_stock=eq.true&order=created_at.desc');
+  const loading = document.getElementById('loading');
+  const products = await sbFetch('GET', 'products', null, 'in_stock=eq.true&order=created_at.desc');
   loading.style.display = 'none';
   if (!products) {
-    document.getElementById('noProducts').innerHTML = '<i class="fas fa-exclamation-circle" style="font-size:2rem;color:var(--red);display:block;margin-bottom:1rem"></i>Could not load products. Please check connection.<br><br><button onclick="location.reload()" style="background:var(--gold);color:var(--dark);border:none;padding:0.6rem 1.5rem;cursor:pointer;font-family:Manrope,sans-serif;font-weight:700;margin-top:0.5rem">Retry</button>';
+    document.getElementById('noProducts').innerHTML = '<i class="fas fa-exclamation-circle" style="font-size:2rem;color:#e74c3c;display:block;margin-bottom:1rem"></i>Could not load products. Please check connection.<br><br><button onclick="location.reload()" style="background:var(--gold);color:var(--dark);border:none;padding:0.6rem 1.5rem;cursor:pointer;font-family:Manrope,sans-serif;font-weight:700;margin-top:0.5rem">Retry</button>';
     document.getElementById('noProducts').style.display = 'block';
     return;
   }
   if (products.length === 0) { document.getElementById('noProducts').style.display = 'block'; return; }
   allProducts = products;
-  var urlParams = new URLSearchParams(window.location.search);
-  var cat = urlParams.get('category');
+  const urlParams = new URLSearchParams(window.location.search);
+  const cat = urlParams.get('category');
   if (cat) {
     document.getElementById('pageTitle').textContent = cat + ' Gifts';
-    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.classList.remove('active');
       if (btn.textContent.includes(cat)) btn.classList.add('active');
     });
-    renderProducts(allProducts.filter(function(p){ return p.category === cat; }));
+    renderProducts(allProducts.filter(p => p.category === cat));
   } else {
     renderProducts(products);
   }
 }
 
 function renderProducts(products) {
-  var grid = document.getElementById('productsGrid');
-  var noP = document.getElementById('noProducts');
+  const grid = document.getElementById('productsGrid');
+  const noP = document.getElementById('noProducts');
   if (!products || products.length === 0) { grid.innerHTML = ''; noP.style.display = 'block'; return; }
   noP.style.display = 'none';
-  grid.innerHTML = products.map(function(p) {
-    var safeP = JSON.stringify(p).replace(/'/g,"&#39;");
-    return '<div class="product-card">' +
-      (p.image_url ? '<img src="' + p.image_url + '" alt="' + p.name + '" class="product-img" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' : '') +
-      '<div class="product-img-placeholder" style="' + (p.image_url ? 'display:none' : '') + '">&#x1F381;</div>' +
-      '<div class="product-body">' +
-        '<div class="product-category">' + p.category + '</div>' +
-        '<div class="product-name">' + p.name + '</div>' +
-        '<div class="product-desc">' + (p.description || '') + '</div>' +
-        '<div class="product-price">Rs.' + Number(p.price).toLocaleString('en-IN') + ' <span>incl. taxes</span></div>' +
-        '<button class="btn-buy" onclick=\'openOrder(' + safeP + ')\'>' +
-          '<i class="fas fa-shopping-bag"></i> Buy Now' +
-        '</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card">
+      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="product-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+      <div class="product-img-placeholder" style="${p.image_url ? 'display:none' : ''}">🎁</div>
+      <div class="product-body">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description || ''}</div>
+        <div class="product-price">₹${Number(p.price).toLocaleString('en-IN')} <span>incl. taxes</span></div>
+        <button class="btn-buy" onclick='openOrder(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+          <i class="fas fa-shopping-bag"></i> Buy Now
+        </button>
+      </div>
+    </div>
+  `).join('');
 }
 
 function filterProducts(cat, btn) {
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderProducts(cat === 'All' ? allProducts : allProducts.filter(function(p){ return p.category === cat; }));
+  renderProducts(cat === 'All' ? allProducts : allProducts.filter(p => p.category === cat));
 }
 
 function openOrder(product) {
   currentProduct = product;
   currentQty = 1;
   currentPayment = 'cod';
+  emailVerified = false;
+  generatedOTP = '';
+  
   document.getElementById('modalProductName').textContent = product.name;
   document.getElementById('modalProductCategory').textContent = product.category;
-  document.getElementById('modalProductPrice').textContent = 'Rs.' + Number(product.price).toLocaleString('en-IN');
+  document.getElementById('modalProductPrice').textContent = '₹' + Number(product.price).toLocaleString('en-IN');
   document.getElementById('qtyVal').textContent = 1;
   document.getElementById('custName').value = '';
   document.getElementById('custPhone').value = '';
   document.getElementById('custEmail').value = '';
   document.getElementById('custAddress').value = '';
+  
+  // Reset verification UI
+  document.getElementById('verifyEmailSection').style.display = 'none';
+  document.getElementById('otpInput').value = '';
+  document.getElementById('verifyBtn').style.display = 'none';
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').style.opacity = '0.5';
+  
   updateTotal();
   document.getElementById('pm-cod').classList.add('selected');
   document.getElementById('pm-online').classList.remove('selected');
   document.getElementById('orderModal').classList.add('active');
 }
 
-function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
-function changeQty(d) { currentQty = Math.max(1, currentQty + d); document.getElementById('qtyVal').textContent = currentQty; updateTotal(); }
-function updateTotal() { if (!currentProduct) return; document.getElementById('modalTotal').textContent = 'Rs.' + (Number(currentProduct.price) * currentQty).toLocaleString('en-IN'); }
+function closeModal() { 
+  document.getElementById('orderModal').classList.remove('active'); 
+}
+
+function changeQty(d) {
+  currentQty = Math.max(1, currentQty + d);
+  document.getElementById('qtyVal').textContent = currentQty;
+  updateTotal();
+}
+
+function updateTotal() {
+  if (!currentProduct) return;
+  document.getElementById('modalTotal').textContent = '₹' + (Number(currentProduct.price) * currentQty).toLocaleString('en-IN');
+}
+
 function selectPayment(method) {
   currentPayment = method;
   document.getElementById('pm-cod').classList.toggle('selected', method === 'cod');
   document.getElementById('pm-online').classList.toggle('selected', method === 'online');
 }
 
-// ── OTP STATE ──────────────────────────────────────────────
-var pendingOtp = null;
-var otpExpiry = null;
-var otpResendCooldown = null;
-var pendingOrderPayload = null; // {name, phone, method, payStatus, payId}
+// Email verification
+document.getElementById('custEmail').addEventListener('blur', function() {
+  const email = this.value.trim();
+  if (email && email.includes('@')) {
+    document.getElementById('verifyBtn').style.display = 'inline-block';
+  } else {
+    document.getElementById('verifyBtn').style.display = 'none';
+    emailVerified = false;
+    document.getElementById('confirmBtn').disabled = true;
+    document.getElementById('confirmBtn').style.opacity = '0.5';
+  }
+});
 
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+async function sendVerificationCode() {
+  const email = document.getElementById('custEmail').value.trim();
+  const name = document.getElementById('custName').value.trim();
+  
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  if (!name) {
+    alert('Please enter your name first');
+    return;
+  }
+  
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+  
+  // Generate 6-digit OTP
+  generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: email,
+      to_name: name,
+      otp_code: generatedOTP,
+      message: `Your verification code is: ${generatedOTP}`
+    });
+    
+    document.getElementById('verifyEmailSection').style.display = 'block';
+    btn.innerHTML = '<i class="fas fa-check"></i> Code Sent';
+    btn.style.background = '#27ae60';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-redo"></i> Resend Code';
+      btn.style.background = 'var(--gold)';
+    }, 3000);
+    
+    alert('✓ Verification code sent to ' + email);
+  } catch(e) {
+    console.error('Email error:', e);
+    alert('Could not send verification code. Please check your email and try again.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-envelope"></i> Send Code';
+  }
+}
+
+function verifyOTP() {
+  const entered = document.getElementById('otpInput').value.trim();
+  
+  if (!entered) {
+    alert('Please enter the verification code');
+    return;
+  }
+  
+  if (entered === generatedOTP) {
+    emailVerified = true;
+    document.getElementById('verifyEmailSection').innerHTML = '<p style="color:#27ae60;font-size:0.85rem;margin:0"><i class="fas fa-check-circle"></i> Email verified successfully!</p>';
+    document.getElementById('confirmBtn').disabled = false;
+    document.getElementById('confirmBtn').style.opacity = '1';
+    alert('✓ Email verified! You can now confirm your order.');
+  } else {
+    alert('❌ Invalid code. Please try again.');
+    document.getElementById('otpInput').value = '';
+  }
 }
 
 async function confirmOrder() {
-  var name = document.getElementById('custName').value.trim();
-  var phone = document.getElementById('custPhone').value.trim();
-  var email = document.getElementById('custEmail').value.trim();
-  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
-  if (!email) { alert('Email address is required to receive your OTP and order confirmation.'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
-
-  var btn = document.getElementById('confirmBtn');
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const email = document.getElementById('custEmail').value.trim();
+  
+  if (!name || !phone) { 
+    alert('Please enter your name and phone number.'); 
+    return; 
+  }
+  
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+  
+  if (!emailVerified) {
+    alert('Please verify your email first by clicking "Send Verification Code"');
+    return;
+  }
+  
+  const btn = document.getElementById('confirmBtn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
-
-  var otp = generateOtp();
-  pendingOtp = otp;
-  otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
-
-  var sent = await sendOtp(email, phone, name, otp);
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  
+  if (currentPayment === 'cod') {
+    await placeOrder(name, phone, email, 'cod', 'pending', null);
+  } else {
+    await startRazorpay(name, phone, email);
+  }
+  
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Confirm Order';
-
-  if (!sent) {
-    alert('Could not send verification code. Please check your email/phone and try again.');
-    return;
-  }
-
-  // OTP must be verified BEFORE payment or order — store intent and open OTP modal
-  if (currentPayment === 'cod') {
-    pendingOrderPayload = { method: 'cod', payStatus: 'pending', payId: null };
-  } else {
-    pendingOrderPayload = { method: 'online', payStatus: null, payId: null }; // payment happens after OTP
-  }
-  closeModal();
-  openOtpModal(email, phone);
-}
-
-async function sendOtp(email, phone, name, otp) {
-  var emailOk = false, smsOk = false;
-  // Send via EmailJS
-  try {
-    await emailjs.send(EMAILJS_SERVICE_ID, OTP_TEMPLATE_ID, {
-      customer_name: name,
-      customer_email: email,
-      otp_code: otp,
-      expiry_mins: '10'
-    });
-    emailOk = true;
-  } catch(e) {
-    console.error('OTP email error:', e);
-  }
-  // Send SMS via Fast2SMS
-  try {
-    var smsResp = await fetch('https://www.fast2sms.com/dev/bulkV2?authorization=' + FAST2SMS_KEY +
-      '&variables_values=' + otp +
-      '&route=dlt' +
-      '&numbers=' + phone.replace(/\D/g,'').slice(-10), {
-      method: 'GET'
-    });
-    var smsData = await smsResp.json();
-    if (smsData.return === true) smsOk = true;
-  } catch(e) {
-    console.error('SMS error:', e);
-    smsOk = true; // Don't block if SMS fails — email OTP is enough
-  }
-  return emailOk; // Email OTP is the primary gate
-}
-
-function openOtpModal(email, phone) {
-  document.getElementById('otpInput').value = '';
-  document.getElementById('otpError').textContent = '';
-  // Mask email: sh**@gmail.com
-  var parts = email.split('@');
-  var masked = parts[0].substring(0,2) + '***@' + parts[1];
-  // Mask phone: ****56789
-  var digits = phone.replace(/\D/g,'').slice(-10);
-  var maskedPhone = '******' + digits.slice(-4);
-  document.getElementById('otpSentEmail').textContent = masked;
-  document.getElementById('otpSentPhone').textContent = maskedPhone;
-  document.getElementById('otpModal').classList.add('active');
-  document.getElementById('otpInput').focus();
-  startResendTimer();
-}
-
-function closeOtpModal() {
-  document.getElementById('otpModal').classList.remove('active');
-  pendingOtp = null;
-  pendingOrderPayload = null;
-  if (otpResendCooldown) clearInterval(otpResendCooldown);
-}
-
-function startResendTimer() {
-  var seconds = 60;
-  document.getElementById('resendBtn').style.display = 'none';
-  var timerEl = document.getElementById('resendTimer');
-  timerEl.style.display = 'inline';
-  timerEl.textContent = 'Resend in ' + seconds + 's';
-  if (otpResendCooldown) clearInterval(otpResendCooldown);
-  otpResendCooldown = setInterval(function() {
-    seconds--;
-    if (seconds <= 0) {
-      clearInterval(otpResendCooldown);
-      timerEl.style.display = 'none';
-      document.getElementById('resendBtn').style.display = 'inline';
-    } else {
-      timerEl.textContent = 'Resend in ' + seconds + 's';
-    }
-  }, 1000);
-}
-
-async function resendOtp() {
-  var name = document.getElementById('custName').value.trim();
-  var phone = document.getElementById('custPhone').value.trim();
-  var email = document.getElementById('custEmail').value.trim();
-  var otp = generateOtp();
-  pendingOtp = otp;
-  otpExpiry = Date.now() + 10 * 60 * 1000;
-  document.getElementById('otpError').textContent = '';
-  document.getElementById('resendBtn').style.display = 'none';
-  var sent = await sendOtp(email, phone, name, otp);
-  if (sent) {
-    document.getElementById('otpError').style.color = 'var(--green)';
-    document.getElementById('otpError').textContent = '✓ New code sent to your email and phone.';
-    setTimeout(function(){ document.getElementById('otpError').style.color = 'var(--red)'; document.getElementById('otpError').textContent = ''; }, 3000);
-  }
-  startResendTimer();
-}
-
-async function verifyOtp() {
-  var entered = document.getElementById('otpInput').value.trim();
-  var errEl = document.getElementById('otpError');
-  if (!entered || entered.length < 6) { errEl.textContent = 'Please enter the 6-digit code.'; return; }
-  if (!pendingOtp) { errEl.textContent = 'Session expired. Please go back and try again.'; return; }
-  if (Date.now() > otpExpiry) {
-    errEl.textContent = 'Code has expired (10 min). Please click Resend.';
-    pendingOtp = null;
-    return;
-  }
-  if (entered !== pendingOtp) {
-    errEl.textContent = 'Incorrect code. Please try again.';
-    document.getElementById('otpInput').value = '';
-    document.getElementById('otpInput').focus();
-    return;
-  }
-  // OTP verified ✓
-  var btn = document.getElementById('otpVerifyBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verified...';
-  errEl.textContent = '';
-  pendingOtp = null;
-
-  var name = document.getElementById('custName').value.trim();
-  var phone = document.getElementById('custPhone').value.trim();
-  var p = pendingOrderPayload;
-  document.getElementById('otpModal').classList.remove('active');
-  pendingOrderPayload = null;
-
-  if (p.method === 'online') {
-    // OTP passed — now open Razorpay to collect payment
-    var email = document.getElementById('custEmail').value.trim();
-    await startRazorpay(name, phone, email);
-  } else {
-    // COD — place order directly
-    await placeOrder(name, phone, 'cod', 'pending', null);
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Place Order';
 }
 
 async function startRazorpay(name, phone, email) {
-  var total = Number(currentProduct.price) * currentQty;
-  var options = {
+  const total = Number(currentProduct.price) * currentQty;
+  const options = {
     key: RZP_KEY,
     amount: total * 100,
     currency: 'INR',
     name: 'Sree Collections',
     description: currentProduct.name,
-    prefill: { name: name, contact: phone, email: email || '' },
+    prefill: { name, contact: phone, email },
     theme: { color: '#C8A96B' },
     method: { upi: true, card: true, netbanking: true, wallet: true },
     handler: async function(response) {
-      // OTP already verified — place order immediately after payment
-      await placeOrder(name, phone, 'online', 'paid', response.razorpay_payment_id);
+      await placeOrder(name, phone, email, 'online', 'paid', response.razorpay_payment_id);
     },
     modal: {
       ondismiss: function() {
-        showResult(false, 'Payment Cancelled', 'You closed the payment window. No charges were made. Try again or choose Cash on Delivery.', null);
+        showResult(false, 'Payment Cancelled ❌', 'You closed the payment window. No charges made.', null);
       }
     }
   };
   try {
-    var rzp = new Razorpay(options);
+    const rzp = new Razorpay(options);
     rzp.on('payment.failed', function() {
-      showResult(false, 'Payment Failed', 'Payment could not be processed. Please try again or use Cash on Delivery.', null);
+      showResult(false, 'Payment Failed ❌', 'Payment could not be processed. Please try again.', null);
     });
+    closeModal();
     rzp.open();
   } catch(e) {
-    showResult(false, 'Error', 'Could not open payment gateway. Please try Cash on Delivery.', null);
+    showResult(false, 'Error', 'Could not open payment gateway.', null);
   }
 }
 
-async function placeOrder(name, phone, method, payStatus, payId) {
-  var email = document.getElementById('custEmail').value.trim();
-  var address = document.getElementById('custAddress').value.trim();
-  var total = Number(currentProduct.price) * currentQty;
-  var orderData = {
+async function placeOrder(name, phone, email, method, payStatus, payId) {
+  const address = document.getElementById('custAddress').value.trim();
+  const total = Number(currentProduct.price) * currentQty;
+  const orderData = {
     customer_name: name,
     customer_phone: phone,
     customer_address: address || null,
@@ -626,47 +513,61 @@ async function placeOrder(name, phone, method, payStatus, payId) {
     razorpay_payment_id: payId || null,
     status: 'placed'
   };
-  var result = await sbFetch('POST', 'orders', orderData);
+  const result = await sbFetch('POST', 'orders', orderData);
   closeModal();
-  var orderId = (result && result[0]) ? result[0].id : ('ORD' + Date.now());
-  var shortId = orderId.toString().substring(0,8).toUpperCase();
+  const orderId = result && result[0] ? result[0].id : ('ORD' + Date.now());
+  const shortId = orderId.toString().substring(0, 8).toUpperCase();
   lastOrder = {
-    id: shortId, name: name, phone: phone, email: email, address: address,
-    product: currentProduct.name, category: currentProduct.category,
-    price: currentProduct.price, qty: currentQty, total: total,
+    id: shortId, name, phone, email, address,
+    product: currentProduct.name,
+    category: currentProduct.category,
+    price: currentProduct.price,
+    qty: currentQty, total,
     method: method === 'cod' ? 'Cash on Delivery' : 'Online Payment (UPI/Card)',
-    payStatus: payStatus,
+    payStatus,
     date: new Date().toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'}),
     time: new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})
   };
-  var title = method === 'cod' ? 'Order Placed!' : 'Payment Successful!';
-  var msg = method === 'cod'
-    ? 'Thank you ' + name + '! Your order for "' + currentProduct.name + '" (Qty: ' + currentQty + ') worth Rs.' + total.toLocaleString('en-IN') + ' is placed. Pay on delivery. We will contact you at ' + phone + '.'
-    : 'Thank you ' + name + '! Payment of Rs.' + total.toLocaleString('en-IN') + ' received. Order confirmed. We will contact you at ' + phone + ' shortly.';
+  const title = method === 'cod' ? 'Order Placed! 🎉' : 'Payment Successful! ✅';
+  const msg = method === 'cod'
+    ? `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.`
+    : `Thank you ${name}! Payment received. We'll contact you at ${phone} shortly.`;
   showResult(true, title, msg, shortId);
+  
+  // Send confirmation email
   if (email) {
-    sendEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, method === 'cod' ? 'Cash on Delivery' : 'Online Payment');
+    sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, method === 'cod' ? 'Cash on Delivery' : 'Online Payment');
   }
 }
 
-async function sendEmail(toEmail, name, phone, orderId, product, qty, total, method) {
-  var statusEl = document.getElementById('emailStatus');
-  statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending confirmation email...';
+async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty, total, method) {
+  const statusEl = document.getElementById('emailStatus');
+  statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending confirmation...';
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      customer_name: name, customer_email: toEmail, customer_phone: phone,
-      order_id: orderId, product_name: product, quantity: qty,
-      total_amount: 'Rs.' + Number(total).toLocaleString('en-IN'), payment_method: method
+      to_email: toEmail,
+      to_name: name,
+      customer_phone: phone,
+      order_id: orderId,
+      product_name: product,
+      quantity: qty,
+      total_amount: '₹' + Number(total).toLocaleString('en-IN'),
+      payment_method: method
     });
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      customer_name: name + ' (NEW ORDER)', customer_email: OWNER_EMAIL, customer_phone: phone,
-      order_id: orderId, product_name: product, quantity: qty,
-      total_amount: 'Rs.' + Number(total).toLocaleString('en-IN'), payment_method: method
+      to_email: OWNER_EMAIL,
+      to_name: name + ' (NEW ORDER)',
+      customer_phone: phone,
+      order_id: orderId,
+      product_name: product,
+      quantity: qty,
+      total_amount: '₹' + Number(total).toLocaleString('en-IN'),
+      payment_method: method
     });
-    statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60"></i> Confirmation email sent to ' + toEmail;
+    statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60"></i> Confirmation sent';
   } catch(e) {
     console.error('Email error:', e);
-    statusEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Email could not be sent. Download invoice below.';
+    statusEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e74c3c"></i> Email could not be sent';
   }
 }
 
@@ -680,99 +581,19 @@ function showResult(success, title, msg, orderId) {
   document.getElementById('successOverlay').classList.add('active');
 }
 
-// MY ORDERS
-function openMyOrders() {
-  document.getElementById('myOrdersModal').classList.add('active');
-  document.getElementById('myOrdersList').innerHTML = '';
-  document.getElementById('lookupPhone').value = '';
-}
-
-function closeMyOrders() {
-  document.getElementById('myOrdersModal').classList.remove('active');
-}
-
-async function lookupOrders() {
-  var phone = document.getElementById('lookupPhone').value.trim();
-  if (!phone) { alert('Please enter your phone number.'); return; }
-  var listEl = document.getElementById('myOrdersList');
-  listEl.innerHTML = '<div class="orders-loading"><i class="fas fa-spinner fa-spin"></i> Looking up your orders...</div>';
-  // Try both with and without country code
-  var filter = 'customer_phone=like.*' + phone.replace(/\D/g,'').slice(-10) + '*&order=created_at.desc';
-  var orders = await sbFetch('GET', 'orders', null, filter);
-  if (!orders || orders.length === 0) {
-    listEl.innerHTML = '<div class="orders-empty"><i class="fas fa-inbox" style="font-size:2rem;color:var(--gold);display:block;margin-bottom:0.8rem"></i>No orders found for this phone number.<br><span style="font-size:0.8rem">Make sure you enter the same number used when ordering.</span></div>';
-    return;
-  }
-  var statusClass = { placed: 'status-placed', processing: 'status-processing', delivered: 'status-delivered', cancelled: 'status-cancelled' };
-  listEl.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">' + orders.length + ' order(s) found for ' + phone + '</div>' +
-    orders.map(function(o) {
-      var d = new Date(o.created_at);
-      var dateStr = d.toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
-      var total = Number(o.product_price) * Number(o.quantity);
-      var sc = statusClass[o.status] || 'status-placed';
-      return '<div class="order-card">' +
-        '<div class="order-card-header">' +
-          '<div>' +
-            '<div class="order-card-id">#' + o.id.substring(0,8).toUpperCase() + '</div>' +
-            '<div style="font-size:0.75rem;color:var(--muted)">' + dateStr + '</div>' +
-          '</div>' +
-          '<span class="order-status-badge ' + sc + '">' + o.status + '</span>' +
-        '</div>' +
-        '<div class="order-card-product">' + o.product_name + '</div>' +
-        '<div class="order-card-details">' +
-          'Qty: ' + o.quantity + ' &nbsp;&bull;&nbsp; ' +
-          'Payment: ' + (o.payment_method === 'online' ? 'Online' : 'Cash on Delivery') + ' &nbsp;&bull;&nbsp; ' +
-          (o.payment_status === 'paid' ? '<span style="color:var(--green)">Paid</span>' : o.payment_status) +
-        '</div>' +
-        '<div class="order-card-amount">Rs.' + total.toLocaleString('en-IN') + '</div>' +
-      '</div>';
-    }).join('');
-}
-
-// Invoice
 function downloadInvoice() {
   if (!lastOrder) return;
-  var o = lastOrder;
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice – ' + o.id + '</title><style>' +
-    'body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}' +
-    '.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}' +
-    '.header h1{font-size:28px;margin:0;letter-spacing:2px}.header p{margin:5px 0 0;color:#888;font-size:13px}' +
-    '.badge{display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}' +
-    '.section{margin-bottom:25px}.section h3{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:0 0 10px;border-bottom:1px solid #eee;padding-bottom:6px}' +
-    '.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.row:last-child{border:none}' +
-    '.label{color:#888}.value{font-weight:600;text-align:right}' +
-    '.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}' +
-    '.total-row .value{color:#C8A96B}' +
-    '.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}' +
-    '@media print{.no-print{display:none}}' +
-  '</style></head><body>' +
-    '<div class="header"><h1>SREE COLLECTIONS</h1><p>Kurnool, Andhra Pradesh &middot; +91 72071 86844</p></div>' +
-    '<div style="text-align:center;margin-bottom:25px"><div class="badge">Tax Invoice</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">' + o.id + '</strong> &nbsp;|&nbsp; ' + o.date + ' at ' + o.time + '</div></div>' +
-    '<div class="section"><h3>Customer Details</h3>' +
-      '<div class="row"><span class="label">Name</span><span class="value">' + o.name + '</span></div>' +
-      '<div class="row"><span class="label">Phone</span><span class="value">' + o.phone + '</span></div>' +
-      (o.email ? '<div class="row"><span class="label">Email</span><span class="value">' + o.email + '</span></div>' : '') +
-      (o.address ? '<div class="row"><span class="label">Address</span><span class="value">' + o.address + '</span></div>' : '') +
-    '</div>' +
-    '<div class="section"><h3>Order Details</h3>' +
-      '<div class="row"><span class="label">Product</span><span class="value">' + o.product + '</span></div>' +
-      '<div class="row"><span class="label">Category</span><span class="value">' + o.category + '</span></div>' +
-      '<div class="row"><span class="label">Unit Price</span><span class="value">Rs.' + Number(o.price).toLocaleString('en-IN') + '</span></div>' +
-      '<div class="row"><span class="label">Quantity</span><span class="value">' + o.qty + '</span></div>' +
-      '<div class="row"><span class="label">Payment Method</span><span class="value">' + o.method + '</span></div>' +
-      '<div class="total-row"><span>Total Amount</span><span class="value">Rs.' + Number(o.total).toLocaleString('en-IN') + '</span></div>' +
-    '</div>' +
-    '<div class="footer"><p>Thank you for shopping at Sree Collections, Kurnool!</p><p>For queries: +91 72071 86844</p></div>' +
-    '<div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer;letter-spacing:1px">PRINT / SAVE AS PDF</button></div>' +
-  '</body></html>';
-  var blob = new Blob([html], {type:'text/html'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = 'Invoice-' + o.id + '-SreeCollections.html'; a.click();
+  const o = lastOrder;
+  const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice – ${o.id}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.header p{margin:5px 0 0;color:#888;font-size:13px}.badge{display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}.section{margin-bottom:25px}.section h3{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:0 0 10px;border-bottom:1px solid #eee;padding-bottom:6px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.row:last-child{border:none}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{body{padding:20px}.no-print{display:none}}</style></head><body><div class="header"><h1>SREE COLLECTIONS</h1><p>Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div class="badge">Tax Invoice</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${o.id}</strong> &nbsp;|&nbsp; ${o.date} at ${o.time}</div></div><div class="section"><h3>Customer Details</h3><div class="row"><span class="label">Name</span><span class="value">${o.name}</span></div><div class="row"><span class="label">Phone</span><span class="value">${o.phone}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${o.email}</span></div>` : ''}${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${o.address}</span></div>` : ''}</div><div class="section"><h3>Order Details</h3><div class="row"><span class="label">Product</span><span class="value">${o.product}</span></div><div class="row"><span class="label">Category</span><span class="value">${o.category}</span></div><div class="row"><span class="label">Unit Price</span><span class="value">₹${Number(o.price).toLocaleString('en-IN')}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${o.qty}</span></div><div class="row"><span class="label">Payment Method</span><span class="value">${o.method}</span></div><div class="total-row"><span>Total Amount</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>Thank you for shopping at Sree Collections!</p><p>+91 72071 86844 · WhatsApp: +91 72071 86844</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
+  const blob = new Blob([invoiceHTML], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Invoice-${o.id}-SreeCollections.html`;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
 loadProducts();
-</script>
-</body>
+</script></body>
 </html>
