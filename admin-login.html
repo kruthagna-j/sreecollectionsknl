@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login – Sree Collections</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--gold:#C8A96B;--dark:#0F0F0F;--charcoal:#1A1A1A;--card-bg:#1F1F1F;--text:#F5F0E8;--muted:#999;--border:rgba(200,169,107,0.2)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.login-box{background:var(--charcoal);border:1px solid var(--border);padding:3rem;width:100%;max-width:420px;text-align:center}
+.logo{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem}
+.subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:2.5rem;letter-spacing:0.05em}
+.form-group{margin-bottom:1.5rem;text-align:left}
+.form-group label{display:block;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem}
+.form-group input{width:100%;padding:0.9rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.95rem;font-family:'Manrope',sans-serif}
+.form-group input:focus{outline:none;border-color:var(--gold)}
+.btn-login{width:100%;padding:1rem;background:var(--gold);color:var(--dark);border:none;font-size:0.9rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;font-family:'Manrope',sans-serif;transition:opacity 0.3s}
+.btn-login:hover:not(:disabled){opacity:0.9}
+.btn-login:disabled{opacity:0.5;cursor:not-allowed}
+.back-link{display:inline-block;margin-top:1.5rem;color:var(--muted);text-decoration:none;font-size:0.85rem;transition:color 0.3s}
+.back-link:hover{color:var(--gold)}
+.error-msg{background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:0.8rem;font-size:0.85rem;margin-bottom:1rem;display:none}
+.success-msg{background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);color:#27ae60;padding:0.8rem;font-size:0.85rem;margin-bottom:1rem;display:none}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+<div class="logo">Sree Collections</div>
+<div class="subtitle">ADMIN ACCESS</div>
+
+<div class="error-msg" id="errorMsg"></div>
+<div class="success-msg" id="successMsg"></div>
+
+<div id="passwordForm">
+<div class="form-group">
+<label>Admin Password</label>
+<input type="password" id="adminPass" placeholder="Enter admin password">
+</div>
+<button class="btn-login" onclick="verifyPassword()">
+<i class="fas fa-lock-open"></i> Login
+</button>
+</div>
+
+<a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Store</a>
+</div>
+
+<script>
+const ADMIN_PASSWORD = 'sree2025admin'; // Change this to your secure password
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+}
+
+function verifyPassword() {
+  const pass = document.getElementById('adminPass').value.trim();
+  
+  if (!pass) {
+    showError('Please enter the admin password.');
+    return;
+  }
+  
+  if (pass === ADMIN_PASSWORD) {
+    // Set session flag
+    sessionStorage.setItem('adminAuth', 'true');
+    sessionStorage.setItem('adminAuthTime', Date.now().toString());
+    
+    showSuccess('✓ Login successful! Redirecting...');
+    setTimeout(() => {
+      window.location.href = 'admin.html';
+    }, 800);
+  } else {
+    showError('Incorrect password. Access denied.');
+    document.getElementById('adminPass').value = '';
+  }
+}
+
+// Enter key to submit
+document.getElementById('adminPass').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') verifyPassword();
+});
+
+// Check if already logged in
+if (sessionStorage.getItem('adminAuth') === 'true') {
+  const authTime = parseInt(sessionStorage.getItem('adminAuthTime') || '0');
+  const now = Date.now();
+  // Session expires after 2 hours
+  if (now - authTime < 2 * 60 * 60 * 1000) {
+    window.location.href = 'admin.html';
+  } else {
+    sessionStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('adminAuthTime');
+  }
+}
+</script>
+
+</body>
+</html>
