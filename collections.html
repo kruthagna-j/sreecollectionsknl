@@ -625,7 +625,9 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
         </div>
         <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
         <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
-          <span>Status: <span style="color:var(--gold)">${o.status}</span></span>
+          <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">
+  ${o.status === 'cancelled' && o.cancelled_by === 'customer' ? 'Cancelled by you' : o.status}
+</span></span>
           ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
         </div>
       </div>
@@ -633,12 +635,12 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
   }
 
   async function cancelOrder(id, phone) {
-    if (!confirm('Are you sure you want to cancel this order?')) return;
-    await sbFetch('PATCH', 'orders', { status: 'cancelled' }, `id=eq.${id}`);
-    alert('Order cancelled successfully.');
-    document.getElementById('myOrdersPhone').value = phone;
-    loadMyOrders();
-  }
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  await sbFetch('PATCH', 'orders', { status: 'cancelled', cancelled_by: 'customer' }, `id=eq.${id}`);
+  alert('Order cancelled successfully.');
+  document.getElementById('myOrdersPhone').value = phone;
+  loadMyOrders();
+}
   loadProducts();
   </script>
 

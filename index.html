@@ -388,10 +388,11 @@ async function loadMyOrders() {
   `).join('');
 }
 
-async function cancelOrder(id) {
-  if (!confirm('Cancel this order?')) return;
-  await sbFetch('PATCH', 'orders', {status: 'cancelled', cancelled_by: 'customer'}, `id=eq.${id}`);
-  alert('Order cancelled');
+async function cancelOrder(id, phone) {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  await sbFetch('PATCH', 'orders', { status: 'cancelled', cancelled_by: 'customer' }, `id=eq.${id}`);
+  alert('Order cancelled successfully.');
+  document.getElementById('myOrdersPhone').value = phone;
   loadMyOrders();
 }
 </script>
