@@ -296,6 +296,30 @@
       </div>
     `).join('');
   }
+  // ENTER KEY SUPPORT
+function enableEnter(inputId, callback) {
+  const el = document.getElementById(inputId);
+
+  if (!el) return;
+
+  el.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      callback();
+    }
+  });
+}
+
+// AUTO FOCUS
+function focusInput(inputId) {
+  setTimeout(() => {
+    const el = document.getElementById(inputId);
+
+    if (el) {
+      el.focus();
+      el.click();
+    }
+  }, 100);
+}
 
   function filterProducts(cat, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -396,6 +420,8 @@
       });
       
       document.getElementById('verifyEmailSection').style.display = 'block';
+      focusInput('otpInput');
+document.getElementById('otpInput').select();
       btn.innerHTML = '<i class="fas fa-check"></i> Code Sent';
       btn.style.background = '#27ae60';
       setTimeout(() => {
@@ -426,6 +452,7 @@
       document.getElementById('verifyEmailSection').innerHTML = '<p style="color:#27ae60;font-size:0.85rem;margin:0"><i class="fas fa-check-circle"></i> Email verified successfully!</p>';
       document.getElementById('confirmBtn').disabled = false;
       document.getElementById('confirmBtn').style.opacity = '1';
+      focusInput('custAddress');
       alert('✓ Email verified! You can now confirm your order.');
     } else {
       alert('❌ Invalid code. Please try again.');
@@ -643,6 +670,26 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
   document.getElementById('myOrdersPhone').value = phone;
   loadMyOrders();
 }
+// ENTER KEY FLOW
+enableEnter('custName', () => {
+  focusInput('custPhone');
+});
+
+enableEnter('custPhone', () => {
+  focusInput('custEmail');
+});
+
+enableEnter('custEmail', () => {
+  sendVerificationCode();
+});
+
+enableEnter('otpInput', () => {
+  verifyOTP();
+});
+
+enableEnter('custAddress', () => {
+  confirmOrder();
+});
   loadProducts();
   </script>
 
