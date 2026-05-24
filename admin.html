@@ -428,7 +428,7 @@ async function updateOrderStatus(id, status) {
   delivered: 'Order Delivered ✅',
   cancelled: 'Order Cancelled ❌',
   placed: 'Order Confirmed ✅'
-};
+};  
   
   try {
     await fetch('https://api.emailjs.com/api/v1.0/email/send', {
