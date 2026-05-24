@@ -551,8 +551,8 @@ async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty
   statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending confirmation...';
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      to_email: toEmail,
-      to_name: name,
+      customer_email: toEmail,
+      customer_name: name,
       customer_phone: phone,
       order_id: orderId,
       product_name: product,
@@ -561,8 +561,8 @@ async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty
       payment_method: method
     });
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      to_email: OWNER_EMAIL,
-      to_name: name + ' (NEW ORDER)',
+      customer_email: OWNER_EMAIL,
+      customer_name: name + ' (NEW ORDER)',
       customer_phone: phone,
       order_id: orderId,
       product_name: product,
