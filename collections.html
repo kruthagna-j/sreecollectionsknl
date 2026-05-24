@@ -89,7 +89,7 @@
   <nav>
     <a href="index.html" class="logo">Sree Collections</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
-      <a href="index.html#myOrders" class="nav-back"><i class="fas fa-receipt"></i> My Orders</a>
+      <a href="my-orders.html" class="nav-back"><i class="fas fa-receipt"></i> My Orders</a>
       <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Home</a>
       <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
@@ -628,7 +628,7 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
         <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
           <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">
   ${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by you' : 'Cancelled by Admin') : o.status}
-</span></span>
+ </span></span>
           ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
           ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
         </div>
@@ -645,17 +645,6 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
 }
   loadProducts();
   </script>
-
-  <!-- MY ORDERS -->
-  <div style="max-width:700px;margin:3rem auto;padding:0 2rem">
-    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
-    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
-      <input type="tel" id="myOrdersPhone" placeholder="+91 XXXXX XXXXX" style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif">
-      <button onclick="loadMyOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
-    </div>
-    <div id="myOrdersList"></div>
-  </div>
 
   </body>
   </html>
