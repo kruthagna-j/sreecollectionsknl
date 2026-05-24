@@ -134,6 +134,7 @@ td,th{padding:0.7rem}
 <th>Amount</th>
 <th>Payment</th>
 <th>Status</th>
+<th>Cancelled By</th>
 <th>Date</th>
 <th>Actions</th>
 </tr>
@@ -317,6 +318,9 @@ async function loadOrders() {
           <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
         </select>
       </td>
+      <td>
+        ${o.status === 'cancelled' ? `<span class="badge badge-pending" style="background:rgba(231,76,60,0.2);color:#e74c3c">${o.cancelled_by === 'customer' ? '👤 Customer' : o.cancelled_by === 'admin' ? '🔑 Admin' : o.cancelled_by || '-'}</span>` : '<span style="color:var(--muted)">-</span>'}
+      </td>
       <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
       <td>
         <button class="btn-small btn-delete" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
@@ -414,7 +418,11 @@ async function clearAllOrders() {
 }
 
 async function updateOrderStatus(id, status) {
-  await sbFetch('PATCH', 'orders', { status }, `id=eq.${id}`);
+  const updateData = { status };
+  if (status === 'cancelled') {
+    updateData.cancelled_by = 'admin';
+  }
+  await sbFetch('PATCH', 'orders', updateData, `id=eq.${id}`);
   loadStats();
   
   // Get order details to send email

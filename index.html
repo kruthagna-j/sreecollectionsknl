@@ -153,6 +153,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
   <a href="index.html" class="logo">Sree Collections</a>
   <ul class="nav-links">
     <li><a href="./collections.html">Collections</a></li>
+    <li><a href="#myOrders">My Orders</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#reviews">Reviews</a></li>
     <li><a href="tel:+917207186844">Contact</a></li>
@@ -385,7 +386,7 @@ async function loadMyOrders() {
       <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
       <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
         <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">
-  ${o.status === 'cancelled' && o.cancelled_by === 'customer' ? 'Cancelled by you' : o.status}
+  ${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by customer' : 'Cancelled by Admin') : o.status}
 </span></span>
         ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
       </div>

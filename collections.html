@@ -89,6 +89,7 @@
   <nav>
     <a href="index.html" class="logo">Sree Collections</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
+      <a href="index.html#myOrders" class="nav-back"><i class="fas fa-receipt"></i> My Orders</a>
       <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Home</a>
       <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
@@ -626,8 +627,9 @@ const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeU
         <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
         <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
           <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">
-  ${o.status === 'cancelled' && o.cancelled_by === 'customer' ? 'Cancelled by you' : o.status}
+  ${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by you' : 'Cancelled by Admin') : o.status}
 </span></span>
+          ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
           ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
         </div>
       </div>
