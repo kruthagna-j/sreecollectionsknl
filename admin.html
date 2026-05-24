@@ -309,7 +309,14 @@ async function loadOrders() {
       <td>${o.quantity}</td>
       <td>₹${(Number(o.product_price) * Number(o.quantity)).toLocaleString('en-IN')}</td>
       <td><span class="badge ${o.payment_method === 'cod' ? 'badge-cod' : 'badge-online'}">${o.payment_method === 'cod' ? 'COD' : 'Online'}</span></td>
-      <td><span class="badge ${o.payment_status === 'paid' ? 'badge-success' : 'badge-pending'}">${o.payment_status}</span></td>
+      <td>
+        <select onchange="updateOrderStatus('${o.id}', this.value)" style="background:var(--dark);border:1px solid var(--border);color:var(--text);padding:0.3rem;font-family:'Manrope',sans-serif;font-size:0.8rem">
+          <option value="placed" ${o.status === 'placed' ? 'selected' : ''}>Placed</option>
+          <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
+          <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+          <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </td>
       <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
       <td>
         <button class="btn-small btn-delete" onclick="deleteOrder(${o.id})"><i class="fas fa-trash"></i></button>
@@ -403,6 +410,10 @@ async function clearAllOrders() {
   
   alert(`✓ Deleted ${orders.length} orders successfully.`);
   loadOrders();
+  async function updateOrderStatus(id, status) {
+  await sbFetch('PATCH', 'orders', { status }, `id=eq.${id}`);
+  loadStats();
+}
   loadStats();
 }
 
