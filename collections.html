@@ -106,7 +106,19 @@
     <h1 id="pageTitle">Our Gift Collections</h1>
     <p>Premium gifts for every occasion · Order online · Pay securely</p>
   </div>
-
+<!-- SEARCH BAR -->
+<div style="padding:1.5rem 2rem;background:var(--charcoal);border-bottom:1px solid var(--border)">
+  <div style="max-width:600px;margin:0 auto;position:relative">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search products..."
+      onkeyup="searchProducts()"
+      style="width:100%;padding:0.8rem 1rem 0.8rem 2.5rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif"
+    >
+    <i class="fas fa-search" style="position:absolute;left:0.8rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem"></i>
+  </div>
+</div>
   <div class="filter-bar">
     <button class="filter-btn active" onclick="filterProducts('All',this)">All</button>
     <button class="filter-btn" onclick="filterProducts('Birthday',this)">🎂 Birthday</button>
@@ -756,6 +768,20 @@ enableEnter('otpInput', () => {
 enableEnter('custAddress', () => {
   confirmOrder();
 });
+function searchProducts() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allProducts.filter(p => 
+    p.name.toLowerCase().includes(searchTerm) || 
+    p.description?.toLowerCase().includes(searchTerm) ||
+    p.category.toLowerCase().includes(searchTerm)
+  );
+  renderProducts(filtered);
+  
+  // Update "All" filter to active when searching
+  if (searchTerm) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  }
+}
   loadProducts();
   </script>
 
