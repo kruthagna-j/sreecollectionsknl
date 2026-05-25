@@ -165,6 +165,50 @@
   </div>
 </div>
 <div id="cartOverlay" onclick="toggleCart()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:240"></div>
+
+<!-- CART CHECKOUT SUMMARY MODAL -->
+<div class="modal-overlay" id="cartCheckoutModal">
+  <div class="modal">
+    <h2>Order Summary</h2>
+    <div id="cartCheckoutItems"></div>
+    <div style="display:flex;justify-content:space-between;padding:1rem 0;margin-top:0.5rem;border-top:2px solid var(--gold)">
+      <strong>Total</strong>
+      <strong id="cartCheckoutTotal" style="color:var(--gold);font-size:1.2rem"></strong>
+    </div>
+    <div class="form-group" style="margin-top:1rem">
+      <label>Your Name *</label>
+      <input type="text" id="cartCustName" placeholder="Enter your full name">
+    </div>
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <input type="tel" id="cartCustPhone" placeholder="+91 XXXXX XXXXX">
+    </div>
+    <div class="form-group">
+      <label>Delivery Address *</label>
+      <textarea id="cartCustAddress" rows="2" placeholder="Enter your full delivery address"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Payment Method</label>
+      <div class="payment-methods">
+        <div class="payment-method selected" id="cart-pm-cod" onclick="selectCartPayment('cod')">
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Cash on Delivery</span>
+        </div>
+        <div class="payment-method" id="cart-pm-online" onclick="selectCartPayment('online')">
+          <i class="fas fa-credit-card"></i>
+          <span>Pay Online (UPI/Card)</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="document.getElementById('cartCheckoutModal').classList.remove('active')">Cancel</button>
+      <button class="btn-confirm" onclick="placeAllOrders()">
+        <i class="fas fa-shopping-bag"></i> Confirm All Orders
+      </button>
+    </div>
+  </div>
+</div>
+
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal">
@@ -885,8 +929,19 @@ function toggleCart() {
 function checkoutCart() {
   if (cart.length === 0) { alert('Cart is empty'); return; }
   toggleCart();
-  currentCartIndex = 0;
-  openOrderFromCart();
+  openCartCheckoutModal();
+}
+
+function openCartCheckoutModal() {
+  const total = cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0);
+  document.getElementById('cartCheckoutItems').innerHTML = cart.map(i => `
+    <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);font-size:0.85rem">
+      <span>${i.name} <span style="color:var(--muted)">x${i.qty}</span></span>
+      <span style="color:var(--gold)">₹${(Number(i.price) * i.qty).toLocaleString('en-IN')}</span>
+    </div>
+  `).join('');
+  document.getElementById('cartCheckoutTotal').textContent = '₹' + total.toLocaleString('en-IN');
+  document.getElementById('cartCheckoutModal').classList.add('active');
 }
 function openOrderFromCart() {
   if (currentCartIndex >= cart.length) { cart = []; updateCartUI(); return; }
@@ -941,6 +996,48 @@ function buySingleFromCart(idx) {
   document.getElementById('pm-online').classList.remove('selected');
   document.getElementById('orderModal').classList.add('active');
 }
+
+let cartPaymentMethod = 'cod';
+
+function selectCartPayment(method) {
+  cartPaymentMethod = method;
+  document.getElementById('cart-pm-cod').classList.toggle('selected', method === 'cod');
+  document.getElementById('cart-pm-online').classList.toggle('selected', method === 'online');
+}
+
+async function placeAllOrders() {
+  const name = document.getElementById('cartCustName').value.trim();
+  const phone = document.getElementById('cartCustPhone').value.trim();
+  const address = document.getElementById('cartCustAddress').value.trim();
+  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+  if (!address) { alert('Please enter your delivery address.'); return; }
+
+  document.getElementById('cartCheckoutModal').classList.remove('active');
+
+  let successCount = 0;
+  for (const item of cart) {
+    const orderData = {
+      customer_name: name,
+      customer_phone: phone,
+      customer_address: address,
+      product_id: item.id,
+      product_name: item.name,
+      product_price: item.price,
+      quantity: item.qty,
+      payment_method: cartPaymentMethod,
+      payment_status: cartPaymentMethod === 'cod' ? 'pending' : 'pending',
+      status: 'placed'
+    };
+    const result = await sbFetch('POST', 'orders', orderData);
+    if (result) successCount++;
+  }
+
+  cart = [];
+  updateCartUI();
+  lastOrder = null;
+  showResult(true, 'All Orders Placed! 🎉', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, 'CART-' + Date.now().toString().slice(-6));
+}
+
   loadProducts();
   </script>
 
