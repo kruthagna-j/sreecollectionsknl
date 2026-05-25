@@ -103,7 +103,7 @@
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
       <button onclick="toggleCart()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;position:relative;padding:0.3rem">
   <i class="fas fa-shopping-cart"></i>
-  <span id="cartCount" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;align-items:center;justify-content:center">0</span>
+  <span id="cartCount" style="position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;align-items:center;justify-content:center">0</span>
 </button>
       <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
@@ -345,7 +345,7 @@
 
   async function loadProducts() {
     const loading = document.getElementById('loading');
-    const products = await sbFetch('GET', 'products', null, 'in_stock=eq.true&order=created_at.desc');
+    const products = await sbFetch('GET', 'products', null, 'order=created_at.desc');
     loading.style.display = 'none';
     if (!products) {
       document.getElementById('noProducts').innerHTML = '<i class="fas fa-exclamation-circle" style="font-size:2rem;color:#e74c3c;display:block;margin-bottom:1rem"></i>Could not load products. Please check connection.<br><br><button onclick="location.reload()" style="background:var(--gold);color:var(--dark);border:none;padding:0.6rem 1.5rem;cursor:pointer;font-family:Manrope,sans-serif;font-weight:700;margin-top:0.5rem">Retry</button>';
