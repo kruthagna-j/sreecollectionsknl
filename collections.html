@@ -866,12 +866,12 @@ function searchProducts() {
   }
 }
 let cart = JSON.parse(localStorage.getItem('sreecart') || '[]');
+updateCartUI();
 let currentCartIndex = 0;
 
 function addToCart(product) {
   const existing = cart.find(i => i.id === product.id);
   if (existing) { existing.qty++; } else { cart.push({ ...product, qty: 1 }); }
-  updateCartUI();
   const n = document.createElement('div');
   n.textContent = '✓ ' + product.name + ' added to cart';
   n.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark);padding:0.8rem 1.5rem;font-weight:700;font-size:0.85rem;z-index:999;font-family:Manrope,sans-serif';
