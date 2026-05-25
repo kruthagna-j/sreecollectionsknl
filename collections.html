@@ -865,7 +865,7 @@ function searchProducts() {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   }
 }
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('sreecart') || '[]');
 let currentCartIndex = 0;
 
 function addToCart(product) {
@@ -880,6 +880,7 @@ function addToCart(product) {
 }
 
 function updateCartUI() {
+  localStorage.setItem('sreecart', JSON.stringify(cart));
   const count = cart.reduce((sum, i) => sum + i.qty, 0);
   const countEl = document.getElementById('cartCount');
   countEl.textContent = count;
