@@ -83,13 +83,20 @@
   .email-status{font-size:0.78rem;color:var(--muted);margin-top:0.8rem;min-height:20px}
   @media(max-width:600px){.payment-methods{grid-template-columns:1fr}.modal{padding:1.5rem}}
   </style>
+  <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-J8KF1GD5ZB');
+</script>
   </head>
   <body>
 
   <nav>
     <a href="index.html" class="logo">Sree Collections</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
-      <a href="my-orders.html" class="nav-back"><i class="fas fa-receipt"></i> My Orders</a>
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
       <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
