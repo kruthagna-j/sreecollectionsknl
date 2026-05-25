@@ -287,64 +287,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
     </div>
   </div>
 </section>
-
-<footer>
-  <div style="max-width:1200px;margin:0 auto">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="logo">Sree Collections</a>
-        <p>Kurnool's most loved gift store. Premium gifts for every occasion, every emotion, every person.</p>
-        <div style="display:flex;gap:1rem;margin-top:1rem">
-          <a href="https://wa.me/917207186844" target="_blank" style="color:var(--muted);font-size:1.2rem"><i class="fab fa-whatsapp"></i></a>
-          <a href="tel:+917207186844" style="color:var(--muted);font-size:1.2rem"><i class="fas fa-phone"></i></a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Collections</h4>
-        <a href="collections.html?category=Birthday">Birthday Gifts</a>
-        <a href="collections.html?category=Wedding">Wedding Gifts</a>
-        <a href="collections.html?category=Anniversary">Anniversary</a>
-        <a href="collections.html?category=Corporate">Corporate</a>
-        <a href="collections.html?category=Festivals">Festivals</a>
-      </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <a href="./collections.html">All Products</a>
-        <a href="my-orders.html">My Orders</a>
-        <a href="tel:+917207186844">Contact Us</a>
-        <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
-        <a href="admin-login.html" style="color:rgba(255,255,255,0.3);font-size:0.8rem">Admin</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2025 Sree Collections, Kurnool. All rights reserved.</span>
-      <span>Made with ❤️ in Kurnool</span>
-    </div>
-  </div>
-</footer>
-
-<script>
-function toggleMenu(){
-  const m = document.getElementById('mobileMenu');
-  m.style.display = m.style.display === 'block' ? 'none' : 'block';
-}
-// Scroll reveal
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
-}, {threshold:0.1});
-document.querySelectorAll('.collection-card,.why-card,.review-card').forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(20px)';
-  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-  observer.observe(el);
-});
-document.addEventListener('DOMContentLoaded', () => {
-  const style = document.createElement('style');
-  style.textContent = '.visible{opacity:1 !important;transform:translateY(0) !important}';
-  document.head.appendChild(style);
-});
-
-</script>
 <!-- MY ORDERS -->
 <section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
   <div style="max-width:700px;margin:0 auto">
@@ -412,5 +354,63 @@ async function cancelOrder(id, phone) {
   loadMyOrders();
 }
 </script>
+<footer>
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">Sree Collections</a>
+        <p>Kurnool's most loved gift store. Premium gifts for every occasion, every emotion, every person.</p>
+        <div style="display:flex;gap:1rem;margin-top:1rem">
+          <a href="https://wa.me/917207186844" target="_blank" style="color:var(--muted);font-size:1.2rem"><i class="fab fa-whatsapp"></i></a>
+          <a href="tel:+917207186844" style="color:var(--muted);font-size:1.2rem"><i class="fas fa-phone"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Collections</h4>
+        <a href="collections.html?category=Birthday">Birthday Gifts</a>
+        <a href="collections.html?category=Wedding">Wedding Gifts</a>
+        <a href="collections.html?category=Anniversary">Anniversary</a>
+        <a href="collections.html?category=Corporate">Corporate</a>
+        <a href="collections.html?category=Festivals">Festivals</a>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="./collections.html">All Products</a>
+        <a href="my-orders.html">My Orders</a>
+        <a href="tel:+917207186844">Contact Us</a>
+        <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
+        <a href="admin-login.html" style="color:rgba(255,255,255,0.3);font-size:0.8rem">Admin</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Sree Collections, Kurnool. All rights reserved.</span>
+      <span>Made with ❤️ in Kurnool</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleMenu(){
+  const m = document.getElementById('mobileMenu');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
+}
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
+}, {threshold:0.1});
+document.querySelectorAll('.collection-card,.why-card,.review-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const style = document.createElement('style');
+  style.textContent = '.visible{opacity:1 !important;transform:translateY(0) !important}';
+  document.head.appendChild(style);
+});
+
+</script>
+
 </body>
 </html>
