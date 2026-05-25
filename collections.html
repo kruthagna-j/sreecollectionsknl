@@ -98,6 +98,10 @@
     <a href="index.html" class="logo">Sree Collections</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
+      <button onclick="toggleCart()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;position:relative;padding:0.3rem">
+  <i class="fas fa-shopping-cart"></i>
+  <span id="cartCount" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;align-items:center;justify-content:center">0</span>
+</button>
       <a href="admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
   </nav>
@@ -119,9 +123,7 @@
     <i class="fas fa-search" style="position:absolute;left:0.8rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem"></i>
   </div>
 </div>
-<div style="padding:1rem 2rem;background:var(--charcoal);border-bottom:1px solid var(--border);display:flex;justify-content:center">
-  <input type="text" id="searchInput" placeholder="🔍 Search gifts..." oninput="searchProducts()" style="width:100%;max-width:500px;padding:0.75rem 1rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
-</div>
+
   <div class="filter-bar">
     <button class="filter-btn active" onclick="filterProducts('All',this)">All</button>
     <button class="filter-btn" onclick="filterProducts('Birthday',this)">🎂 Birthday</button>
@@ -142,7 +144,27 @@
       <a href="https://wa.me/917207186844" target="_blank" style="color:var(--gold)">Contact us on WhatsApp</a> to enquire.
     </div>
   </div>
-
+<!-- CART DRAWER -->
+<div id="cartDrawer" style="display:none;position:fixed;top:0;right:0;width:100%;max-width:400px;height:100vh;background:var(--charcoal);border-left:1px solid var(--border);z-index:250;overflow-y:auto;padding:2rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold)">Your Cart</h2>
+    <button onclick="toggleCart()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer">&times;</button>
+  </div>
+  <div id="cartItems"></div>
+  <div id="cartFooter" style="display:none;margin-top:2rem;border-top:1px solid var(--border);padding-top:1.5rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+      <span style="color:var(--muted)">Total</span>
+      <strong id="cartTotal" style="color:var(--gold);font-size:1.2rem">₹0</strong>
+    </div>
+    <button onclick="checkoutCart()" style="width:100%;padding:1rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'Manrope',sans-serif"><i class="fas fa-shopping-bag"></i> Checkout All</button>
+    <button onclick="clearCart()" style="width:100%;padding:0.7rem;background:transparent;color:#e74c3c;border:1px solid #e74c3c;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;margin-top:0.5rem">Clear Cart</button>
+  </div>
+  <div id="cartEmpty" style="text-align:center;padding:3rem 0;color:var(--muted)">
+    <i class="fas fa-shopping-cart" style="font-size:3rem;color:var(--gold);display:block;margin-bottom:1rem"></i>
+    Your cart is empty
+  </div>
+</div>
+<div id="cartOverlay" onclick="toggleCart()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:240"></div>
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal">
@@ -311,9 +333,14 @@
           <div class="product-name">${p.name}</div>
           <div class="product-desc">${p.description || ''}</div>
           <div class="product-price">₹${Number(p.price).toLocaleString('en-IN')} <span>incl. taxes</span></div>
-          <button class="btn-buy" onclick='openOrder(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
-            <i class="fas fa-shopping-bag"></i> Buy Now
-          </button>
+          <div style="display:flex;gap:0.5rem">
+            <button class="btn-buy" style="flex:1" onclick='openOrder(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+              <i class="fas fa-bolt"></i> Buy Now
+            </button>
+            <button class="btn-buy" style="width:48px;background:var(--charcoal);border:1px solid var(--gold)" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+              <i class="fas fa-cart-plus" style="color:var(--gold)"></i>
+            </button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -590,6 +617,15 @@ document.getElementById('otpInput').select();
       ? `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.`
       : `Thank you ${name}! Payment received. We'll contact you at ${phone} shortly.`;
     showResult(true, title, msg, shortId);
+    if (currentCartIndex < cart.length - 1) {
+      currentCartIndex++;
+      setTimeout(() => {
+        document.getElementById('successOverlay').classList.remove('active');
+        openOrderFromCart();
+      }, 2000);
+    } else {
+      currentCartIndex = 0;
+    }
     
     // Send confirmation email
     if (email) {
@@ -785,6 +821,97 @@ function searchProducts() {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   }
 }
+let cart = [];
+let currentCartIndex = 0;
+
+function addToCart(product) {
+  const existing = cart.find(i => i.id === product.id);
+  if (existing) { existing.qty++; } else { cart.push({ ...product, qty: 1 }); }
+  updateCartUI();
+  const n = document.createElement('div');
+  n.textContent = '✓ ' + product.name + ' added to cart';
+  n.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark);padding:0.8rem 1.5rem;font-weight:700;font-size:0.85rem;z-index:999;font-family:Manrope,sans-serif';
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2500);
+}
+
+function updateCartUI() {
+  const count = cart.reduce((sum, i) => sum + i.qty, 0);
+  const countEl = document.getElementById('cartCount');
+  countEl.textContent = count;
+  countEl.style.display = count > 0 ? 'flex' : 'none';
+  document.getElementById('cartTotal').textContent = '₹' + cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0).toLocaleString('en-IN');
+  const cartItems = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    document.getElementById('cartEmpty').style.display = 'block';
+    document.getElementById('cartFooter').style.display = 'none';
+    cartItems.innerHTML = '';
+    return;
+  }
+  document.getElementById('cartEmpty').style.display = 'none';
+  document.getElementById('cartFooter').style.display = 'block';
+  cartItems.innerHTML = cart.map((item, idx) => `
+    <div style="background:var(--card-bg);border:1px solid var(--border);padding:1rem;margin-bottom:0.8rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+        <span style="font-weight:700;font-size:0.9rem">${item.name}</span>
+        <button onclick="removeFromCart(${idx})" style="background:none;border:none;color:#e74c3c;cursor:pointer">✕</button>
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">${item.category}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <button onclick="updateCartQty(${idx},-1)" style="width:28px;height:28px;background:var(--dark);border:1px solid var(--border);color:var(--text);cursor:pointer">−</button>
+          <span style="font-weight:700">${item.qty}</span>
+          <button onclick="updateCartQty(${idx},1)" style="width:28px;height:28px;background:var(--dark);border:1px solid var(--border);color:var(--text);cursor:pointer">+</button>
+        </div>
+        <span style="color:var(--gold);font-weight:700">₹${(Number(item.price) * item.qty).toLocaleString('en-IN')}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeFromCart(idx) { cart.splice(idx, 1); updateCartUI(); }
+function updateCartQty(idx, d) { cart[idx].qty = Math.max(1, cart[idx].qty + d); updateCartUI(); }
+function clearCart() { if (!confirm('Clear all items?')) return; cart = []; updateCartUI(); }
+function toggleCart() {
+  const drawer = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('cartOverlay');
+  const isOpen = drawer.style.display === 'block';
+  drawer.style.display = isOpen ? 'none' : 'block';
+  overlay.style.display = isOpen ? 'none' : 'block';
+}
+function checkoutCart() {
+  if (cart.length === 0) { alert('Cart is empty'); return; }
+  toggleCart();
+  currentCartIndex = 0;
+  openOrderFromCart();
+}
+function openOrderFromCart() {
+  if (currentCartIndex >= cart.length) { cart = []; updateCartUI(); return; }
+  const item = cart[currentCartIndex];
+  currentProduct = item;
+  currentQty = item.qty;
+  currentPayment = 'cod';
+  emailVerified = false;
+  generatedOTP = '';
+  document.getElementById('modalProductName').textContent = item.name;
+  document.getElementById('modalProductCategory').textContent = item.category;
+  document.getElementById('modalProductPrice').textContent = '₹' + Number(item.price).toLocaleString('en-IN');
+  document.getElementById('qtyVal').textContent = item.qty;
+  document.getElementById('custName').value = '';
+  document.getElementById('custPhone').value = '';
+  document.getElementById('custEmail').value = '';
+  document.getElementById('custAddress').value = '';
+  document.getElementById('verifyEmailSection').style.display = 'none';
+  document.getElementById('otpInput').value = '';
+  document.getElementById('verifyBtn').style.display = 'none';
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').style.opacity = '0.5';
+  updateTotal();
+  document.getElementById('pm-cod').classList.add('selected');
+  document.getElementById('pm-online').classList.remove('selected');
+  document.getElementById('orderModal').classList.add('active');
+}
+
   loadProducts();
   </script>
 
