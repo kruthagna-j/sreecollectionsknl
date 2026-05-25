@@ -313,7 +313,10 @@ async function loadOrders() {
       <td>
         <select onchange="updateOrderStatus('${o.id}', this.value)" style="background:var(--dark);border:1px solid var(--border);color:var(--text);padding:0.3rem;font-family:'Manrope',sans-serif;font-size:0.8rem">
           <option value="placed" ${o.status === 'placed' ? 'selected' : ''}>Placed</option>
-          <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
+           <option value="shipping" ${o.status === 'shipping' ? 'selected' : ''}>
+    Shipping
+  </option>
+          <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
           <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
           <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
         </select>
@@ -432,8 +435,8 @@ async function updateOrderStatus(id, status) {
   if (!o.customer_email) return;
   
   const statusMessages = {
-  processing: 'Order Processing 🔄',
-  delivered: 'Order Delivered ✅',
+  shipped: 'Order Shipped 🚚',
+  delivered: 'Order Delivered 📦',
   cancelled: 'Order Cancelled ❌',
   placed: 'Order Confirmed ✅'
 };  
