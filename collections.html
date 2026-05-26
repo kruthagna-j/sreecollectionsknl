@@ -254,12 +254,33 @@
         <label>🎁 Gift Message <span style="color:var(--muted);font-size:0.7rem">(optional)</span></label>
         <textarea id="giftMessage" rows="2" placeholder="e.g. Happy Birthday! Wishing you all the best 🎂" style="width:100%;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif"></textarea>
       </div>
+      <div class="form-group">
+        <label>Quantity</label>
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty(-1)">−</button>
           <span class="qty-val" id="qtyVal">1</span>
           <button class="qty-btn" onclick="changeQty(1)">+</button>
         </div>
       </div>
+      <div class="form-group">
+        <label>Payment Method</label>
+        <div class="payment-methods">
+          <div class="payment-method selected" id="pm-cod" onclick="selectPayment('cod')">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Cash on Delivery</span>
+          </div>
+          <div class="payment-method" id="pm-online" onclick="selectPayment('online')">
+            <i class="fas fa-credit-card"></i>
+            <span>Pay Online (UPI/Card)</span>
+          </div>
+        </div>
+      </div>
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-val" id="qtyVal">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Payment Method</label>
         <div class="payment-methods">
