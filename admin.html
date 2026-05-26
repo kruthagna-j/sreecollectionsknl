@@ -187,6 +187,7 @@ td,th{padding:0.7rem}
   <div style="display:flex;gap:0.5rem;align-items:center">
   <select id="bulkStatus" style="padding:0.6rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.8rem">
     <option value="">Bulk Action</option>
+    <option value="placed">Mark Placed</option>
     <option value="shipping">Mark Shipping</option>
     <option value="shipped">Mark Shipped</option>
     <option value="delivered">Mark Delivered</option>
@@ -213,9 +214,23 @@ td,th{padding:0.7rem}
     <option value="cod">COD</option>
     <option value="online">Online</option>
   </select>
-  <input type="date" id="orderDateFrom" onchange="filterOrders()" style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem">
-  <input type="date" id="orderDateTo" onchange="filterOrders()" style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem">
-  <button onclick="resetOrderFilters()" style="padding:0.7rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.85rem">Reset</button>
+<input
+  type="date"
+  id="orderDateFrom"
+  onchange="filterOrders()"
+  onkeydown="return true"
+  onclick="this.showPicker && this.showPicker()"
+  style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:text"
+>
+
+<input
+  type="date"
+  id="orderDateTo"
+  onchange="filterOrders()"
+  onkeydown="return true"
+  onclick="this.showPicker && this.showPicker()"
+  style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:text"
+>  <button onclick="resetOrderFilters()" style="padding:0.7rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.85rem">Reset</button>
 </div>
 
 </div>
@@ -457,9 +472,7 @@ function renderOrders(orders) {
       <td>
         <select onchange="updateOrderStatus('${o.id}', this.value)" style="background:var(--dark);border:1px solid var(--border);color:var(--text);padding:0.3rem;font-family:'Manrope',sans-serif;font-size:0.8rem">
           <option value="placed" ${o.status === 'placed' ? 'selected' : ''}>Placed</option>
-           <option value="shipping" ${o.status === 'shipping' ? 'selected' : ''}>
-    Shipping
-  </option>
+           <option value="shipping" ${o.status === 'shipping' ? 'selected' : ''}>Shipping</option>
           <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
           <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
           <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
