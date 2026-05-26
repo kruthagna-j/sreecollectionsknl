@@ -454,8 +454,22 @@
   let pincodeVerified = false;
 
 function isValidServicePincode(pincode) {
-function checkDeliveryMessage() {
 
+  const num = parseInt(pincode);
+
+  // Entire Telangana + Andhra Pradesh
+  return (num >= 500001 && num <= 534999);
+
+}
+function checkDeliveryMessage() {
+function isValidServicePincode(pincode) {
+
+  const num = parseInt(pincode);
+
+  // Entire Telangana + Andhra Pradesh
+  return (num >= 500001 && num <= 534999);
+
+}
   const pincode = document.getElementById('custPincode').value.trim();
 
   const msg = document.getElementById('deliveryMessage');
@@ -491,8 +505,7 @@ function checkDeliveryMessage() {
   }
 
   return false;
-}
-
+  
   async function sbFetch(method, table, body, filter) {
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
     if (filter) url += `?${filter}`;
