@@ -1512,12 +1512,14 @@ function applyTheme() {
 
 applyTheme();
 
+// Sync across tabs
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') applyTheme();
+});
+
 // Load products after the page has finished parsing
 window.addEventListener('DOMContentLoaded', () => {
   loadProducts();
 });
 
-// Sync across tabs
-window.addEventListener('storage', (e) => {
-  if (e.key === 'theme') applyTheme();
-});
+
