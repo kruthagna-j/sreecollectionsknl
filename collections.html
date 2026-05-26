@@ -901,16 +901,14 @@ if (!isValidServicePincode(pincode)) {
       showResult(false, 'Error', 'Could not open payment gateway.', null);
     }
   }
-
-  async function placeOrder(name, phone, email, method, payStatus, payId) {
-    function getDeliveryCharge(pincode) {
+function getDeliveryCharge(pincode) {
   const num = parseInt(pincode);
-  // Kurnool district — free delivery
   if (num >= 518001 && num <= 518599) return 0;
-  // Rest of AP & Telangana — ₹100
   if (num >= 500001 && num <= 534999) return 100;
   return 0;
 }
+
+async function placeOrder(name, phone, email, method, payStatus, payId) {
     const address = document.getElementById('custAddress').value.trim();
 const pincode = document.getElementById('custPincode').value.trim();
 const deliveryCharge = getDeliveryCharge(pincode);
@@ -1153,11 +1151,6 @@ function searchProducts() {
     document.querySelectorAll('.filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
   }
 }
-  
-  // Update "All" filter to active when searching
-  if (searchTerm) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  }
 let cart = [];
 let currentCartIndex = 0;
 
@@ -1482,18 +1475,6 @@ function notifyOwnerWhatsApp(name, phone, product, total, orderId) {
   loadProducts();
   </script>
   <script>
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-}
-
-function applyTheme() {
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-  }
-}
-
-applyTheme();
 </script>
 
   </body>
