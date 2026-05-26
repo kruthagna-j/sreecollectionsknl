@@ -203,6 +203,8 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 >
 
 <datalist id="recentPhones"></datalist>
+<div style="text-align:center;color:var(--muted);font-size:0.8rem;margin:0.5rem 0">— or —</div>
+<input type="email" id="myOrdersEmail" placeholder="Enter your email address" style="width:100%;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem;border-radius:2px;margin-bottom:0.5rem">
       <button onclick="loadMyOrders()" style="padding:0.75rem 1.5rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px">Find Orders</button>
     </div>
   </div>
@@ -336,34 +338,33 @@ function renderRecentPhones() {
 }
 async function loadMyOrders() {
   const phone = document.getElementById('myOrdersPhone').value.trim();
-  if (!phone) { alert('Enter your phone number'); return; }
+  const email = document.getElementById('myOrdersEmail')?.value.trim();
   const el = document.getElementById('ordersContainer');
   el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--gold);margin-right:0.5rem"></i>Loading...</p>';
-  const clean = phone.trim().replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
-  if (!/^[6-9]\d{9}$/.test(clean)) {
-    alert('Please enter a valid 10-digit Indian mobile number.');
-    el.innerHTML = '';
-    return;
+
+  let filter;
+  if (phone) {
+    const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
+    if (!/^[6-9]\d{9}$/.test(clean)) {
+      alert('Please enter a valid 10-digit Indian mobile number.');
+      el.innerHTML = ''; return;
+    }
+    saveRecentPhone(clean);
+    filter = `or=(customer_phone.eq.${encodeURIComponent(clean)},customer_phone.eq.${encodeURIComponent('+91'+clean)})&order=created_at.desc`;
+  } else if (email) {
+    filter = `customer_email=eq.${encodeURIComponent(email)}&order=created_at.desc`;
+  } else {
+    alert('Enter your phone number or email address.');
+    el.innerHTML = ''; return;
   }
-  const possiblePhones = [
-  clean,
-  '+91' + clean
-];
-
-saveRecentPhone(clean);
-
-const orders = await sbFetch(
-  'GET',
-  'orders',
-  null,
-  `or=(customer_phone.eq.${encodeURIComponent(possiblePhones[0])},customer_phone.eq.${encodeURIComponent(possiblePhones[1])})&order=created_at.desc`
-);
+const orders = await sbFetch('GET', 'orders', null, filter);
   const emptyState = document.getElementById('emptyState');
   if (!orders || orders.length === 0) { 
     el.innerHTML = '';
     emptyState.style.display = 'block';
     return; 
   }
+  allMyOrders = orders;
   emptyState.style.display = 'none';
   el.innerHTML = orders.map((o, index) => `
     <div style="background:var(--card-bg);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;border-radius:4px">
@@ -430,12 +431,155 @@ const orders = await sbFetch(
           <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--gold)">₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')}</div>
         </div>
         <div>
-          ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.6rem 1.2rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px;font-weight:600;transition:all 0.3s" onmouseover="this.style.background='rgba(231,76,60,0.1)'" onmouseout="this.style.background='transparent'">🗑 Cancel Order</button>` : ''}
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+  <button onclick="downloadInvoice('${o.id}')" style="padding:0.6rem 1.2rem;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);color:#27ae60;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px;font-weight:600">
+    <i class="fas fa-download"></i> Invoice
+  </button>
+  ${o.status === 'delivered' ? `
+<button onclick="openReviewModal('${o.id}')" style="padding:0.6rem 1.2rem;background:rgba(241,196,15,0.1);border:1px solid rgba(241,196,15,0.3);color:#f1c40f;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px;font-weight:600">
+  <i class="fas fa-star"></i> Review
+</button>
+` : ''}
+  <button onclick="reorder('${o.id}')" style="padding:0.6rem 1.2rem;background:rgba(200,169,107,0.1);border:1px solid rgba(200,169,107,0.3);color:var(--gold);font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px;font-weight:600">
+    <i class="fas fa-redo"></i> Reorder
+  </button>
+  ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.6rem 1.2rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;border-radius:2px;font-weight:600;transition:all 0.3s" onmouseover="this.style.background='rgba(231,76,60,0.1)'" onmouseout="this.style.background='transparent'">🗑 Cancel</button>` : ''}
+</div>
         </div>
       </div>
 
     </div>
   `).join('');
+}
+
+function reorder(id) {
+  const o = allMyOrders.find(x => x.id === id);
+  if (!o) return;
+  const msg = encodeURIComponent(`Hi, I want to reorder:\n\nProduct: ${o.product_name}\nQty: ${o.quantity}\nPrice: ₹${Number(o.product_price).toLocaleString('en-IN')}`);
+  window.open(`https://wa.me/917207186844?text=${msg}`, '_blank');
+}
+
+function downloadInvoice(id) {
+  const o = allMyOrders.find(x => x.id === id);
+  if (!o) return;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice #${o.id.toString().slice(-8).toUpperCase()}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:40px;max-width:650px;margin:0 auto;color:#222}
+    h1{color:#C8A96B;font-size:22px;margin-bottom:4px}
+    .sub{color:#888;font-size:12px;margin-bottom:24px}
+    table{width:100%;border-collapse:collapse;margin:16px 0}
+    th{background:#1A1A1A;color:#C8A96B;padding:9px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+    td{padding:9px;border-bottom:1px solid #eee;font-size:13px}
+    .total{font-size:17px;font-weight:bold;color:#C8A96B;text-align:right;margin-top:8px;padding-top:12px;border-top:2px solid #C8A96B}
+    .status{display:inline-block;padding:3px 10px;font-size:11px;font-weight:bold;background:${o.status==='delivered'?'#e8f5e9':'#fff3e0'};color:${o.status==='delivered'?'#2e7d32':'#e65100'}}
+    @media print{button{display:none}}
+  </style></head><body>
+  <h1>SREE COLLECTIONS</h1>
+  <div class="sub">Kurnool, Andhra Pradesh &nbsp;·&nbsp; +91 72071 86844</div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:13px"><strong>Order ID:</strong> #${o.id.toString().slice(-8).toUpperCase()}</div>
+      <div style="font-size:13px"><strong>Date:</strong> ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-size:13px"><strong>Payment:</strong> ${o.payment_method==='cod'?'Cash on Delivery':'Online Payment'}</div>
+    </div>
+    <div>
+      <span class="status">${o.status.toUpperCase()}</span>
+      ${o.rating ? `
+<div style="margin-top:0.5rem;color:#f1c40f;font-size:0.9rem">
+  ${'★'.repeat(o.rating)}${'☆'.repeat(5 - o.rating)}
+  ${o.review ? `<div style="color:var(--muted);font-size:0.8rem;margin-top:0.3rem">"${o.review}"</div>` : ''}
+</div>
+` : ''}
+      </div>
+  </div>
+  <table><thead><tr><th>Customer</th><th>Phone</th><th>Address</th></tr></thead>
+  <tbody><tr>
+    <td>${o.customer_name}</td>
+    <td>${o.customer_phone}</td>
+    <td>${o.customer_address||'—'}</td>
+  </tr></tbody></table>
+  <table><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead>
+  <tbody><tr>
+    <td>${o.product_name}</td>
+    <td>₹${Number(o.product_price).toLocaleString('en-IN')}</td>
+    <td>${o.quantity}</td>
+    <td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td>
+  </tr></tbody></table>
+  <div class="total">Grand Total: ₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</div>
+  <div style="text-align:center;margin-top:36px">
+    <button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:10px 28px;font-size:13px;font-weight:bold;cursor:pointer">🖨️ Print / Save PDF</button>
+  </div>
+  <div style="text-align:center;margin-top:16px;font-size:11px;color:#888">Thank you for shopping with Sree Collections!</div>
+  </body></html>`;
+const w = window.open('', '_blank');
+if (!w) {
+  alert('Please allow popups to download invoice.');
+  return;
+}  
+  w.document.write(html);
+  w.document.close();
+}
+
+let reviewOrderId = null;
+let selectedRating = 0;
+
+function openReviewModal(id) {
+  reviewOrderId = id;
+  selectedRating = 0;
+
+  document.getElementById('reviewText').value = '';
+
+  document.querySelectorAll('#starRating span').forEach(star => {
+    star.style.color = '#555';
+  });
+
+  document.getElementById('reviewModal').style.display = 'flex';
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').style.display = 'none';
+}
+
+function setRating(rating) {
+  selectedRating = rating;
+
+  document.querySelectorAll('#starRating span').forEach((star, index) => {
+    star.style.color = index < rating ? '#f1c40f' : '#555';
+  });
+}
+
+async function submitReview() {
+  if (!reviewOrderId) return;
+
+  if (selectedRating < 1) {
+    alert('Please select a rating.');
+    return;
+  }
+
+  const review = document.getElementById('reviewText').value.trim();
+
+  try {
+    await sbFetch(
+      'PATCH',
+      'orders',
+      {
+        rating: selectedRating,
+        review: review,
+        reviewed_at: new Date().toISOString()
+      },
+      `id=eq.${reviewOrderId}`
+    );
+
+    showToast('Thank you for your review!', 'success');
+
+    closeReviewModal();
+
+    loadMyOrders();
+
+  } catch (err) {
+    console.error(err);
+    alert('Failed to submit review.');
+  }
 }
 
 function closeCancelModal() {
@@ -447,13 +591,11 @@ function closeCancelModal() {
 function confirmCancel() {
   executeCancelOrder();
   closeCancelModal();
-}
-  if (!pendingCancelId) return;
-  cancelOrder(pendingCancelId, pendingCancelPhone);
-  closeCancelModal();
-  
+}  
 let pendingCancelId = null;
 let pendingCancelPhone = null;
+let allMyOrders = [];
+
 async function cancelOrder(id, phone) {
   pendingCancelId = id;
   pendingCancelPhone = phone;
@@ -506,5 +648,38 @@ window.onload = () => {
   renderRecentPhones();
 };
 </script>
+<div id="reviewModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:9999;padding:1rem">
+  <div style="background:var(--charcoal);border:1px solid var(--border);padding:1.5rem;max-width:420px;width:100%;border-radius:4px">
+    
+    <h3 style="margin-top:0;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.5rem">
+      Rate Your Order
+    </h3>
+
+    <div id="starRating" style="display:flex;gap:0.5rem;font-size:1.8rem;margin:1rem 0;color:#555">
+      <span onclick="setRating(1)">★</span>
+      <span onclick="setRating(2)">★</span>
+      <span onclick="setRating(3)">★</span>
+      <span onclick="setRating(4)">★</span>
+      <span onclick="setRating(5)">★</span>
+    </div>
+
+    <textarea
+      id="reviewText"
+      placeholder="Write your review..."
+      style="width:100%;min-height:110px;padding:0.8rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;resize:vertical;box-sizing:border-box"
+    ></textarea>
+
+    <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1rem">
+      <button onclick="closeReviewModal()" style="padding:0.7rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer">
+        Cancel
+      </button>
+
+      <button onclick="submitReview()" style="padding:0.7rem 1.2rem;background:var(--gold);border:none;color:#111;font-weight:700;cursor:pointer">
+        Submit Review
+      </button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
