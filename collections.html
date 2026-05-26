@@ -203,14 +203,14 @@
         </div>
       </div>
     </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="document.getElementById('cartCheckoutModal').classList.remove('active')">Cancel</button>
-      <button class="btn-confirm" onclick="placeAllOrders()">
-        <i class="fas fa-shopping-bag"></i> Confirm All Orders
-      </button>
+   <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-confirm" id="confirmBtn" onclick="confirmOrder()">
+          <i class="fas fa-shopping-bag"></i> Confirm Order
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
@@ -256,14 +256,6 @@
       </div>
       <div class="form-group">
         <label>Quantity</label>
-        <div class="qty-control">
-          <button class="qty-btn" onclick="changeQty(-1)">−</button>
-          <span class="qty-val" id="qtyVal">1</span>
-          <button class="qty-btn" onclick="changeQty(1)">+</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Payment Method</label>
         <div class="payment-methods">
           <div class="payment-method selected" id="pm-cod" onclick="selectPayment('cod')">
             <i class="fas fa-money-bill-wave"></i>
