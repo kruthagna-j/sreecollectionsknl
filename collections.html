@@ -218,6 +218,16 @@
     <div class="form-group">
   <label>Pincode *</label>
   <input 
+    type="text"
+    id="cartCustPincode"
+    maxlength="6"
+    placeholder="Enter 6-digit pincode"
+    style="width:100%;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif"
+  >
+</div>
+    <div class="form-group">
+  <label>Pincode *</label>
+  <input 
     type="text" 
     id="custPincode" 
     maxlength="6"
@@ -282,6 +292,16 @@
         <label>Delivery Address *</label>
         <textarea id="custAddress" rows="2" placeholder="Enter your full delivery address"></textarea>
       </div>
+      <div class="form-group">
+  <label>Pincode *</label>
+  <input 
+    type="text"
+    id="custPincode"
+    maxlength="6"
+    placeholder="Enter 6-digit pincode"
+    style="width:100%;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif"
+  >
+</div>
       <div class="form-group">
   <label>Pincode *</label>
   <input type="text" id="custPincode" maxlength="6" placeholder="Enter 6-digit pincode">
@@ -359,6 +379,22 @@
   let lastOrder = null;
   let generatedOTP = '';
   let emailVerified = false;
+  let pincodeVerified = false;
+
+function isValidServicePincode(pincode) {
+
+  // Andhra Pradesh pincodes
+  if (/^5(1|2|3)\d{4}$/.test(pincode)) {
+    return true;
+  }
+
+  // Telangana pincodes
+  if (/^50\d{4}$/.test(pincode)) {
+    return true;
+  }
+
+  return false;
+}
 
   async function sbFetch(method, table, body, filter) {
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
@@ -634,6 +670,16 @@ document.getElementById('otpInput').select();
     }
     const address = document.getElementById('custAddress').value.trim();
     const pincode = document.getElementById('custPincode').value.trim();
+
+if (!/^\d{6}$/.test(pincode)) {
+  alert('Please enter valid 6-digit pincode.');
+  return;
+}
+
+if (!isValidServicePincode(pincode)) {
+  alert('Sorry, delivery available only in Andhra Pradesh and Telangana.');
+  return;
+}
 
 if (!/^\d{6}$/.test(pincode)) {
   alert('Please enter a valid 6-digit pincode.');
@@ -1060,6 +1106,7 @@ function openOrderFromCart() {
   document.getElementById('custPhone').value = '';
   document.getElementById('custEmail').value = '';
   document.getElementById('custAddress').value = '';
+  document.getElementById('custPincode').value = '';
   if (document.getElementById('giftMessage')) document.getElementById('giftMessage').value = '';
   document.getElementById('verifyEmailSection').style.display = 'none';
   document.getElementById('otpInput').value = '';
@@ -1113,6 +1160,16 @@ async function placeAllOrders() {
   const email = document.getElementById('cartCustEmail').value.trim();
   const address = document.getElementById('cartCustAddress').value.trim();
   const pincode = document.getElementById('cartCustPincode').value.trim();
+
+if (!/^\d{6}$/.test(pincode)) {
+  alert('Please enter valid 6-digit pincode.');
+  return;
+}
+
+if (!isValidServicePincode(pincode)) {
+  alert('Sorry, delivery available only in Andhra Pradesh and Telangana.');
+  return;
+}
 
 if (!/^\d{6}$/.test(pincode)) {
   alert('Please enter a valid 6-digit pincode.');
