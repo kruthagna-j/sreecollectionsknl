@@ -216,6 +216,52 @@
       <textarea id="cartCustAddress" rows="2" placeholder="Enter your full delivery address"></textarea>
     </div>
     <div class="form-group">
+
+  <label>Pincode *</label>
+
+  <input 
+    type="text"
+    id="custPincode"
+    maxlength="6"
+    placeholder="Enter 6-digit pincode"
+    oninput="checkDeliveryMessage()"
+    style="
+      width:100%;
+      padding:0.75rem;
+      background:var(--dark);
+      border:1px solid var(--border);
+      color:var(--text);
+      font-size:0.9rem;
+      font-family:'Manrope',sans-serif
+    "
+  >
+
+  <div style="margin-top:0.8rem">
+
+    <div style="
+      font-size:0.95rem;
+      font-weight:700;
+      color:var(--gold);
+      margin-bottom:0.35rem
+    ">
+      Delivery Check
+    </div>
+
+    <div 
+      id="deliveryMessage"
+      style="
+        font-size:0.82rem;
+        color:var(--muted);
+        line-height:1.5
+      "
+    >
+      Do We Deliver to You? Check using your pincode.
+    </div>
+
+  </div>
+
+</div>
+    <div class="form-group">
   <label>Pincode *</label>
   <input 
     type="text"
@@ -382,6 +428,31 @@
   let pincodeVerified = false;
 
 function isValidServicePincode(pincode) {
+function checkDeliveryMessage() {
+
+  const pincode = document.getElementById('custPincode').value.trim();
+
+  const msg = document.getElementById('deliveryMessage');
+
+  if (/^\d{6}$/.test(pincode)) {
+
+    if (isValidServicePincode(pincode)) {
+
+      msg.innerHTML = '✅ Yes! We deliver to your area.';
+      msg.style.color = '#27ae60';
+
+    } else {
+
+      msg.innerHTML = '❌ Sorry, we currently do not deliver to this area.';
+      msg.style.color = '#e74c3c';
+    }
+
+  } else {
+
+    msg.innerHTML = 'Do We Deliver to You? Check using your pincode.';
+    msg.style.color = 'var(--muted)';
+  }
+}
 
   // Andhra Pradesh pincodes
   if (/^5(1|2|3)\d{4}$/.test(pincode)) {
