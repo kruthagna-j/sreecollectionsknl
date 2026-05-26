@@ -214,23 +214,33 @@ td,th{padding:0.7rem}
     <option value="cod">COD</option>
     <option value="online">Online</option>
   </select>
-<input
-  type="date"
-  id="orderDateFrom"
-  onchange="filterOrders()"
-  onkeydown="return true"
-  onclick="this.showPicker && this.showPicker()"
-  style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:text"
->
 
-<input
-  type="date"
-  id="orderDateTo"
-  onchange="filterOrders()"
-  onkeydown="return true"
-  onclick="this.showPicker && this.showPicker()"
-  style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:text"
->  <button onclick="resetOrderFilters()" style="padding:0.7rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.85rem">Reset</button>
+<div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+
+  <div style="display:flex;flex-direction:column;gap:0.4rem">
+    <label style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">
+      From Date
+    </label>
+    <input
+      type="date"
+      id="orderDateFrom"
+      onchange="filterOrders()"
+      style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:pointer;min-width:180px"
+    >
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:0.4rem">
+    <label style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">
+      To Date
+    </label>
+    <input
+      type="date"
+      id="orderDateTo"
+      onchange="filterOrders()"
+      style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;cursor:pointer;min-width:180px"
+    >
+  </div>
+
 </div>
 
 </div>
