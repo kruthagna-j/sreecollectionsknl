@@ -22,6 +22,25 @@
 :root{--gold:#C8A96B;--gold-light:#E8C98B;--dark:#0F0F0F;--charcoal:#1A1A1A;--card-bg:#1F1F1F;--text:#F5F0E8;--muted:#999;--border:rgba(200,169,107,0.2)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif}
+
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"] {
+  background:var(--dark);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:0.5rem;
+  font-family:'Manrope',sans-serif;
+  color-scheme: dark;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
 #bgCanvas {
   position: fixed;
   top: 0;
@@ -442,7 +461,7 @@ body {
 
 <script>
 const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI0NTU5MCwiZXhwIjoyMDk0ODIxNTkwfQ.iIpZHj4BuXf4u06isC-Km_tEtSKbdhtc-d-raM3kPfk';
 
 const ONESIGNAL_APP_ID = '20b46cc0-1f20-4482-9879-f258a7234c13';
 const ONESIGNAL_REST_KEY = 'os_v2_app_ec2gzqa7ebcifgdz6jmkoi2mco226yl6kpnud35xhkydeyl7hi2tmwyfrwxEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf'; // get this from OneSignal Settings → Keys & IDs
