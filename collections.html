@@ -45,6 +45,9 @@
   background: #f5f5f5;
   color: #111;
 }
+.light-mode nav {
+  background: rgba(255,255,255,0.97) !important;
+}
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif}
   nav{position:fixed;top:0px;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(15,15,15,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
@@ -177,6 +180,7 @@
     <a href="index.html" class="logo">Sree Collections</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
+      <button onclick="toggleTheme()" id="themeBtn" title="Toggle theme" style="background:none;border:1px solid var(--border);color:var(--gold);width:36px;height:36px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">🌙</button>
       <button onclick="toggleCart()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;position:relative;padding:0.3rem">
   <i class="fas fa-shopping-cart"></i>
   <span id="cartCount" style="position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;display:none;align-items:center;justify-content:center">0</span>
