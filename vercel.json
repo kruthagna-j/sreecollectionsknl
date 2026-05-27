@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "framework": "static",
+  "outputDirectory": ".",
+  "framework": {},
   "headers": [
     {
       "source": "/sitemap.xml",
@@ -16,8 +17,20 @@
       ]
     }
   ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "backend/:path*"
+    }
+  ],
   "env": {
     "SUPABASE_URL": "https://supabase.com/dashboard/project/peqqtfvypljvgcorddbn",
     "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE"
+  },
+  "functions": {
+    "backend/server.js": {  
+      "memory": 1024,
+      "maxDuration": 60
+    }
   }
 }
