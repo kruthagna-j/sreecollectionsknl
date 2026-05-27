@@ -164,6 +164,75 @@ body {
 <button class="tab active" onclick="switchTab('products', this)">Products</button>
 <button class="tab" onclick="switchTab('orders', this)">Orders</button>
 <button class="tab" onclick="switchTab('customers', this)">👥 Customers</button>
+<button class="tab" onclick="switchTab('coupons', this)">🎟️ Coupons</button>
+</div>
+
+<!-- COUPONS TAB -->
+<div class="tab-content" id="tab-coupons">
+  <div class="section-header">
+    <h2 class="section-title">Coupons</h2>
+    <button class="btn-primary" onclick="openCouponModal()"><i class="fas fa-plus"></i> Add Coupon</button>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Label</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="couponsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div class="modal" id="couponModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Coupon</h3>
+      <button class="btn-close" onclick="closeCouponModal()">&times;</button>
+    </div>
+    <form id="couponForm">
+      <div class="form-group">
+        <label>Coupon Code *</label>
+        <input type="text" id="cpnCode" required placeholder="e.g. SAVE20" style="text-transform:uppercase">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type *</label>
+          <select id="cpnType" required>
+            <option value="percent">Percent Off</option>
+            <option value="flat">Flat Amount Off</option>
+            <option value="freeship">Free Delivery</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Value</label>
+          <input type="number" id="cpnValue" placeholder="e.g. 10 for 10%">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Label (shown to customer) *</label>
+        <input type="text" id="cpnLabel" required placeholder="e.g. 10% off">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="cpnActive">
+          <option value="true">✅ Active</option>
+          <option value="false">❌ Inactive</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:2rem">
+        <button type="button" class="btn" onclick="closeCouponModal()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1">Save Coupon</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- CUSTOMERS TAB -->
@@ -435,6 +504,58 @@ async function sbFetch(method, table, body, filter) {
   }
 }
 
+async function loadCoupons() {
+  const coupons = await sbFetch('GET', 'coupons', null, 'order=created_at.desc');
+  const tbody = document.getElementById('couponsBody');
+  if (!coupons || coupons.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No coupons yet.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = coupons.map(c => `
+    <tr>
+      <td><strong>${c.code}</strong></td>
+      <td>${c.type}</td>
+      <td>${c.type === 'percent' ? c.value + '%' : c.type === 'flat' ? '₹' + c.value : 'Free'}</td>
+      <td>${c.label}</td>
+      <td><span class="badge ${c.active ? 'badge-success' : 'badge-cod'}">${c.active ? '✅ Active' : '❌ Inactive'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-small btn-delete" onclick="deleteCoupon('${c.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCouponModal() {
+  document.getElementById('couponForm').reset();
+  document.getElementById('couponModal').classList.add('active');
+}
+
+function closeCouponModal() {
+  document.getElementById('couponModal').classList.remove('active');
+}
+
+document.getElementById('couponForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = {
+    code: document.getElementById('cpnCode').value.trim().toUpperCase(),
+    type: document.getElementById('cpnType').value,
+    value: Number(document.getElementById('cpnValue').value) || 0,
+    label: document.getElementById('cpnLabel').value.trim(),
+    active: document.getElementById('cpnActive').value === 'true'
+  };
+  await sbFetch('POST', 'coupons', data);
+  closeCouponModal();
+  loadCoupons();
+});
+
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon?')) return;
+  await sbFetch('DELETE', 'coupons', null, `id=eq.${id}`);
+  loadCoupons();
+}
+
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
@@ -444,6 +565,7 @@ function switchTab(tab, el) {
   if (tab === 'products') loadProducts();
   if (tab === 'orders') loadOrders();
   if (tab === 'customers') loadCustomers();
+if (tab === 'coupons') loadCoupons();
 }
 
 async function loadStats() {
@@ -981,6 +1103,59 @@ startOrderPolling();
 </script>
 
 <script>
+
+async function loadCoupons() {
+  const coupons = await sbFetch('GET', 'coupons', null, 'order=created_at.desc');
+  const tbody = document.getElementById('couponsBody');
+  if (!coupons || coupons.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No coupons yet.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = coupons.map(c => `
+    <tr>
+      <td><strong>${c.code}</strong></td>
+      <td>${c.type}</td>
+      <td>${c.type === 'percent' ? c.value + '%' : c.type === 'flat' ? '₹' + c.value : 'Free'}</td>
+      <td>${c.label}</td>
+      <td><span class="badge ${c.active ? 'badge-success' : 'badge-cod'}">${c.active ? '✅ Active' : '❌ Inactive'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-small btn-delete" onclick="deleteCoupon('${c.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCouponModal() {
+  document.getElementById('couponForm').reset();
+  document.getElementById('couponModal').classList.add('active');
+}
+
+function closeCouponModal() {
+  document.getElementById('couponModal').classList.remove('active');
+}
+
+document.getElementById('couponForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = {
+    code: document.getElementById('cpnCode').value.trim().toUpperCase(),
+    type: document.getElementById('cpnType').value,
+    value: Number(document.getElementById('cpnValue').value) || 0,
+    label: document.getElementById('cpnLabel').value.trim(),
+    active: document.getElementById('cpnActive').value === 'true'
+  };
+  await sbFetch('POST', 'coupons', data);
+  closeCouponModal();
+  loadCoupons();
+});
+
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon?')) return;
+  await sbFetch('DELETE', 'coupons', null, `id=eq.${id}`);
+  loadCoupons();
+}
+
 function setTheme(isLight) {
   document.body.classList.toggle('light-mode', isLight);
   localStorage.setItem('theme', isLight ? 'light' : 'dark');

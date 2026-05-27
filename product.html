@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product – Sree Collections</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--gold:#C8A96B;--gold-light:#E8C98B;--dark:#0F0F0F;--charcoal:#1A1A1A;--card-bg:#1F1F1F;--text:#F5F0E8;--muted:#999;--border:rgba(200,169,107,0.2)}
+.light-mode{--gold:#9A6F2E;--gold-light:#B8882A;--dark:#f5f5f5;--charcoal:#ffffff;--card-bg:#ffffff;--text:#111;--muted:#555;--border:rgba(0,0,0,0.15)}
+.light-mode body{background:#f5f5f5;color:#111}
+.light-mode nav{background:rgba(255,255,255,0.97)!important}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(15,15,15,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--gold);text-decoration:none}
+.nav-back{color:var(--muted);text-decoration:none;font-size:0.85rem;display:flex;align-items:center;gap:0.4rem;transition:color 0.3s}
+.nav-back:hover{color:var(--gold)}
+.container{max-width:1100px;margin:0 auto;padding:7rem 2rem 4rem}
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.product-img-box{position:relative}
+.product-img-box img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border:1px solid var(--border)}
+.product-img-placeholder{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1F1F1F,#2A2A2A);display:flex;align-items:center;justify-content:center;font-size:6rem;border:1px solid var(--border)}
+.product-category{font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem}
+.product-name{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;line-height:1.2;margin-bottom:1rem}
+.product-price{font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem}
+.product-price span{font-size:0.85rem;font-weight:400;color:var(--muted)}
+.product-desc{color:var(--muted);line-height:1.8;margin-bottom:2rem;font-size:0.95rem}
+.stock-badge{display:inline-block;padding:0.4rem 1rem;font-size:0.78rem;font-weight:600;margin-bottom:1.5rem;border-radius:2px}
+.divider{border:none;border-top:1px solid var(--border);margin:2rem 0}
+.btn-buy{width:100%;padding:1rem;background:var(--gold);color:var(--dark);border:none;font-size:0.95rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;font-family:'Manrope',sans-serif;transition:background 0.3s;margin-bottom:0.8rem}
+.btn-buy:hover{background:var(--gold-light)}
+.btn-cart{width:100%;padding:1rem;background:transparent;color:var(--gold);border:1px solid var(--gold);font-size:0.95rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;font-family:'Manrope',sans-serif;transition:all 0.3s;margin-bottom:0.8rem}
+.btn-cart:hover{background:rgba(200,169,107,0.1)}
+.btn-whatsapp{width:100%;padding:1rem;background:#25D366;color:white;border:none;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;display:flex;align-items:center;justify-content:center;gap:0.5rem;text-decoration:none}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.feature{display:flex;align-items:center;gap:0.8rem;font-size:0.85rem;color:var(--muted)}
+.feature i{color:var(--gold);font-size:1rem;width:20px;text-align:center}
+.reviews-section{margin-top:4rem}
+.reviews-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;margin-bottom:2rem}
+.review-card{background:var(--card-bg);border:1px solid var(--border);padding:1.5rem;margin-bottom:1rem}
+.stars{color:var(--gold);margin-bottom:0.5rem}
+.review-text{color:var(--muted);font-size:0.9rem;line-height:1.6;font-style:italic}
+.reviewer-name{font-size:0.85rem;font-weight:600;margin-top:0.8rem}
+.related-section{margin-top:4rem}
+.related-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;margin-bottom:2rem}
+.related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem}
+.related-card{background:var(--card-bg);border:1px solid var(--border);cursor:pointer;transition:all 0.3s;text-decoration:none;color:var(--text);display:block}
+.related-card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.related-card img{width:100%;height:160px;object-fit:cover}
+.related-card-body{padding:1rem}
+.related-card-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.3rem}
+.related-card-price{color:var(--gold);font-weight:700}
+@media(max-width:768px){
+  .product-grid{grid-template-columns:1fr;gap:2rem}
+  .features{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Sree Collections</a>
+  <div style="display:flex;align-items:center;gap:1.5rem">
+    <a href="collections.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back</a>
+    <button onclick="toggleTheme()" id="themeBtn" style="background:none;border:1px solid var(--border);color:var(--gold);width:36px;height:36px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">🌙</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="product-grid" id="productDetail">
+    <div style="text-align:center;padding:4rem;color:var(--muted);grid-column:1/-1">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--gold);display:block;margin-bottom:1rem"></i>
+      Loading product...
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="reviews-section" id="reviewsSection" style="display:none">
+    <h2>Customer Reviews</h2>
+    <div id="reviewsList"></div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <div class="related-section" id="relatedSection" style="display:none">
+    <h2>You May Also Like</h2>
+    <div class="related-grid" id="relatedGrid"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+
+async function sbFetch(method, table, body, filter) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
+  if (filter) url += `?${filter}`;
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function loadProduct() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if (!id) {
+    window.location.href = 'collections.html';
+    return;
+  }
+
+  const data = await sbFetch('GET', 'products', null, `id=eq.${id}`);
+  if (!data || data.length === 0) {
+    window.location.href = 'collections.html';
+    return;
+  }
+
+  const p = data[0];
+  document.title = p.name + ' – Sree Collections';
+
+  const stockBadge = p.stock_status === 'outofstock'
+    ? `<span class="stock-badge" style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)">❌ Out of Stock</span>`
+    : p.stock_status === 'lowstock'
+    ? `<span class="stock-badge" style="background:rgba(241,196,15,0.15);color:#f1c40f;border:1px solid rgba(241,196,15,0.3)">⚠️ Only a few left</span>`
+    : `<span class="stock-badge" style="background:rgba(39,174,96,0.15);color:#27ae60;border:1px solid rgba(39,174,96,0.3)">✅ In Stock</span>`;
+
+  document.getElementById('productDetail').innerHTML = `
+    <div class="product-img-box">
+      ${p.image_url
+        ? `<img src="${p.image_url}" alt="${p.name}">`
+        : `<div class="product-img-placeholder">🎁</div>`
+      }
+    </div>
+    <div>
+      <div class="product-category">${p.category}</div>
+      <h1 class="product-name">${p.name}</h1>
+      ${stockBadge}
+      <div class="product-price">₹${Number(p.price).toLocaleString('en-IN')} <span>incl. taxes</span></div>
+      <p class="product-desc">${p.description || 'A premium gift from Sree Collections, Kurnool.'}</p>
+      <hr class="divider">
+      ${p.stock_status !== 'outofstock' ? `
+        <button class="btn-buy" onclick="buyNow()">
+          <i class="fas fa-bolt"></i> Buy Now
+        </button>
+        <button class="btn-cart" onclick="addToCartAndGo()">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      ` : `
+        <button class="btn-buy" disabled style="opacity:0.5;cursor:not-allowed">Out of Stock</button>
+      `}
+      <a href="https://wa.me/917207186844?text=${encodeURIComponent('Hi! I want to order: ' + p.name + ' (₹' + Number(p.price).toLocaleString('en-IN') + ')')}" target="_blank" class="btn-whatsapp">
+        <i class="fab fa-whatsapp"></i> Order on WhatsApp
+      </a>
+      <div class="features">
+        <div class="feature"><i class="fas fa-truck"></i> Delivery across AP & Telangana</div>
+        <div class="feature"><i class="fas fa-shield-alt"></i> Secure payment</div>
+        <div class="feature"><i class="fas fa-gift"></i> Premium packaging</div>
+        <div class="feature"><i class="fas fa-headset"></i> WhatsApp support</div>
+      </div>
+    </div>
+  `;
+
+  // Store product for buy now
+  window.currentProductData = p;
+
+  // Load reviews
+  loadReviews(p.id);
+
+  // Load related
+  loadRelated(p.category, p.id);
+}
+
+async function loadReviews(productId) {
+  const reviews = await sbFetch('GET', 'orders', null,
+    `product_id=eq.${productId}&rating=not.is.null&select=customer_name,rating,review,reviewed_at&order=reviewed_at.desc&limit=5`
+  );
+  if (!reviews || reviews.length === 0) return;
+  document.getElementById('reviewsSection').style.display = 'block';
+  document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+    <div class="review-card">
+      <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+      ${r.review ? `<div class="review-text">"${r.review}"</div>` : ''}
+      <div class="reviewer-name">${r.customer_name.charAt(0)}*** · ${new Date(r.reviewed_at).toLocaleDateString('en-IN', {month:'long', year:'numeric'})}</div>
+    </div>
+  `).join('');
+}
+
+async function loadRelated(category, currentId) {
+  const related = await sbFetch('GET', 'products', null,
+    `category=eq.${encodeURIComponent(category)}&id=neq.${currentId}&limit=4&order=created_at.desc`
+  );
+  if (!related || related.length === 0) return;
+  document.getElementById('relatedSection').style.display = 'block';
+  document.getElementById('relatedGrid').innerHTML = related.map(p => `
+    <a href="product.html?id=${p.id}" class="related-card">
+      ${p.image_url
+        ? `<img src="${p.image_url}" alt="${p.name}">`
+        : `<div style="height:160px;background:linear-gradient(135deg,#1F1F1F,#2A2A2A);display:flex;align-items:center;justify-content:center;font-size:3rem">🎁</div>`
+      }
+      <div class="related-card-body">
+        <div class="related-card-name">${p.name}</div>
+        <div class="related-card-price">₹${Number(p.price).toLocaleString('en-IN')}</div>
+      </div>
+    </a>
+  `).join('');
+}
+
+function buyNow() {
+  const p = window.currentProductData;
+  if (!p) return;
+  window.location.href = `collections.html?buyNow=${p.id}`;
+}
+
+function addToCartAndGo() {
+  const p = window.currentProductData;
+  if (!p) return;
+  let cart = JSON.parse(localStorage.getItem('sreecart') || '[]');
+  const existing = cart.find(i => i.id === p.id);
+  if (existing) { existing.qty++; } else { cart.push({ ...p, qty: 1 }); }
+  localStorage.setItem('sreecart', JSON.stringify(cart));
+  window.location.href = 'collections.html';
+}
+
+function setTheme(isLight) {
+  document.body.classList.toggle('light-mode', isLight);
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+}
+function toggleTheme() { setTheme(!document.body.classList.contains('light-mode')); }
+function applyTheme() {
+  const saved = localStorage.getItem('theme');
+  const systemLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  setTheme(saved ? saved === 'light' : systemLight);
+}
+applyTheme();
+
+window.addEventListener('DOMContentLoaded', loadProduct);
+</script>
+</body>
+</html>
