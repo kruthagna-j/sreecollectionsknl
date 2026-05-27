@@ -184,6 +184,7 @@ body {
 <button class="tab" onclick="switchTab('orders', this)">Orders</button>
 <button class="tab" onclick="switchTab('customers', this)">👥 Customers</button>
 <button class="tab" onclick="switchTab('coupons', this)">🎟️ Coupons</button>
+<button class="tab" onclick="switchTab('returns', this)">↩️ Returns</button>
 </div>
 
 <!-- COUPONS TAB -->
@@ -556,7 +557,6 @@ async function loadCoupons() {
       <td>
         <div class="action-btns">
           <button class="btn-small btn-delete" onclick="deleteCoupon('${c.id}')"><i class="fas fa-trash"></i></button>
-          <button class="tab" onclick="switchTab('returns', this)">↩️ Returns</button>
         </div>
       </td>
     </tr>
@@ -1297,7 +1297,8 @@ window.addEventListener('storage', (e) => {
 
   window.addEventListener('DOMContentLoaded', init);
 })();
-
+</script>
+<script>
 async function loadReturns() {
   const returns = await sbFetch('GET', 'returns', null, 'order=created_at.desc');
   const tbody = document.getElementById('returnsBody');
@@ -1331,7 +1332,6 @@ async function updateReturnStatus(id, status) {
   await sbFetch('PATCH', 'returns', {status}, `id=eq.${id}`);
   showToast('Return status updated');
 }
-
 </script>
 </body>
 </html>
