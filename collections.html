@@ -571,8 +571,10 @@ async function sbFetch(method, table, body, filter) {
     noP.style.display = 'none';
     grid.innerHTML = products.map(p => `
       <div class="product-card">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-        <div class="product-img-placeholder" style="${p.image_url ? 'display:none' : ''}">🎁</div>
+        <a href="product.html?id=${p.id}" style="display:block">
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+          <div class="product-img-placeholder" style="${p.image_url ? 'display:none' : ''}">🎁</div>
+        </a>
         <div class="product-body">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
   <div class="product-category">${p.category}</div>
