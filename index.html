@@ -276,21 +276,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
           <span class="auth-prefix">+91</span>
           <input type="tel" id="globalAuthPhone" placeholder="Enter 10-digit number" maxlength="10" class="auth-input">
         </div>
-        <script>  
-        // ENTER KEY SUPPORT
-function enableEnter(inputId, callback) {
-  const el = document.getElementById(inputId);
-
-  if (!el) return;
-
-  el.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      callback();
-    }
-  });
-}
-</script>
-
       </div>
       <button class="auth-submit-btn" onclick="handleSendLoginOTP()">Continue</button>
     </div>
@@ -593,16 +578,51 @@ async function cancelOrder(id, phone) {
 
 <script>
 let authCountdown;
+let authModalKeyboardHandler = null;
 
 function openAuthModal() {
-  document.getElementById('globalAuthModal').classList.add('active');
+  const modal = document.getElementById('globalAuthModal');
+  if (!modal) return;
+  
+  modal.classList.add('active');
   document.getElementById('authPhoneView').style.display = 'block';
   document.getElementById('authOtpView').style.display = 'none';
+
+  // Automatically focus on the mobile number input field instantly
+  const phoneField = document.getElementById('globalAuthPhone');
+  if (phoneField) {
+    phoneField.value = '';
+    setTimeout(() => phoneField.focus(), 60);
+  }
+
+  // Keyboard Enter & Escape key functionality mapping
+  authModalKeyboardHandler = function(e) {
+    if (e.key === 'Escape') {
+      closeAuthModal();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      // Route submission based on whether the user is viewing Phone view or OTP view
+      const isOtpViewActive = document.getElementById('authOtpView').style.display === 'block';
+      if (isOtpViewActive) {
+        handleVerifyLoginOTP();
+      } else {
+        handleSendLoginOTP();
+      }
+    }
+  };
+
+  window.addEventListener('keydown', authModalKeyboardHandler);
 }
 
 function closeAuthModal() {
-  document.getElementById('globalAuthModal').classList.remove('active');
+  const modal = document.getElementById('globalAuthModal');
+  if (modal) modal.classList.remove('active');
   clearInterval(authCountdown);
+
+  if (authModalKeyboardHandler) {
+    window.removeEventListener('keydown', authModalKeyboardHandler);
+    authModalKeyboardHandler = null;
+  }
 }
 
 function handleProtectedFeature(target, isExternalPage = false) {
