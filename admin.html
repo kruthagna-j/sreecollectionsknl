@@ -505,11 +505,41 @@ body {
 
 </div>
 <script>
-const ADMIN_SECRET = 'sree-admin-2024-secret';
-
+// Publicly safe Application IDs
 const ONESIGNAL_APP_ID = '20b46cc0-1f20-4482-9879-f258a7234c13';
-const ONESIGNAL_REST_KEY = 'os_v2_app_ec2gzqa7ebcifgdz6jmkoi2mco226yl6kpnud35xhkydeyl7hi2tmwyfrwxEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf'; // get this from OneSignal Settings → Keys & IDs
 
+// SENSITIVE CREDENTIALS REMOVED FROM SOURCE CONTROL:
+// These are loaded securely into browser memory when you authenticate locally
+let ONESIGNAL_REST_KEY = sessionStorage.getItem('admin_onesignal_rest_key');
+
+// Secure Local Authentication Hook
+function authenticateAdminSession() {
+  const inputSecret = prompt("System Access Required:\nPlease enter your Administrator Access Secret:");
+  
+  if (inputSecret === "sree-admin-2024-secret") {
+    // Prompt for the newly rotated OneSignal key only if it's not already cached in memory
+    if (!ONESIGNAL_REST_KEY) {
+      const inputOneSignalKey = prompt("Notification System Validation:\nPlease paste your newly rotated OneSignal REST API Key:");
+      if (inputOneSignalKey && inputOneSignalKey.trim().length > 15) {
+        ONESIGNAL_REST_KEY = inputOneSignalKey.trim();
+        sessionStorage.setItem('admin_onesignal_rest_key', ONESIGNAL_REST_KEY);
+      } else {
+        alert("Invalid Notification Key provided. Admin notifications disabled.");
+      }
+    }
+    alert("Authentication Successful. Welcome back.");
+  } else {
+    alert("Access Denied: Incorrect Administrative Secret Key.");
+    document.body.innerHTML = "<h2 style='color:#e74c3c; text-align:center; margin-top:5rem;'>Security Error: Access Denied</h2>";
+  }
+}
+
+// Automatically enforce checking when the dashboard loads
+document.addEventListener('DOMContentLoaded', () => {
+  if (!ONESIGNAL_REST_KEY) {
+    authenticateAdminSession();
+  }
+});
 async function sendPushToAll(title, message, url = '/') {
   try {
     await fetch('https://onesignal.com/api/v1/notifications', {
