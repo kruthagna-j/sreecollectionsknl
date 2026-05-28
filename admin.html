@@ -213,13 +213,15 @@ body {
     <table>
       <thead>
         <tr>
-          <th>Code</th>
-          <th>Type</th>
-          <th>Value</th>
-          <th>Label</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
+  <th>Code</th>
+  <th>Type</th>
+  <th>Value</th>
+  <th>Label</th>
+  <th>Expiry</th>
+  <th>Usage Limit</th>
+  <th>Status</th>
+  <th>Actions</th>
+</tr>
       </thead>
       <tbody id="couponsBody"></tbody>
     </table>
@@ -546,7 +548,7 @@ function logout() {
 
 async function sbFetch(method, table, body, filter) {
   try {
-    const res = await fetch('/backend/server', {
+    const res = await fetch('/api/server', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

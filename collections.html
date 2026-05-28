@@ -446,10 +446,10 @@
 <div class="form-group">
   <label>Coupon Code <span style="color:var(--muted);font-size:0.7rem">(optional)</span></label>
   <div style="display:flex;gap:0.5rem">
-    <input type="text" id="couponInput" placeholder="Enter coupon code" style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif;text-transform:uppercase">
+    <input type="text" id="orderCouponInput" placeholder="Enter coupon code" style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif;text-transform:uppercase">
     <button onclick="applyCoupon()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Apply</button>
   </div>
-  <div id="couponMsg" style="font-size:0.8rem;margin-top:0.4rem;min-height:16px"></div>
+  <div id="orderCouponMsg" style="font-size:0.8rem;margin-top:0.4rem;min-height:16px"></div>
 </div>
     
       <div class="form-group">
@@ -733,8 +733,8 @@ function resetPrice() {
     emailVerified = false;
     generatedOTP = '';
     appliedCoupon = null;
-if (document.getElementById('couponInput')) document.getElementById('couponInput').value = '';
-if (document.getElementById('couponMsg')) document.getElementById('couponMsg').innerHTML = '';
+if (document.getElementById('orderCouponInput')) document.getElementById('orderCouponInput').value = '';
+if (document.getElementById('orderCouponMsg')) document.getElementById('orderCouponMsg').innerHTML = '';
     
     document.getElementById('modalProductName').textContent = product.name;
     document.getElementById('modalProductCategory').textContent = product.category;
@@ -897,8 +897,12 @@ document.getElementById('otpInput').select();
 let appliedCoupon = null;
 
 async function applyCoupon() {
-  const code = document.getElementById('couponInput').value.trim().toUpperCase();
-  const msg = document.getElementById('couponMsg');
+  const orderInput = document.getElementById('orderCouponInput');
+  const cartInput = document.getElementById('couponInput');
+  const input = orderInput && document.getElementById('orderModal').classList.contains('active') ? orderInput : cartInput;
+  const msgId = input === orderInput ? 'orderCouponMsg' : 'couponMsg';
+  const code = input.value.trim().toUpperCase();
+  const msg = document.getElementById(msgId);
   if (!code) { msg.innerHTML = ''; appliedCoupon = null; updateTotal(); return; }
   msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
   const COUPONS = await getCoupons();
