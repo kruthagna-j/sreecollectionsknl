@@ -239,6 +239,19 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
 <script>
+    // ENTER KEY SUPPORT
+function enableEnter(inputId, callback) {
+  const el = document.getElementById(inputId);
+
+  if (!el) return;
+
+  el.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      callback();
+    }
+  });
+}
+
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -269,7 +282,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
       <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.5rem">Welcome to Sree Collections</h3>
       <p style="color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem">Verify your mobile number to access your order history and account dashboard.</p>
     </div>
-
     <div id="authPhoneView">
       <div class="auth-input-group">
         <label class="auth-input-label">Mobile Number</label>
