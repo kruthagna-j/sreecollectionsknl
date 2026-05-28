@@ -374,6 +374,7 @@ body {
     <option value="cancelled">Mark Cancelled</option>
   </select>
   <button onclick="applyBulkStatus()" style="padding:0.6rem 1rem;background:var(--gold);color:var(--dark);border:none;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Apply</button>
+  <button onclick="resetOrderFilters()" style="padding:0.7rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.85rem">Reset</button>
   <button class="btn-primary" style="background:#1a3a2a;color:#27ae60;border:1px solid rgba(39,174,96,0.3)" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
   <button class="btn-danger" onclick="clearAllOrders()"><i class="fas fa-trash"></i> Clear All Orders</button>
 </div>
@@ -771,7 +772,9 @@ function switchTab(tab, el) {
   if (tab === 'customers') loadCustomers();
 if (tab === 'coupons') loadCoupons();
 if (tab === 'returns') loadReturns();
-if (tab === 'reviews') loadReviews();
+  if (tab === 'reviews') loadReviews();
+}
+
 async function loadReviews() {
   const reviews = await sbFetch('GET', 'reviews', null, 'order=created_at.desc');
   const tbody = document.getElementById('reviewsBody');
@@ -779,7 +782,6 @@ async function loadReviews() {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-star"></i><p>No reviews yet.</p></div></td></tr>';
     return;
   }
-
   tbody.innerHTML = reviews.map(r => `
     <tr>
       <td>${r.product_id?.toString().substring(0,8)}</td>
@@ -796,7 +798,6 @@ async function deleteReview(id) {
   await sbFetch('DELETE', 'reviews', null, `id=eq.${id}`);
   showToast('Review deleted');
   loadReviews();
-}
 }
 
 async function loadStats() {

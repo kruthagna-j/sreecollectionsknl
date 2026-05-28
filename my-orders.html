@@ -171,13 +171,18 @@ async function loadOrders() {
   const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
   if (!/^[6-9]\d{9}$/.test(clean)) { alert('Please enter a valid 10-digit Indian mobile number.'); return; }
   currentPhone = phone;
-  const searchPhone = '+91' + clean;
-  const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
+const searchPhone = '+91' + clean;
+const orders1 = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(clean)}&order=created_at.desc`);
+const orders2 = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
+const merged = [...(orders1 || []), ...(orders2 || [])];
+const orders = merged.filter((o, i, self) => i === self.findIndex(x => x.id === o.id));
   if (!orders || orders.length === 0) {
     el.innerHTML = '<div class="empty"><i class="fas fa-box-open"></i><p>No orders found for this number.</p><a href="collections.html" style="color:var(--gold);margin-top:1rem;display:inline-block">Start Shopping →</a></div>';
     return;
   }
-  const returns = await sbFetch('GET', 'returns', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}`);
+  const returns1 = await sbFetch('GET', 'returns', null, `customer_phone=eq.${encodeURIComponent(clean)}`);
+const returns2 = await sbFetch('GET', 'returns', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}`);
+const returns = [...(returns1 || []), ...(returns2 || [])];
   const returnedOrderIds = returns ? returns.map(r => r.order_id) : [];
   el.innerHTML = orders.map(o => renderOrder(o, returnedOrderIds)).join('');
 }

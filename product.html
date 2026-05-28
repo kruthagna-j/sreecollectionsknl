@@ -179,8 +179,8 @@ async function loadProduct() {
 }
 
 async function loadReviews(productId) {
-  const reviews = await sbFetch('GET', 'orders', null,
-    `product_id=eq.${productId}&rating=not.is.null&select=customer_name,rating,review,reviewed_at&order=reviewed_at.desc&limit=5`
+  const reviews = await sbFetch('GET', 'reviews', null,
+    `product_id=eq.${productId}&order=created_at.desc&limit=5`
   );
   if (!reviews || reviews.length === 0) return;
   document.getElementById('reviewsSection').style.display = 'block';
@@ -188,8 +188,7 @@ async function loadReviews(productId) {
     <div class="review-card">
       <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
       ${r.review ? `<div class="review-text">"${r.review}"</div>` : ''}
-      <div class="reviewer-name">${r.customer_name.charAt(0)}*** · ${new Date(r.reviewed_at).toLocaleDateString('en-IN', {month:'long', year:'numeric'})}</div>
-    </div>
+<div class="reviewer-name">${r.customer_name.charAt(0)}*** · ${new Date(r.created_at).toLocaleDateString('en-IN', {month:'long', year:'numeric'})}</div>    </div>
   `).join('');
 }
 
