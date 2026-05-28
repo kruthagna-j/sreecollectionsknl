@@ -12,10 +12,10 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/:path*", "destination": "backend/:path*" }
+    { "source": "/api/:path*", "destination": "api/:path*" }
   ],
   "functions": {
-    "backend/server.js": {
+    "api/server.js": {
       "memory": 1024,
       "maxDuration": 60
     }
