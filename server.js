@@ -2,121 +2,323 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// 📁 files where data will be stored permanently
+app.use(cors());
+app.use(express.json({ limit: "2mb" }));
+
+// ---------------- SECURITY HELPERS ----------------
+
+const otpStore = new Map();
+
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validateIndianPhone(phone) {
+    return /^[6-9]\d{9}$/.test(phone);
+}
+
+function sanitize(value = "") {
+    return String(value).replace(/[<>]/g, "");
+}
+
+// ---------------- FILE PATHS ----------------
+
 const PRODUCTS_FILE = path.join(__dirname, "products.json");
 const ORDERS_FILE = path.join(__dirname, "orders.json");
 
-// ---------- PRODUCTS HELPER FUNCTIONS ----------
+// ---------------- PRODUCTS ----------------
+
 function loadProducts() {
     if (!fs.existsSync(PRODUCTS_FILE)) return [];
-    const data = fs.readFileSync(PRODUCTS_FILE);
-    return JSON.parse(data);
+
+    try {
+        return JSON.parse(fs.readFileSync(PRODUCTS_FILE));
+    } catch {
+        return [];
+    }
 }
 
 function saveProducts(products) {
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
 }
 
-// ---------- ORDERS HELPER FUNCTIONS ----------
+// ---------------- ORDERS ----------------
+
 function loadOrders() {
     if (!fs.existsSync(ORDERS_FILE)) return [];
-    const data = fs.readFileSync(ORDERS_FILE);
-    return JSON.parse(data);
+
+    try {
+        return JSON.parse(fs.readFileSync(ORDERS_FILE));
+    } catch {
+        return [];
+    }
 }
 
 function saveOrders(orders) {
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
 }
 
-// ---------- GET products ----------
+// ---------------- PRODUCTS API ----------------
+
 app.get("/products", (req, res) => {
-    const products = loadProducts();
-    res.json(products);
+    return res.json(loadProducts());
 });
 
-// ---------- ADD product (ADMIN USE) ----------
 app.post("/products", (req, res) => {
+
     const products = loadProducts();
+
+    const name = sanitize(req.body.name);
+    const image = sanitize(req.body.image);
+
+    if (!name) {
+        return res.status(400).json({
+            success: false,
+            message: "Product name required"
+        });
+    }
 
     const newProduct = {
         id: Date.now(),
-        name: req.body.name,
-        price: req.body.price,
-        image: req.body.image || ""
+        name,
+        price: Number(req.body.price || 0),
+        image
     };
 
     products.push(newProduct);
     saveProducts(products);
 
-    res.json({ message: "Product added", product: newProduct });
+    return res.json({
+        success: true,
+        product: newProduct
+    });
 });
 
-// ---------- GET all orders ----------
+// ---------------- ORDERS API ----------------
+
 app.get("/orders", (req, res) => {
-    const orders = loadOrders();
-    res.json(orders);
+    return res.json(loadOrders());
 });
 
-// ---------- CREATE new order ----------
-app.post("/orders", (req, res) => {
+app.get("/orders/:id", (req, res) => {
+
     const orders = loadOrders();
 
-    const newOrder = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        items: req.body.items || [],
-        total: req.body.total || 0,
-        status: "Pending",
-        customerName: req.body.customerName || "Guest",
-        customerEmail: req.body.customerEmail || "",
-        customerPhone: req.body.customerPhone || "",
-        shippingAddress: req.body.shippingAddress || ""
-    };
-
-    orders.push(newOrder);
-    saveOrders(orders);
-
-    res.json({ message: "Order created successfully", order: newOrder });
-});
-
-// ---------- CANCEL order ----------
-app.put("/orders/:id/cancel", (req, res) => {
-    const orders = loadOrders();
-    const orderId = parseInt(req.params.id);
-
-    const order = orders.find(o => o.id === orderId);
+    const order = orders.find(
+        o => o.id === Number(req.params.id)
+    );
 
     if (!order) {
-        return res.status(404).json({ message: "Order not found" });
+        return res.status(404).json({
+            success: false,
+            message: "Order not found"
+        });
     }
 
-    if (order.status === "Delivered" || order.status === "Cancelled") {
-        return res.status(400).json({ message: `Cannot cancel a ${order.status.toLowerCase()} order` });
+    return res.json(order);
+});
+
+app.post("/orders", (req, res) => {
+
+    const {
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        items,
+        total
+    } = req.body;
+
+    if (!validateEmail(customerEmail || "")) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid email"
+        });
+    }
+
+    if (!validateIndianPhone(customerPhone || "")) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid phone number"
+        });
+    }
+
+    const orders = loadOrders();
+
+    const order = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        customerName: sanitize(customerName),
+        customerEmail: sanitize(customerEmail),
+        customerPhone: sanitize(customerPhone),
+        shippingAddress: sanitize(shippingAddress),
+        items: Array.isArray(items) ? items : [],
+        total: Number(total || 0),
+        status: "Pending"
+    };
+
+    orders.push(order);
+
+    saveOrders(orders);
+
+    return res.json({
+        success: true,
+        order
+    });
+});
+
+app.put("/orders/:id/cancel", (req, res) => {
+
+    const orders = loadOrders();
+
+    const order = orders.find(
+        o => o.id === Number(req.params.id)
+    );
+
+    if (!order) {
+        return res.status(404).json({
+            success: false,
+            message: "Order not found"
+        });
+    }
+
+    if (
+        order.status === "Delivered" ||
+        order.status === "Cancelled"
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Cannot cancel order"
+        });
     }
 
     order.status = "Cancelled";
+
     saveOrders(orders);
 
-    res.json({ message: "Order cancelled successfully", order });
+    return res.json({
+        success: true,
+        order
+    });
 });
 
-// ---------- GET order by ID ----------
-app.get("/orders/:id", (req, res) => {
-    const orders = loadOrders();
-    const orderId = parseInt(req.params.id);
-    const order = orders.find(o => o.id === orderId);
+// ---------------- OTP API ----------------
 
-    if (!order) {
-        return res.status(404).json({ message: "Order not found" });
+app.post("/api/send-otp", async (req, res) => {
+
+    const email = sanitize(req.body.email || "");
+
+    if (!validateEmail(email)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid email"
+        });
     }
 
-    res.json(order);
+    const otp = Math.floor(
+        100000 + Math.random() * 900000
+    );
+
+    otpStore.set(email, {
+        otp,
+        expires: Date.now() + (5 * 60 * 1000)
+    });
+
+    // Integrate EmailJS / email provider here
+
+    return res.json({
+        success: true
+    });
 });
+
+app.post("/api/verify-otp", (req, res) => {
+
+    const email = sanitize(req.body.email || "");
+    const otp = sanitize(req.body.otp || "");
+
+    const data = otpStore.get(email);
+
+    if (!data) {
+        return res.status(400).json({
+            success: false,
+            message: "OTP not found"
+        });
+    }
+
+    if (Date.now() > data.expires) {
+
+        otpStore.delete(email);
+
+        return res.status(400).json({
+            success: false,
+            message: "OTP expired"
+        });
+    }
+
+    if (String(data.otp) !== String(otp)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid OTP"
+        });
+    }
+
+    otpStore.delete(email);
+
+    return res.json({
+        success: true
+    });
+});
+
+// ---------------- RAZORPAY VERIFY ----------------
+
+app.post("/api/verify-payment", async (req, res) => {
+
+    try {
+
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature
+        } = req.body;
+
+        const generated = crypto
+            .createHmac(
+                "sha256",
+                process.env.RAZORPAY_SECRET
+            )
+            .update(
+                `${razorpay_order_id}|${razorpay_payment_id}`
+            )
+            .digest("hex");
+
+        if (generated !== razorpay_signature) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Payment verification failed"
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Payment verified"
+        });
+
+    } catch (err) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+});
+
+// ---------------- START SERVER ----------------
 
 const PORT = process.env.PORT || 5000;
 

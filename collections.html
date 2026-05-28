@@ -74,7 +74,7 @@
 .skeleton-line.price{width:35%;height:18px;margin-top:1rem}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
-  .product-card{background:var(--card-bg);border:1px solid var(--border);transition:all 0.3s;overflow:hidden}
+  .product-card{background:var(--card-bg);border:1px solid var(--border);transition:all 0.3s;overflow:hidden}  
   .product-card:hover{border-color:var(--gold);transform:translateY(-3px)}
   .product-img{width:100%;height:200px;object-fit:cover;background:var(--charcoal);display:block}
   .product-img-placeholder{width:100%;height:200px;background:linear-gradient(135deg,#1F1F1F,#2A2A2A);display:flex;align-items:center;justify-content:center;font-size:3rem}
@@ -195,14 +195,10 @@
 <!-- SEARCH BAR -->
 <div style="padding:1.5rem 2rem;background:var(--charcoal);border-bottom:1px solid var(--border)">
   <div style="max-width:600px;margin:0 auto;position:relative">
-    <input 
-      type="text" 
-      id="searchInput" 
-      placeholder="Search products..."
-      onkeyup="searchProducts()"
-      style="width:100%;padding:0.8rem 1rem 0.8rem 2.5rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif"
-    >
+    <input type="text" id="searchInput" placeholder="Search products..." oninput="searchProducts()" autocomplete="off"
+      style="width:100%;padding:0.8rem 1rem 0.8rem 2.5rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif">
     <i class="fas fa-search" style="position:absolute;left:0.8rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem"></i>
+    <div id="searchSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--charcoal);border:1px solid var(--border);z-index:50;max-height:250px;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -212,6 +208,15 @@
   <button class="filter-btn" id="sort-low" onclick="sortProducts('lowtohigh',this)">Price: Low to High</button>
   <button class="filter-btn" id="sort-high" onclick="sortProducts('hightolow',this)">Price: High to Low</button>
   <button class="filter-btn" id="sort-new" onclick="sortProducts('newest',this)">Newest First</button>
+</div>
+<div style="padding:0.8rem 2rem;background:var(--charcoal);border-bottom:1px solid var(--border);display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+  <span style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Price:</span>
+  <input type="range" id="priceMin" min="0" max="10000" value="0" step="100" oninput="applyFiltersAndSort()" style="width:120px;accent-color:var(--gold)">
+  <span style="font-size:0.8rem;color:var(--muted)">₹<span id="priceMinVal">0</span></span>
+  <span style="font-size:0.8rem;color:var(--muted)">–</span>
+  <input type="range" id="priceMax" min="0" max="10000" value="10000" step="100" oninput="applyFiltersAndSort()" style="width:120px;accent-color:var(--gold)">
+  <span style="font-size:0.8rem;color:var(--muted)">₹<span id="priceMaxVal">10000</span></span>
+  <button onclick="resetPrice()" style="font-size:0.75rem;padding:0.3rem 0.8rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif">Reset</button>
 </div>
   <div class="filter-bar">
     <button class="filter-btn active" onclick="filterProducts('All',this)">All</button>
@@ -467,6 +472,9 @@
     <strong id="modalTotal" style="color:var(--gold);font-size:1.2rem">₹0</strong>
   </div>
 </div>
+<div id="deliveryEstimate" style="font-size:0.82rem;color:#27ae60;margin-bottom:1rem;text-align:center">
+  <i class="fas fa-truck"></i> Estimated delivery: calculating...
+</div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-confirm" id="confirmBtn" onclick="confirmOrder()">
@@ -558,10 +566,31 @@ async function sbFetch(method, table, body, filter) {
         if (btn.textContent.includes(cat)) btn.classList.add('active');
       });
       renderProducts(allProducts.filter(p => p.category === cat));
+      loadProductRatings();
     } else {
       renderProducts(products);
+      loadProductRatings();
     }
   }
+
+  async function loadProductRatings() {
+  const reviews = await sbFetch('GET', 'reviews');
+  if (!reviews || !reviews.length) return;
+  const ratings = {};
+  const counts = {};
+  reviews.forEach(r => {
+    if (!ratings[r.product_id]) { ratings[r.product_id] = 0; counts[r.product_id] = 0; }
+    ratings[r.product_id] += r.rating;
+    counts[r.product_id]++;
+  });
+  document.querySelectorAll('[data-product-id]').forEach(el => {
+    const id = el.dataset.productId;
+    if (ratings[id]) {
+      const avg = (ratings[id] / counts[id]).toFixed(1);
+      el.innerHTML = `<span style="color:var(--gold)">★</span> ${avg} <span style="color:var(--muted);font-size:0.7rem">(${counts[id]})</span>`;
+    }
+  });
+}
 
   function renderProducts(products) {
     const grid = document.getElementById('productsGrid');
@@ -577,6 +606,7 @@ async function sbFetch(method, table, body, filter) {
         <div class="product-body">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
   <div class="product-category">${p.category}</div>
+  <div data-product-id="${p.id}" style="font-size:0.8rem;margin-bottom:0.3rem;color:var(--muted)">No reviews yet</div>
   ${p.stock_status === 'lowstock' ? `<span style="font-size:0.7rem;background:rgba(241,196,15,0.15);color:#f1c40f;border:1px solid rgba(241,196,15,0.3);padding:0.2rem 0.5rem">⚠️ Only a few left</span>` : ''}
   ${p.stock_status === 'outofstock' ? `<span style="font-size:0.7rem;background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);padding:0.2rem 0.5rem">❌ Out of Stock</span>` : ''}
 </div>
@@ -667,13 +697,25 @@ function applyFiltersAndSort() {
   let filtered = currentCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === currentCategory);
   const search = document.getElementById('searchInput').value.toLowerCase();
   if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.description?.toLowerCase().includes(search) || p.category.toLowerCase().includes(search));
+  const minP = Number(document.getElementById('priceMin').value);
+  const maxP = Number(document.getElementById('priceMax').value);
+  document.getElementById('priceMinVal').textContent = minP.toLocaleString('en-IN');
+  document.getElementById('priceMaxVal').textContent = maxP.toLocaleString('en-IN');
+  filtered = filtered.filter(p => Number(p.price) >= minP && Number(p.price) <= maxP);
   if (currentSort === 'lowtohigh') filtered.sort((a,b) => Number(a.price) - Number(b.price));
   else if (currentSort === 'hightolow') filtered.sort((a,b) => Number(b.price) - Number(a.price));
   else if (currentSort === 'newest') filtered.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
   renderProducts(filtered);
 }
 
+function resetPrice() {
+  document.getElementById('priceMin').value = 0;
+  document.getElementById('priceMax').value = 10000;
+  applyFiltersAndSort();
+}
+
   function openOrder(product) {
+    trackRecentlyViewed(product);
     currentProduct = product;
     currentQty = 1;
     currentPayment = 'cod';
@@ -734,8 +776,13 @@ if (document.getElementById('couponMsg')) document.getElementById('couponMsg').i
   if (document.getElementById('modalDelivery')) document.getElementById('modalDelivery').textContent = delivery === 0 ? '✅ Free' : '₹' + delivery;
   if (document.getElementById('modalDiscount')) document.getElementById('modalDiscount').textContent = discount > 0 ? '-₹' + discount.toLocaleString('en-IN') : '—';
   document.getElementById('modalTotal').textContent = '₹' + Math.max(0, total).toLocaleString('en-IN');
-}
+  const deliveryDays = 3;
+const deliveryDate = new Date();
+deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
+const formatted = deliveryDate.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long'});
+document.getElementById('deliveryEstimate').textContent = `Estimated delivery: ${formatted}`;
 
+}
   function selectPayment(method) {
     currentPayment = method;
     document.getElementById('pm-cod').classList.toggle('selected', method === 'cod');
@@ -1079,7 +1126,33 @@ enableEnter('custAddress', () => {
 });
 function searchProducts() {
   applyFiltersAndSort();
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const box = document.getElementById('searchSuggestions');
+  if (!query || query.length < 2) { box.style.display = 'none'; return; }
+  const matches = allProducts.filter(p => p.name.toLowerCase().includes(query)).slice(0, 6);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(p => `
+    <div onclick="selectSuggestion('${p.name.replace(/'/g,"\\'")}',${JSON.stringify(p).replace(/'/g,"&#39;")})"
+      style="padding:0.7rem 1rem;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
+      onmouseover="this.style.background='rgba(200,169,107,0.08)'" onmouseout="this.style.background=''">
+      <span><i class="fas fa-search" style="color:var(--muted);font-size:0.75rem;margin-right:0.5rem"></i>${p.name}</span>
+      <span style="color:var(--gold);font-size:0.82rem">₹${Number(p.price).toLocaleString('en-IN')}</span>
+    </div>`).join('');
+  box.style.display = 'block';
 }
+
+function selectSuggestion(name, product) {
+  document.getElementById('searchInput').value = name;
+  document.getElementById('searchSuggestions').style.display = 'none';
+  applyFiltersAndSort();
+  openOrder(product);
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#searchInput') && !e.target.closest('#searchSuggestions')) {
+    document.getElementById('searchSuggestions').style.display = 'none';
+  }
+});
 let cart = [];
 let currentCartIndex = 0;
 
@@ -1429,8 +1502,34 @@ window.addEventListener('DOMContentLoaded', () => {
       const product = allProducts.find(p => p.id === buyNowId);
       if (product) openOrder(product);
     }
+     showRecentlyViewed();
   });
 });
+
+function trackRecentlyViewed(product) {
+  let recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+  recent = recent.filter(p => p.id !== product.id);
+  recent.unshift(product);
+  recent = recent.slice(0, 5);
+  localStorage.setItem('recentlyViewed', JSON.stringify(recent));
+}
+
+function showRecentlyViewed() {
+  const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+  if (!recent.length) return;
+  document.getElementById('recentlyViewed').style.display = 'block';
+  document.getElementById('recentGrid').innerHTML = recent.map(p => `
+    <div style="min-width:160px;background:var(--card-bg);border:1px solid var(--border);padding:0.8rem;cursor:pointer;flex-shrink:0" onclick="openOrder(${JSON.stringify(p).replace(/'/g,"&#39;")})">
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100px;object-fit:cover;display:block;margin-bottom:0.5rem">` : '<div style="width:100%;height:100px;background:var(--charcoal);display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:0.5rem">🎁</div>'}
+      <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.3rem">${p.name}</div>
+      <div style="color:var(--gold);font-size:0.85rem;font-weight:700">₹${Number(p.price).toLocaleString('en-IN')}</div>
+    </div>`).join('');
+}
+
 </script>
+<div id="recentlyViewed" style="display:none;padding:2rem;max-width:1200px;margin:0 auto">
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);margin-bottom:1rem">Recently Viewed</h3>
+  <div id="recentGrid" style="display:flex;gap:1rem;overflow-x:auto;padding-bottom:0.5rem"></div>
+</div>
 </body>
 </html>

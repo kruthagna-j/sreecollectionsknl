@@ -185,6 +185,7 @@ body {
 <button class="tab" onclick="switchTab('customers', this)">👥 Customers</button>
 <button class="tab" onclick="switchTab('coupons', this)">🎟️ Coupons</button>
 <button class="tab" onclick="switchTab('returns', this)">↩️ Returns</button>
+<button class="tab" onclick="switchTab('reviews', this)">⭐ Reviews</button>
 </div>
 
 <!-- COUPONS TAB -->
@@ -221,6 +222,18 @@ body {
         </tr>
       </thead>
       <tbody id="returnsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-reviews">
+  <div class="section-header"><h2 class="section-title">Customer Reviews</h2></div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr><th>Product</th><th>Customer</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="reviewsBody"></tbody>
     </table>
   </div>
 </div>
@@ -603,6 +616,31 @@ function switchTab(tab, el) {
   if (tab === 'customers') loadCustomers();
 if (tab === 'coupons') loadCoupons();
 if (tab === 'returns') loadReturns();
+if (tab === 'reviews') loadReviews();
+async function loadReviews() {
+  const reviews = await sbFetch('GET', 'reviews', null, 'order=created_at.desc');
+  const tbody = document.getElementById('reviewsBody');
+  if (!reviews || reviews.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-star"></i><p>No reviews yet.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = reviews.map(r => `
+    <tr>
+      <td>${r.product_id?.toString().substring(0,8)}</td>
+      <td>${r.customer_name}<br><small style="color:var(--muted)">${r.customer_phone}</small></td>
+      <td><span style="color:var(--gold)">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></td>
+      <td>${r.review || '—'}</td>
+      <td>${new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+      <td><button class="btn-small btn-delete" onclick="deleteReview('${r.id}')"><i class="fas fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+async function deleteReview(id) {
+  if (!confirm('Delete this review?')) return;
+  await sbFetch('DELETE', 'reviews', null, `id=eq.${id}`);
+  showToast('Review deleted');
+  loadReviews();
+}
 }
 
 async function loadStats() {
