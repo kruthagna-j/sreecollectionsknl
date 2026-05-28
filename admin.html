@@ -505,41 +505,53 @@ body {
 
 </div>
 <script>
-// Publicly safe Application IDs
+// 1. PUBLIC IDENTIFIERS SAFE FOR SOURCE CONTROL
+const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
+const SUPABASE_KEY = 'YOUR_NEW_ANON_PUBLIC_KEY_HERE'; // Be sure to update this with your rolled public public 'anon' key!
 const ONESIGNAL_APP_ID = '20b46cc0-1f20-4482-9879-f258a7234c13';
 
-// SENSITIVE CREDENTIALS REMOVED FROM SOURCE CONTROL:
-// These are loaded securely into browser memory when you authenticate locally
+// 2. LOAD CONFIDENTIAL API KEY FROM VOLATILE BROWSER STORAGE
 let ONESIGNAL_REST_KEY = sessionStorage.getItem('admin_onesignal_rest_key');
 
-// Secure Local Authentication Hook
-function authenticateAdminSession() {
-  const inputSecret = prompt("System Access Required:\nPlease enter your Administrator Access Secret:");
+// 3. MASTER RUNTIME GATEWAY GUARD VERIFICATION
+function verifyAdminSessionGate() {
+  const activeSessionPhone = localStorage.getItem('userLoggedInPhone');
+
+  // If you logged in from the main index.html page already:
+  if (activeSessionPhone === "+919999999999" && ONESIGNAL_REST_KEY) {
+    console.log("Session clearance confirmed: Admin parameters active.");
+    return; 
+  }
+
+  // Fallback prompt mechanism if you opened admin.html directly
+  const phoneCheck = prompt("Enter Admin Access Identification Line:");
   
-  if (inputSecret === "sree-admin-2024-secret") {
-    // Prompt for the newly rotated OneSignal key only if it's not already cached in memory
-    if (!ONESIGNAL_REST_KEY) {
-      const inputOneSignalKey = prompt("Notification System Validation:\nPlease paste your newly rotated OneSignal REST API Key:");
-      if (inputOneSignalKey && inputOneSignalKey.trim().length > 15) {
-        ONESIGNAL_REST_KEY = inputOneSignalKey.trim();
-        sessionStorage.setItem('admin_onesignal_rest_key', ONESIGNAL_REST_KEY);
-      } else {
-        alert("Invalid Notification Key provided. Admin notifications disabled.");
+  if (phoneCheck === "9999999999") {
+    const passwordCheck = prompt("Enter Admin Security Verification Password:");
+    
+    if (passwordCheck === "sreecollections@knl") {
+      const restKeyCheck = prompt("Provide OneSignal REST API Master Authorization Token Key:");
+      
+      if (restKeyCheck) {
+        // Save to browser memory so you don't have to re-type it during this session
+        localStorage.setItem('userLoggedInPhone', '+919999999999');
+        sessionStorage.setItem('admin_onesignal_rest_key', restKeyCheck.trim());
+        ONESIGNAL_REST_KEY = restKeyCheck.trim();
+        
+        alert("Session verification cleared successfully.");
+        window.location.reload(); 
+        return;
       }
     }
-    alert("Authentication Successful. Welcome back.");
-  } else {
-    alert("Access Denied: Incorrect Administrative Secret Key.");
-    document.body.innerHTML = "<h2 style='color:#e74c3c; text-align:center; margin-top:5rem;'>Security Error: Access Denied</h2>";
   }
+  
+  // If entry details are wrong, boot them out to safety
+  alert("Authorization Failure: Valid system authentication token parameters are absent.");
+  window.location.href = "index.html?triggerLogin=true";
 }
 
-// Automatically enforce checking when the dashboard loads
-document.addEventListener('DOMContentLoaded', () => {
-  if (!ONESIGNAL_REST_KEY) {
-    authenticateAdminSession();
-  }
-});
+// Automatically enforce checking when the dashboard structure loads
+document.addEventListener('DOMContentLoaded', verifyAdminSessionGate);
 async function sendPushToAll(title, message, url = '/') {
   try {
     await fetch('https://onesignal.com/api/v1/notifications', {
