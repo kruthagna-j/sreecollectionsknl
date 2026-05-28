@@ -275,7 +275,7 @@
     <div class="no-products" id="noProducts" style="display:none">
       <i class="fas fa-box-open" style="font-size:3rem;color:var(--gold);display:block;margin-bottom:1rem"></i>
       No products found in this category yet.<br>
-      <a href="https://wa.me/917207186844" target="_blank" style="color:var(--gold)">Contact us on WhatsApp</a> to enquire.
+      <a href="tel:+917207186844" style="color:var(--gold)">Contact us</a> to enquire.
     </div>
   </div>
 <!-- CART DRAWER -->
@@ -594,9 +594,7 @@ async function sbFetch(method, table, body, filter) {
             </button>
           </div>
           <div style="display:flex;gap:0.5rem">
-            <a href="https://wa.me/917207186844?text=${encodeURIComponent('Hi! I want to order: ' + p.name + ' (₹' + Number(p.price).toLocaleString('en-IN') + ')')}" target="_blank" style="flex:1;padding:0.6rem;background:#25D366;color:white;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:0.3rem"><i class="fab fa-whatsapp"></i> WhatsApp</a>
             <button onclick="shareOnWhatsApp('${p.name.replace(/'/g,"\\'")}', ${p.price})" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
-            ${!p.in_stock ? `<button onclick="notifyMe('${p.name.replace(/'/g,"\\'")}', '${p.id}')" style="flex:1;padding:0.6rem;background:var(--charcoal);color:#f1c40f;border:1px solid rgba(241,196,15,0.3);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-bell"></i> Notify Me</button>` : ''}
           </div>
         </div>
       </div>
@@ -990,9 +988,6 @@ const total = (Number(currentProduct.price) * currentQty) + deliveryCharge;    c
   `${name} ordered ${currentProduct.name} — ₹${total.toLocaleString('en-IN')}`,
   '/admin-login.html'
 );
-
-    notifyOwnerWhatsApp(name, phone, currentProduct.name, total, shortId);
-    notifyCustomerWhatsApp(name, phone, currentProduct.name, total, shortId);
     if (currentCartIndex < cart.length - 1) {
       currentCartIndex++;
       setTimeout(() => {
@@ -1008,18 +1003,6 @@ const total = (Number(currentProduct.price) * currentQty) + deliveryCharge;    c
       sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, method === 'cod' ? 'Cash on Delivery' : 'Online Payment');
     }
   }
-
-function notifyCustomerWhatsApp(name, phone, product, total, orderId) {
-  const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
-  const msg = `🎁 *Thank you for your order, ${name}!*\n\n` +
-    `Order ID: ${orderId}\n` +
-    `Product: ${product}\n` +
-    `Total: ₹${Number(total).toLocaleString('en-IN')}\n\n` +
-    `Track your order: https://sreecollectionsknl.vercel.app/my-orders.html\n\n` +
-    `Questions? Reply to this message. – Sree Collections`;
-  window.open(`https://wa.me/91${clean}?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
   async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty, total, method) {
     const statusEl = document.getElementById('emailStatus');
     statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending confirmation...';
@@ -1273,7 +1256,8 @@ if (!isValidServicePincode(pincode)) {
   document.getElementById('cartCheckoutModal').classList.remove('active');
 
   const cartSnapshot = [...cart];
-  const cartTotalAmt = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
+const deliveryCharge = getDeliveryCharge(pincode);
+const cartTotalAmt = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0) + deliveryCharge;
   const cartProductNames = cart.map(i => `${i.name} x${i.qty}`).join(', ');
 
   let successCount = 0;
@@ -1305,7 +1289,6 @@ if (!isValidServicePincode(pincode)) {
     `${name} placed ${successCount} order(s) — ₹${cartTotalAmt.toLocaleString('en-IN')}`,
     '/admin-login.html'
   );
-  notifyOwnerWhatsApp(name, phone, cartProductNames, cartTotalAmt, cartOrderId);
   
   // Send owner email
   try {
@@ -1338,18 +1321,15 @@ function shareOnWhatsApp(name, price) {
   const msg = `🎁 Check out this amazing gift at Sree Collections, Kurnool!\n\n*${name}* — ₹${Number(price).toLocaleString('en-IN')}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
-
-function notifyMe(name, productId) {
-  const phone = prompt('Enter your WhatsApp number to get notified when "' + name + '" is back in stock:');
-  if (!phone) return;
-  const msg = `Hi! Please notify me on WhatsApp when "${name}" (ID: ${productId}) is back in stock. My number: ${phone}`;
-  window.open('https://wa.me/917207186844?text=' + encodeURIComponent(msg), '_blank');
-  alert('✅ Request sent! We will notify you when it is back in stock.');
-}
-
 let cartGeneratedOTP = '';
 let cartEmailVerified = false;
 
+document.getElementById('cartCustPincode').addEventListener('input', function() {
+  const pincode = this.value.trim();
+  const delivery = getDeliveryCharge(pincode);
+  const subtotal = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
+  document.getElementById('cartCheckoutTotal').textContent = '₹' + (subtotal + delivery).toLocaleString('en-IN');
+});
 document.getElementById('cartCustEmail').addEventListener('blur', function() {
   const email = this.value.trim();
   if (email && email.includes('@')) {
@@ -1406,16 +1386,6 @@ function verifyCartOTP() {
   }
 }
 
-function notifyOwnerWhatsApp(name, phone, product, total, orderId) {
-  const msg = `🛍️ *NEW ORDER – Sree Collections*\n\n` +
-    `Order ID: ${orderId}\n` +
-    `Customer: ${name}\n` +
-    `Phone: ${phone}\n` +
-    `Product: ${product}\n` +
-    `Total: ₹${Number(total).toLocaleString('en-IN')}\n\n` +
-    `View in Admin: https://sreecollectionsknl.vercel.app/admin-login.html`;
-  window.open('https://wa.me/917207186844?text=' + encodeURIComponent(msg), '_blank');
-}
 function setTheme(isLight) {
   document.body.classList.toggle('light-mode', isLight);
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
@@ -1451,7 +1421,15 @@ window.addEventListener('storage', (e) => {
 
 // Load products after the page has finished parsing
 window.addEventListener('DOMContentLoaded', () => {
-  loadProducts();
+  loadProducts().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    const buyNowId = params.get('buyNow');
+    const autoOrder = params.get('autoOrder');
+    if (buyNowId && autoOrder) {
+      const product = allProducts.find(p => p.id === buyNowId);
+      if (product) openOrder(product);
+    }
+  });
 });
 </script>
 </body>

@@ -250,7 +250,6 @@ function renderOrder(o, returnedOrderIds) {
         ${canReturn ? `<button class="btn-action" style="border-color:var(--gold);color:var(--gold)" onclick="openReturn('${o.id}')"><i class="fas fa-undo"></i> Return / Refund</button>` : ''}
         ${hasReturn ? `<span class="badge return-badge"><i class="fas fa-check"></i> Return Requested</span>` : ''}
         <button class="btn-action" onclick="reorder('${o.product_id}')"><i class="fas fa-redo"></i> Reorder</button>
-        <a href="https://wa.me/917207186844?text=${encodeURIComponent('Hi! I need help with order #'+o.id.toString().substring(0,8).toUpperCase())}" target="_blank" class="btn-action" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem"><i class="fab fa-whatsapp" style="color:#25D366"></i> Help</a>
       </div>
     </div>
   </div>`;
@@ -264,7 +263,7 @@ async function cancelOrder(id) {
 }
 
 function reorder(productId) {
-  window.location.href = `collections.html?buyNow=${productId}`;
+  window.location.href = `collections.html?buyNow=${productId}&autoOrder=1`;
 }
 
 function openReview(orderId, productId) {
@@ -327,7 +326,7 @@ async function submitReturn() {
   };
   await sbFetch('POST', 'returns', data);
   closeModal('returnModal');
-  alert('✅ Return request submitted! Our team will contact you within 24 hours via WhatsApp.');
+  alert('✅ Return request submitted! Our team will contact you within 24 hours.');
   loadOrders();
 }
 
