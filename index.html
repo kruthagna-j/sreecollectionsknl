@@ -53,7 +53,6 @@ body > *:not(#bgCanvas) {
   --border: rgba(200,169,107,0.2);
 }
 body.light-mode {
-  background: #F8F4EE;
   --gold: #9A6F2E;
   --gold-light: #B8882A;
   --dark: #F8F4EE;
@@ -69,18 +68,18 @@ body{background:var(--dark);color:var(--text);font-family:'Manrope',sans-serif;o
 
 /* NAV */
 nav{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(15, 15, 15, 0.97); /* Solid background color on initial load to stop background bleeding */
-  backdrop-filter: blur(10px); /* Adds a blur effect to the background behind the nav */
-  border-bottom: 1px solid var(--border);
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:100;
+  padding:1rem 2rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(15,15,15,0.97);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
 }
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--gold);text-decoration:none}
 .nav-links{display:flex;gap:2rem;list-style:none}
