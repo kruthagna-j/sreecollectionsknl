@@ -175,17 +175,22 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 
 /* LOGIN MODAL WALL CSS */
 .auth-modal-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
   background: rgba(10,10,10,0.85);
   backdrop-filter: blur(8px);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 99999 !important; /* Forces it over the navigation menu layout entirely */
+  display: flex !important;
+  align-items: center !important;     /* Centers box vertically */
+  justify-content: center !important;  /* Centers box horizontally */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .auth-modal-overlay.active {
   opacity: 1;
