@@ -191,6 +191,21 @@ body {
 <!-- COUPONS TAB -->
 <div class="tab-content" id="tab-coupons">
   <div class="section-header">
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+
+  <input id="couponSearch"
+    placeholder="Search coupon..."
+    oninput="filterCoupons()"
+    style="padding:0.6rem;background:var(--dark);border:1px solid var(--border);color:var(--text)">
+
+  <select id="couponFilter" onchange="filterCoupons()"
+    style="padding:0.6rem;background:var(--dark);border:1px solid var(--border);color:var(--text)">
+    <option value="">All</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+    <option value="expired">Expired</option>
+  </select>
+</div>
     <h2 class="section-title">Coupons</h2>
     <button class="btn-primary" onclick="openCouponModal()"><i class="fas fa-plus"></i> Add Coupon</button>
   </div>
@@ -489,8 +504,7 @@ body {
 </div>
 
 <script>
-const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+const ADMIN_SECRET = 'sree-admin-2024-secret';
 
 const ONESIGNAL_APP_ID = '20b46cc0-1f20-4482-9879-f258a7234c13';
 const ONESIGNAL_REST_KEY = 'os_v2_app_ec2gzqa7ebcifgdz6jmkoi2mco226yl6kpnud35xhkydeyl7hi2tmwyfrwxEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf'; // get this from OneSignal Settings → Keys & IDs
@@ -514,6 +528,7 @@ async function sendPushToAll(title, message, url = '/') {
   } catch(e) { console.error('Push error:', e); }
 }
 let currentEditId = null;
+let couponsData = [];
 
 // Check auth on page load
 if (sessionStorage.getItem('adminAuth') !== 'true') {
@@ -529,51 +544,150 @@ function logout() {
 }
 
 async function sbFetch(method, table, body, filter) {
-  let url = `${SUPABASE_URL}/rest/v1/${table}`;
-  if (filter) url += `?${filter}`;
   try {
-    const res = await fetch(url, {
-      method,
+    const res = await fetch('/api/server', {
+      method: 'POST',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
+        'x-admin-secret': ADMIN_SECRET
       },
-      body: body ? JSON.stringify(body) : undefined
+      body: JSON.stringify({ method, table, body, filter })
     });
-    if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
     if (res.status === 204) return [];
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
     return text ? JSON.parse(text) : [];
   } catch(e) {
-    console.error('Supabase error:', e);
-    alert('Database error: ' + e.message);
+    console.error('API error:', e);
+    alert('Error: ' + e.message);
     return null;
   }
 }
 
 async function loadCoupons() {
-  const coupons = await sbFetch('GET', 'coupons', null, 'order=created_at.desc');
+  couponsData = await sbFetch('GET', 'coupons', null, 'order=created_at.desc');
   const tbody = document.getElementById('couponsBody');
-  if (!coupons || coupons.length === 0) {
+
+  if (!couponsData || couponsData.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No coupons yet.</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = coupons.map(c => `
+
+  const now = new Date();
+
+  tbody.innerHTML = couponsData.map(c => {
+    const expired = c.expiry_date ? new Date(c.expiry_date) < now : false;
+    const usageLeft = c.usage_limit ? (c.usage_limit - (c.used_count || 0)) : '∞';
+
+    return `
+      <tr>
+        <td><input value="${c.code}" onchange="inlineUpdate('${c.id}','code',this.value)" style="background:transparent;border:none;color:var(--text);font-weight:700;width:90px"></td>
+
+        <td>
+          <select onchange="inlineUpdate('${c.id}','type',this.value)" style="background:var(--dark);color:var(--text);border:1px solid var(--border)">
+            <option value="percent" ${c.type==='percent'?'selected':''}>Percent</option>
+            <option value="flat" ${c.type==='flat'?'selected':''}>Flat</option>
+            <option value="freeship" ${c.type==='freeship'?'selected':''}>Free Ship</option>
+          </select>
+        </td>
+
+        <td>
+          <input type="number" value="${c.value}"
+            onchange="inlineUpdate('${c.id}','value',Number(this.value))"
+            style="background:transparent;border:none;color:var(--text);width:70px">
+        </td>
+
+        <td>
+          <input value="${c.label}"
+            onchange="inlineUpdate('${c.id}','label',this.value)"
+            style="background:transparent;border:none;color:var(--text);width:120px">
+        </td>
+
+        <td>
+          <input type="date"
+            value="${c.expiry_date ? c.expiry_date.split('T')[0] : ''}"
+            onchange="inlineUpdate('${c.id}','expiry_date',this.value)"
+            style="background:var(--dark);border:1px solid var(--border);color:var(--text)">
+        </td>
+
+        <td>
+          <input type="number"
+            value="${c.usage_limit || ''}"
+            placeholder="∞"
+            onchange="inlineUpdate('${c.id}','usage_limit',Number(this.value))"
+            style="background:transparent;border:none;color:var(--text);width:70px">
+        </td>
+
+        <td>
+          <span class="badge ${c.active && !expired ? 'badge-success' : 'badge-cod'}">
+            ${expired ? '❌ Expired' : (c.active ? 'Active' : 'Inactive')}
+          </span>
+        </td>
+
+        <td>
+          <button class="btn-small" onclick="toggleCoupon('${c.id}', ${!c.active})">
+            ${c.active ? 'Disable' : 'Enable'}
+          </button>
+
+          <button class="btn-small btn-delete" onclick="deleteCoupon('${c.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterCoupons() {
+  const search = document.getElementById('couponSearch').value.toLowerCase();
+  const filter = document.getElementById('couponFilter').value;
+  const now = new Date();
+
+  const filtered = couponsData.filter(c => {
+    const expired = c.expiry_date ? new Date(c.expiry_date) < now : false;
+
+    const matchSearch =
+      !search ||
+      c.code?.toLowerCase().includes(search) ||
+      c.label?.toLowerCase().includes(search);
+
+    const matchFilter =
+      !filter ||
+      (filter === 'active' && c.active && !expired) ||
+      (filter === 'inactive' && !c.active) ||
+      (filter === 'expired' && expired);
+
+    return matchSearch && matchFilter;
+  });
+
+  const tbody = document.getElementById('couponsBody');
+
+  tbody.innerHTML = filtered.map(c => `
     <tr>
       <td><strong>${c.code}</strong></td>
       <td>${c.type}</td>
-      <td>${c.type === 'percent' ? c.value + '%' : c.type === 'flat' ? '₹' + c.value : 'Free'}</td>
+      <td>${c.value}</td>
       <td>${c.label}</td>
-      <td><span class="badge ${c.active ? 'badge-success' : 'badge-cod'}">${c.active ? '✅ Active' : '❌ Inactive'}</span></td>
-      <td>
-        <div class="action-btns">
-          <button class="btn-small btn-delete" onclick="deleteCoupon('${c.id}')"><i class="fas fa-trash"></i></button>
-        </div>
-      </td>
+      <td>${c.active ? 'Active' : 'Inactive'}</td>
+      <td>—</td>
     </tr>
   `).join('');
+}
+
+async function inlineUpdate(id, field, value) {
+  await sbFetch('PATCH', 'coupons', {
+    [field]: value
+  }, `id=eq.${id}`);
+
+  loadCoupons();
+}
+
+async function toggleCoupon(id, state) {
+  await sbFetch('PATCH', 'coupons', {
+    active: state
+  }, `id=eq.${id}`);
+
+  loadCoupons();
 }
 
 function openCouponModal() {
@@ -603,6 +717,47 @@ async function deleteCoupon(id) {
   if (!confirm('Delete this coupon?')) return;
   await sbFetch('DELETE', 'coupons', null, `id=eq.${id}`);
   loadCoupons();
+}
+async function updateCoupon(id, updatedData) {
+
+  const res = await sbFetch(
+    'PATCH',
+    'coupons',
+    updatedData,
+    `id=eq.${id}`
+  );
+
+  if (!res) {
+    alert('Failed to update coupon');
+    return;
+  }
+
+  alert('Coupon updated successfully');
+  loadCoupons();
+}
+
+function editCoupon(id) {
+
+  const coupon = couponsData.find(c => c.id === id);
+  if (!coupon) return;
+
+  const newDiscount = prompt('Enter new value', coupon.value);
+  if (newDiscount === null) return;
+
+  const newLabel = prompt('Enter new label', coupon.label);
+  if (newLabel === null) return;
+
+  const newType = prompt('Type (percent / flat / freeship)', coupon.type);
+  if (newType === null) return;
+
+  const newActive = confirm('OK = Active, Cancel = Inactive');
+
+  updateCoupon(id, {
+    value: Number(newDiscount),
+    label: newLabel,
+    type: newType,
+    active: newActive
+  });
 }
 
 function switchTab(tab, el) {
