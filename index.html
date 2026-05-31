@@ -575,12 +575,44 @@ function checkGlobalLoginState() {
   const desktopLink = document.getElementById('navAuthLink');
   const mobileLink = document.getElementById('mobileAuthLink');
   if (sessionUser) {
-    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)"><i class="fas fa-sign-out-alt"></i> Logout (${sessionUser.substring(3)})</a>`;
-    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)">Logout (${sessionUser.substring(3)})</a>`;
+    if (desktopLink) {
+      const a = document.createElement('a');
+      a.href = 'javascript:void(0)';
+      a.style.color = 'var(--gold)';
+      a.addEventListener('click', handleLogout);
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-sign-out-alt';
+      a.appendChild(icon);
+      a.appendChild(document.createTextNode(` Logout (${sessionUser.substring(3)})`));
+      desktopLink.replaceChildren(a);
+    }
+    if (mobileLink) {
+      const a = document.createElement('a');
+      a.href = 'javascript:void(0)';
+      a.style.color = 'var(--gold)';
+      a.addEventListener('click', handleLogout);
+      a.textContent = `Logout (${sessionUser.substring(3)})`;
+      mobileLink.replaceChildren(a);
+    }
     if (document.getElementById('phoneInput')) document.getElementById('phoneInput').value = sessionUser;
   } else {
-    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()"><i class="fas fa-user-circle"></i> Login</a>`;
-    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()">👤 Login / Sign Up</a>`;
+    if (desktopLink) {
+      const a = document.createElement('a');
+      a.href = 'javascript:void(0)';
+      a.addEventListener('click', openAuthModal);
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-user-circle';
+      a.appendChild(icon);
+      a.appendChild(document.createTextNode(' Login'));
+      desktopLink.replaceChildren(a);
+    }
+    if (mobileLink) {
+      const a = document.createElement('a');
+      a.href = 'javascript:void(0)';
+      a.addEventListener('click', openAuthModal);
+      a.textContent = '👤 Login / Sign Up';
+      mobileLink.replaceChildren(a);
+    }
   }
 }
 
