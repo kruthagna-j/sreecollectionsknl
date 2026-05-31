@@ -459,7 +459,9 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
       </div>
     </div>
   </div>
+</section>
 <script>
+  <div style="max-width:700px;margin:0 auto"></div>
   emailjs.init('9fGahlws55ZA4Hq9S');
 const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
@@ -671,24 +673,8 @@ function checkGlobalLoginState() {
   const mobileLink = document.getElementById('mobileAuthLink');
 
   if (sessionUser) {
-    if (desktopLink) {
-      desktopLink.textContent = '';
-      const desktopAnchor = document.createElement('a');
-      desktopAnchor.href = 'javascript:void(0)';
-      desktopAnchor.style.color = 'var(--gold)';
-      desktopAnchor.addEventListener('click', handleLogout);
-      desktopAnchor.textContent = `Logout (${sessionUser.substring(3)})`;
-      desktopLink.appendChild(desktopAnchor);
-    }
-    if (mobileLink) {
-      mobileLink.textContent = '';
-      const mobileAnchor = document.createElement('a');
-      mobileAnchor.href = 'javascript:void(0)';
-      mobileAnchor.style.color = 'var(--gold)';
-      mobileAnchor.addEventListener('click', handleLogout);
-      mobileAnchor.textContent = `Logout (${sessionUser.substring(3)})`;
-      mobileLink.appendChild(mobileAnchor);
-    }
+    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)"><i class="fas fa-sign-out-alt"></i> Logout (${sessionUser.substring(3)})</a>`;
+    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)">Logout (${sessionUser.substring(3)})</a>`;
     if (document.getElementById('phoneInput')) {
       document.getElementById('phoneInput').value = sessionUser;
     }
