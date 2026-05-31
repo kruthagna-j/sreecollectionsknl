@@ -549,19 +549,13 @@ function executeLoginSuccess(phone) {
   }
 }
 
-function logout() {
-  if (confirm('Are you sure you want to logout?')) {
-    sessionStorage.removeItem('adminAuth');
-    sessionStorage.removeItem('adminAuthTime');
-    window.location.href = 'admin-login.html';
-  }
-}
-
 function handleLogout() {
-  localStorage.removeItem('userLoggedInPhone');
-  alert('Logged out successfully.');
-  checkGlobalLoginState();
-  document.getElementById('ordersList').innerHTML = '';
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem('userLoggedInPhone');
+    alert('Logged out successfully.');
+    checkGlobalLoginState();
+    document.getElementById('ordersList').innerHTML = '';
+  }
 }
 
 function checkGlobalLoginState() {
