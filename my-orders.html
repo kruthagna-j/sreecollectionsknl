@@ -262,7 +262,7 @@ function renderOrder(o, returnedOrderIds) {
 
       <div class="order-actions">
         ${canCancel ? `<button class="btn-action btn-cancel" onclick="cancelOrder('${o.id}')"><i class="fas fa-times"></i> Cancel Order</button>` : ''}
-        ${canReview ? `<button class="btn-action btn-review" onclick="openReview('${o.id}','${o.product_id}','${(o.customer_name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')"><i class="fas fa-star"></i> Write Review</button>` : ''}
+        ${canReview ? `<button class="btn-action btn-review" onclick="openReview('${o.id}','${o.product_id}','${(o.customer_name||'').replace(/'/g,"\\'")}')"><i class="fas fa-star"></i> Write Review</button>` : ''}
         ${canReturn ? `<button class="btn-action" style="border-color:var(--gold);color:var(--gold)" onclick="openReturn('${o.id}')"><i class="fas fa-undo"></i> Return / Refund</button>` : ''}
         ${hasReturn ? `<span class="badge return-badge"><i class="fas fa-check"></i> Return Requested</span>` : ''}
         <button class="btn-action" onclick="reorder('${o.product_id}')"><i class="fas fa-redo"></i> Reorder</button>
