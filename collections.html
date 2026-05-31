@@ -582,7 +582,7 @@
             </button>
           </div>
           <div style="display:flex;gap:0.5rem">
-            <button onclick="shareOnWhatsApp('${p.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', ${p.price})" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
+            <button onclick="shareOnWhatsApp('${p.name.replace(/\\/g, "\\\\").replace(/'/g,"\\'").replace(/"/g,'&quot;')}', ${p.price})" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
           </div>
         </div>
       </div>
