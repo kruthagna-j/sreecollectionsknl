@@ -671,8 +671,24 @@ function checkGlobalLoginState() {
   const mobileLink = document.getElementById('mobileAuthLink');
 
   if (sessionUser) {
-    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)"><i class="fas fa-sign-out-alt"></i> Logout (${sessionUser.substring(3)})</a>`;
-    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)">Logout (${sessionUser.substring(3)})</a>`;
+    if (desktopLink) {
+      desktopLink.textContent = '';
+      const desktopAnchor = document.createElement('a');
+      desktopAnchor.href = 'javascript:void(0)';
+      desktopAnchor.style.color = 'var(--gold)';
+      desktopAnchor.addEventListener('click', handleLogout);
+      desktopAnchor.textContent = `Logout (${sessionUser.substring(3)})`;
+      desktopLink.appendChild(desktopAnchor);
+    }
+    if (mobileLink) {
+      mobileLink.textContent = '';
+      const mobileAnchor = document.createElement('a');
+      mobileAnchor.href = 'javascript:void(0)';
+      mobileAnchor.style.color = 'var(--gold)';
+      mobileAnchor.addEventListener('click', handleLogout);
+      mobileAnchor.textContent = `Logout (${sessionUser.substring(3)})`;
+      mobileLink.appendChild(mobileAnchor);
+    }
     if (document.getElementById('phoneInput')) {
       document.getElementById('phoneInput').value = sessionUser;
     }
