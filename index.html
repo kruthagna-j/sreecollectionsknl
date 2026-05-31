@@ -204,12 +204,12 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
   <a href="index.html" class="logo">Sree Collections</a>
   <ul class="nav-links">
     <li><a href="./collections.html">Collections</a></li>
-    <li><a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a></li>
+    <li><a href="./my-orders.html">My Orders</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#reviews">Reviews</a></li>
     <li><a href="tel:+917207186844">Contact</a></li>
     <li><a href="#contact">Visit Our Store</a></li>
-    <li><a href="javascript:void(0)" onclick="handleProtectedFeature('admin-login.html', true)" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a></li>
+    <li><a href="./admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a></li>
     <li id="navAuthLink"><a href="javascript:void(0)" onclick="openAuthModal()"><i class="fas fa-user-circle"></i> Login</a></li>
   </ul>
   <a href="./collections.html" class="nav-cta">Shop Now</a>
@@ -221,8 +221,8 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="./collections.html" onclick="toggleMenu()">🛍️ Collections</a>
-  <a href="javascript:void(0)" onclick="toggleMenu(); handleProtectedFeature('#myOrders')">📦 My Orders</a>
-  <a href="my-orders.html" onclick="toggleMenu()">🔍 Track Order</a>
+  <a href="./my-orders.html" onclick="toggleMenu()">📦 My Orders</a>
+  <a href="./track-order.html" onclick="toggleMenu()">🔍 Track Order</a>
   <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
   <a href="#reviews" onclick="toggleMenu()">⭐ Reviews</a>
   <a href="tel:+917207186844" onclick="toggleMenu()">📞 Call Us</a>
@@ -230,7 +230,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
   <a href="#contact" onclick="toggleMenu()">📍 Visit Our Store</a>
   <div id="mobileAuthLink"><a href="javascript:void(0)" onclick="toggleMenu(); openAuthModal();">👤 Login / Sign Up</a></div>
   <a href="./collections.html" style="color:var(--gold);font-weight:600;border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem">🎁 Shop Now</a>
-  <a href="javascript:void(0)" onclick="toggleMenu(); handleProtectedFeature('admin-login.html', true)" style="color:var(--muted);font-size:0.78rem">🔑 Admin Login</a>
+  <a href="./admin-login.html" onclick="toggleMenu()" style="color:var(--muted);font-size:0.78rem">🔑 Admin Login</a>
 </div>
 
 <section class="hero">
@@ -357,21 +357,7 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
     </div>
   </div>
 </section>
-
-<section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
-  <div style="max-width:700px;margin:0 auto">
-    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
-    <div id="guardedOrdersWrapper">
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
-      <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
-        <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
-        <button onclick="loadOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
-      </div>
-    </div>
-    <div id="ordersList"></div>
-  </div>
-</section>
-
+<div style="max-width:700px;margin:0 auto">
 <script>
   emailjs.init('9fGahlws55ZA4Hq9S');
   const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
@@ -414,8 +400,8 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
         </div>
         <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
         <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
-          <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by Admin' : 'Cancelled by customer') : o.status}</span></span>
-          ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${searchPhone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
+          <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by customer' : 'Cancelled by Admin') : o.status}</span></span>
+          ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
         </div>
       </div>`).join('');
   }
@@ -452,7 +438,7 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
       <div class="footer-col">
         <h4>Quick Links</h4>
         <a href="./collections.html">All Products</a>
-        <a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a>
+        <a href="./my-orders.html">My Orders</a>
         <a href="tel:+917207186844">Contact Us</a>
         <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
         <a href="javascript:void(0)" onclick="handleProtectedFeature('admin-login.html', true)" style="color:rgba(200,169,107,0.4);font-size:0.78rem"><i class="fas fa-lock"></i> Admin</a>
@@ -575,44 +561,12 @@ function checkGlobalLoginState() {
   const desktopLink = document.getElementById('navAuthLink');
   const mobileLink = document.getElementById('mobileAuthLink');
   if (sessionUser) {
-    if (desktopLink) {
-      const a = document.createElement('a');
-      a.href = 'javascript:void(0)';
-      a.style.color = 'var(--gold)';
-      a.addEventListener('click', handleLogout);
-      const icon = document.createElement('i');
-      icon.className = 'fas fa-sign-out-alt';
-      a.appendChild(icon);
-      a.appendChild(document.createTextNode(` Logout (${sessionUser.substring(3)})`));
-      desktopLink.replaceChildren(a);
-    }
-    if (mobileLink) {
-      const a = document.createElement('a');
-      a.href = 'javascript:void(0)';
-      a.style.color = 'var(--gold)';
-      a.addEventListener('click', handleLogout);
-      a.textContent = `Logout (${sessionUser.substring(3)})`;
-      mobileLink.replaceChildren(a);
-    }
+    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)"><i class="fas fa-sign-out-alt"></i> Logout (${sessionUser.substring(3)})</a>`;
+    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)">Logout (${sessionUser.substring(3)})</a>`;
     if (document.getElementById('phoneInput')) document.getElementById('phoneInput').value = sessionUser;
   } else {
-    if (desktopLink) {
-      const a = document.createElement('a');
-      a.href = 'javascript:void(0)';
-      a.addEventListener('click', openAuthModal);
-      const icon = document.createElement('i');
-      icon.className = 'fas fa-user-circle';
-      a.appendChild(icon);
-      a.appendChild(document.createTextNode(' Login'));
-      desktopLink.replaceChildren(a);
-    }
-    if (mobileLink) {
-      const a = document.createElement('a');
-      a.href = 'javascript:void(0)';
-      a.addEventListener('click', openAuthModal);
-      a.textContent = '👤 Login / Sign Up';
-      mobileLink.replaceChildren(a);
-    }
+    if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()"><i class="fas fa-user-circle"></i> Login</a>`;
+    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()">👤 Login / Sign Up</a>`;
   }
 }
 
