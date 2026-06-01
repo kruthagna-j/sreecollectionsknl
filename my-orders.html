@@ -24,7 +24,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 .search-box button:hover{background:var(--gold-light)}
 .order-card{background:var(--card-bg);border:1px solid var(--border);margin-bottom:1.2rem;overflow:hidden}
 .order-header{padding:1.2rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;border-bottom:1px solid var(--border)}
-.order-id{font-size:0.8rem;color:var(--muted)}
 .order-date{font-size:0.8rem;color:var(--muted)}
 .order-body{padding:1.2rem 1.5rem}
 .order-product{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem}
@@ -100,6 +99,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
     <h2>Write a Review</h2>
     <input type="hidden" id="reviewOrderId">
     <input type="hidden" id="reviewProductId">
+    <!-- FIX: stores real customer name from order data, not phone number -->
     <input type="hidden" id="reviewCustomerName">
     <div class="form-group">
       <label>Your Rating *</label>
@@ -125,6 +125,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
     <button class="btn-close-modal" onclick="closeModal('returnModal')">&times;</button>
     <h2>Request Return / Refund</h2>
     <input type="hidden" id="returnOrderId">
+    <!-- FIX: store customer name for return request too -->
+    <input type="hidden" id="returnCustomerName">
     <div class="form-group">
       <label>Reason *</label>
       <select id="returnReason">
@@ -146,31 +148,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 </div>
 
 <script>
-function enableEnter(inputId, callback) {
-  const el = document.getElementById(inputId);
-  if (!el) return;
-  el.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') { callback(); }
-  });
-}
-
 const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
 
 let selectedRating = 0;
-let currentPhone = '';
 let loadedOrders = [];
 
 async function sbFetch(method, table, body, filter) {
   let url = `${SUPABASE_URL}/rest/v1/${table}`;
   if (filter) url += `?${filter}`;
-  const res = await fetch(url, {
-    method,
-    headers: {'apikey': SUPABASE_KEY,'Authorization': `Bearer ${SUPABASE_KEY}`,'Content-Type': 'application/json','Prefer': method === 'POST' ? 'return=representation' : ''},
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+  } catch(e) {
+    console.error('Fetch error:', e);
+    return [];
+  }
 }
 
 async function loadOrders() {
@@ -179,22 +182,28 @@ async function loadOrders() {
   const el = document.getElementById('ordersList');
   el.innerHTML = '<div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Loading your orders...</p></div>';
   const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
-  if (!/^[6-9]\d{9}$/.test(clean)) { alert('Please enter a valid 10-digit Indian mobile number.'); return; }
-  currentPhone = phone;
+  if (!/^[6-9]\d{9}$/.test(clean)) {
+    alert('Please enter a valid 10-digit Indian mobile number.');
+    el.innerHTML = '';
+    return;
+  }
   const searchPhone = '+91' + clean;
   const orders1 = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(clean)}&order=created_at.desc`);
   const orders2 = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
   const merged = [...(orders1 || []), ...(orders2 || [])];
   const orders = merged.filter((o, i, self) => i === self.findIndex(x => x.id === o.id));
   loadedOrders = orders;
+
   if (!orders || orders.length === 0) {
     el.innerHTML = '<div class="empty"><i class="fas fa-box-open"></i><p>No orders found for this number.</p><a href="collections.html" style="color:var(--gold);margin-top:1rem;display:inline-block">Start Shopping →</a></div>';
     return;
   }
+
   const returns1 = await sbFetch('GET', 'returns', null, `customer_phone=eq.${encodeURIComponent(clean)}`);
   const returns2 = await sbFetch('GET', 'returns', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}`);
   const returns = [...(returns1 || []), ...(returns2 || [])];
   const returnedOrderIds = returns ? returns.map(r => r.order_id) : [];
+
   el.innerHTML = orders.map(o => renderOrder(o, returnedOrderIds)).join('');
 }
 
@@ -222,6 +231,8 @@ function renderOrder(o, returnedOrderIds) {
   const canReview = isDelivered;
   const total = Number(o.product_price) * Number(o.quantity);
   const fillPct = isCancelled ? 0 : (progress / (steps.length - 1)) * 100;
+  // FIX: escape customer name for use in onclick attribute
+  const safeName = (o.customer_name || 'Customer').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
   return `
   <div class="order-card">
@@ -257,13 +268,13 @@ function renderOrder(o, returnedOrderIds) {
 
       <div class="order-meta">
         ${o.customer_address ? `<span><i class="fas fa-map-marker-alt" style="color:var(--gold)"></i> ${o.customer_address}${o.customer_pincode ? ', '+o.customer_pincode : ''}</span>` : ''}
-        ${o.gift_message ? `<span><i class="fas fa-gift" style="color:var(--gold)"></i> "${o.gift_message}"</span>` : ''}
+        ${o.gift_message ? `<span><i class="fas fa-gift" style="color:var(--gold)"></i> &ldquo;${o.gift_message}&rdquo;</span>` : ''}
       </div>
 
       <div class="order-actions">
         ${canCancel ? `<button class="btn-action btn-cancel" onclick="cancelOrder('${o.id}')"><i class="fas fa-times"></i> Cancel Order</button>` : ''}
-        ${canReview ? `<button class="btn-action btn-review" onclick="openReview('${o.id}','${o.product_id}','${(o.customer_name||'').replace(/\\/g,"\\\\").replace(/'/g,"\\'")}')"><i class="fas fa-star"></i> Write Review</button>` : ''}
-        ${canReturn ? `<button class="btn-action" style="border-color:var(--gold);color:var(--gold)" onclick="openReturn('${o.id}')"><i class="fas fa-undo"></i> Return / Refund</button>` : ''}
+        ${canReview ? `<button class="btn-action btn-review" onclick="openReview('${o.id}','${o.product_id}','${safeName}')"><i class="fas fa-star"></i> Write Review</button>` : ''}
+        ${canReturn ? `<button class="btn-action" style="border-color:var(--gold);color:var(--gold)" onclick="openReturn('${o.id}','${safeName}')"><i class="fas fa-undo"></i> Return / Refund</button>` : ''}
         ${hasReturn ? `<span class="badge return-badge"><i class="fas fa-check"></i> Return Requested</span>` : ''}
         <button class="btn-action" onclick="reorder('${o.product_id}')"><i class="fas fa-redo"></i> Reorder</button>
       </div>
@@ -285,7 +296,7 @@ function reorder(productId) {
 function openReview(orderId, productId, customerName) {
   document.getElementById('reviewOrderId').value = orderId;
   document.getElementById('reviewProductId').value = productId;
-  // FIX: store the actual customer name so reviews don't show a phone number
+  // FIX: use the real customer name passed from order, not phone number
   document.getElementById('reviewCustomerName').value = customerName || 'Customer';
   document.getElementById('reviewText').value = '';
   selectedRating = 0;
@@ -293,8 +304,10 @@ function openReview(orderId, productId, customerName) {
   document.getElementById('reviewModal').classList.add('active');
 }
 
-function openReturn(orderId) {
+function openReturn(orderId, customerName) {
   document.getElementById('returnOrderId').value = orderId;
+  // FIX: store real customer name for return submission
+  document.getElementById('returnCustomerName').value = customerName || 'Customer';
   document.getElementById('returnReason').value = '';
   document.getElementById('returnDesc').value = '';
   document.getElementById('returnModal').classList.add('active');
@@ -323,7 +336,7 @@ async function submitReview() {
   if (!selectedRating) { alert('Please select a rating'); return; }
   const phone = document.getElementById('phoneInput').value.trim();
   const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
-  // FIX: use the stored customer name from the order, not the phone number
+  // FIX: use real customer name from order, not the phone number
   const customerName = document.getElementById('reviewCustomerName').value || 'Customer';
   const data = {
     order_id: document.getElementById('reviewOrderId').value,
@@ -344,9 +357,11 @@ async function submitReturn() {
   if (!reason) { alert('Please select a reason'); return; }
   const phone = document.getElementById('phoneInput').value.trim();
   const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
+  // FIX: use real customer name from order
+  const customerName = document.getElementById('returnCustomerName').value || 'Customer';
   const data = {
     order_id: document.getElementById('returnOrderId').value,
-    customer_name: 'Customer',
+    customer_name: customerName,
     customer_phone: '+91' + clean,
     reason,
     description: document.getElementById('returnDesc').value.trim() || null,
@@ -358,7 +373,9 @@ async function submitReturn() {
   loadOrders();
 }
 
-document.getElementById('phoneInput').addEventListener('keypress', e => { if(e.key==='Enter') loadOrders(); });
+document.getElementById('phoneInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') loadOrders();
+});
 
 function setTheme(isLight) {
   document.body.classList.toggle('light-mode', isLight);
@@ -374,9 +391,13 @@ function applyTheme() {
 }
 applyTheme();
 
+// Auto-load if phone passed in URL
 const urlParams = new URLSearchParams(window.location.search);
-const phone = urlParams.get('phone');
-if (phone) { document.getElementById('phoneInput').value = phone; loadOrders(); }
+const phoneParam = urlParams.get('phone');
+if (phoneParam) {
+  document.getElementById('phoneInput').value = phoneParam;
+  loadOrders();
+}
 </script>
 </body>
 </html>

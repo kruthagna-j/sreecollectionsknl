@@ -129,7 +129,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 .auth-input{background:none;border:none;outline:none;padding:0.8rem 1rem 0.8rem 0.2rem;color:#fff;font-size:0.95rem;width:100%;font-family:inherit}
 .auth-submit-btn{width:100%;background:var(--gold);color:#000;border:none;padding:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.85rem;cursor:pointer;transition:background 0.2s;margin-top:0.5rem}
 .auth-submit-btn:hover{background:var(--gold-light)}
-/* FIX: use CSS class for scroll-reveal so cards are visible if JS is slow */
+/* FIX: CSS class for scroll-reveal so cards are visible even if JS is slow */
 .reveal-card{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease}
 .reveal-card.visible{opacity:1;transform:translateY(0)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
@@ -191,7 +191,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
         <p style="font-size:0.8rem;margin-bottom:0.8rem;color:var(--muted)">Sent to <span id="displayLoginPhone" style="color:var(--text);font-weight:600"></span></p>
         <input type="text" id="globalAuthOtp" placeholder="Enter 6-digit code" maxlength="6" class="auth-input" style="background:#222;border:1px solid rgba(200,169,107,0.15);padding:0.8rem;width:100%;letter-spacing:6px;text-align:center">
       </div>
-      <button class="auth-submit-btn" onclick="handleVerifyLoginOTP()">Verify & Login</button>
+      <button class="auth-submit-btn" onclick="handleVerifyLoginOTP()">Verify &amp; Login</button>
       <div style="font-size:0.8rem;color:var(--muted);text-align:center;margin-top:0.8rem">
         <span id="loginTimerText">Resend code in 30s</span>
         <span id="loginResendBtn" onclick="handleSendLoginOTP()" style="display:none;color:var(--gold);cursor:pointer;font-weight:700;text-decoration:underline">Resend OTP</span>
@@ -209,7 +209,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
     <li><a href="#reviews">Reviews</a></li>
     <li><a href="tel:+917207186844">Contact</a></li>
     <li><a href="#contact">Visit Our Store</a></li>
-    <li><a href="./admin-login.html" class="nav-back" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a></li>
+    <li><a href="./admin-login.html" style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a></li>
     <li id="navAuthLink"><a href="javascript:void(0)" onclick="openAuthModal()"><i class="fas fa-user-circle"></i> Login</a></li>
   </ul>
   <a href="./collections.html" class="nav-cta">Shop Now</a>
@@ -222,7 +222,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 <div class="mobile-menu" id="mobileMenu">
   <a href="./collections.html" onclick="toggleMenu()">🛍️ Collections</a>
   <a href="./my-orders.html" onclick="toggleMenu()">📦 My Orders</a>
-  <a href="./track-order.html" onclick="toggleMenu()">🔍 Track Order</a>
   <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
   <a href="#reviews" onclick="toggleMenu()">⭐ Reviews</a>
   <a href="tel:+917207186844" onclick="toggleMenu()">📞 Call Us</a>
@@ -311,22 +310,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
   </div>
 </section>
 
-<script>
-function checkPin() {
-  const pin = document.getElementById('pinInput').value.trim();
-  const res = document.getElementById('pinResult');
-  if (pin.length !== 6 || isNaN(pin)) { res.innerHTML = '<span style="color:#e74c3c">⚠️ Enter a valid 6-digit pincode.</span>'; return; }
-  const num = parseInt(pin);
-  const isAPTS = (num >= 500001 && num <= 534999);
-  if (isAPTS) {
-    res.innerHTML = '✅ <strong style="color:#27ae60">Great news!</strong> We deliver to your area. <a href="https://wa.me/917207186844" target="_blank" style="color:var(--gold)">Order on WhatsApp →</a>';
-  } else {
-    res.innerHTML = '❌ <strong style="color:#e74c3c">Sorry!</strong> We currently do not deliver to this area.';
-  }
-}
-document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key==='Enter') checkPin(); });
-</script>
-
 <div class="cta-banner">
   <h2>Ready to Find the Perfect Gift?</h2>
   <p>Browse 500+ options online or call us to customise your hamper.</p>
@@ -357,64 +340,6 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
     </div>
   </div>
 </section>
-<div style="max-width:1200px;margin:0 auto">
-<script>
-  emailjs.init('9fGahlws55ZA4Hq9S');
-  const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
-
-  async function sbFetch(method, table, body, filter) {
-    let url = `${SUPABASE_URL}/rest/v1/${table}`;
-    if (filter) url += `?${filter}`;
-    const res = await fetch(url, {
-      method,
-      headers: {'apikey': SUPABASE_KEY,'Authorization': `Bearer ${SUPABASE_KEY}`,'Content-Type': 'application/json','Prefer': method === 'POST' ? 'return=representation' : ''},
-      body: body ? JSON.stringify(body) : undefined
-    });
-    const text = await res.text();
-    return text ? JSON.parse(text) : [];
-  }
-
-  async function loadOrders() {
-    const activeSession = localStorage.getItem('userLoggedInPhone');
-    if (!activeSession) { alert('Please log in with your mobile number to view and track order details.'); openAuthModal(); return; }
-    const phone = document.getElementById('phoneInput').value.trim();
-    if (!phone) { alert('Enter your phone number'); return; }
-    const el = document.getElementById('ordersList');
-    el.innerHTML = '<p style="color:var(--muted)">Loading...</p>';
-    const clean = phone.trim().replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
-    if (!/^[6-9]\d{9}$/.test(clean)) { alert('Please enter a valid 10-digit Indian mobile number.'); return; }
-    const searchPhone = '+91' + clean;
-    if (activeSession.replace(/\s/g, '') !== searchPhone) {
-      alert('Security Alert: You can only view orders placed by your verified login number.');
-      el.innerHTML = '<p style="color:#e74c3c">Access Denied: Phone mismatch.</p>';
-      return;
-    }
-    const orders = await sbFetch('GET', 'orders', null, `customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
-    if (!orders || orders.length === 0) { el.innerHTML = '<p style="color:var(--muted)">No orders found for this number.</p>'; return; }
-    el.innerHTML = orders.map(o => `
-      <div style="background:var(--card-bg);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
-        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
-          <span style="color:var(--gold);font-weight:700">${o.product_name}</span>
-          <span style="color:var(--muted);font-size:0.8rem">${new Date(o.created_at).toLocaleDateString('en-IN')}</span>
-        </div>
-        <div style="font-size:0.85rem;color:var(--muted)">Qty: ${o.quantity} · ₹${Number(o.product_price * o.quantity).toLocaleString('en-IN')} · ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
-        <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
-          <span>Status: <span style="color:${o.status === 'cancelled' ? '#e74c3c' : 'var(--gold)'}">${o.status === 'cancelled' ? (o.cancelled_by === 'customer' ? 'Cancelled by customer' : 'Cancelled by Admin') : o.status}</span></span>
-          ${o.status === 'placed' ? `<button onclick="cancelOrder('${o.id}', '${phone}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>` : ''}
-        </div>
-      </div>`).join('');
-  }
-
-  async function cancelOrder(id, phone) {
-    if (!localStorage.getItem('userLoggedInPhone')) { alert('Session expired. Please log in again.'); openAuthModal(); return; }
-    if (!confirm('Are you sure you want to cancel this order?')) return;
-    await sbFetch('PATCH', 'orders', { status: 'cancelled', cancelled_by: 'customer' }, `id=eq.${id}`);
-    alert('Order cancelled successfully.');
-    document.getElementById('phoneInput').value = phone;
-    loadOrders();
-  }
-</script>
 
 <footer>
   <div style="max-width:1200px;margin:0 auto">
@@ -441,7 +366,7 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
         <a href="./my-orders.html">My Orders</a>
         <a href="tel:+917207186844">Contact Us</a>
         <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
-        <a href="javascript:void(0)" onclick="handleProtectedFeature('admin-login.html', true)" style="color:rgba(200,169,107,0.4);font-size:0.78rem"><i class="fas fa-lock"></i> Admin</a>
+        <a href="./admin-login.html" style="color:rgba(200,169,107,0.4);font-size:0.78rem"><i class="fas fa-lock"></i> Admin</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -450,6 +375,31 @@ document.getElementById('pinInput')?.addEventListener('keydown', e => { if(e.key
     </div>
   </div>
 </footer>
+
+<!-- FIX: Supabase setup moved outside layout divs; dead loadOrders/cancelOrder code removed.
+     Orders are handled on my-orders.html. Index.html only needs auth. -->
+<script>
+  emailjs.init('9fGahlws55ZA4Hq9S');
+  const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+
+  // FIX: removed unused loadOrders/cancelOrder that referenced non-existent #phoneInput/#ordersList on this page.
+  // Order viewing is on my-orders.html.
+
+  function checkPin() {
+    const pin = document.getElementById('pinInput').value.trim();
+    const res = document.getElementById('pinResult');
+    if (pin.length !== 6 || isNaN(pin)) { res.innerHTML = '<span style="color:#e74c3c">⚠️ Enter a valid 6-digit pincode.</span>'; return; }
+    const num = parseInt(pin);
+    const isAPTS = (num >= 500001 && num <= 534999);
+    if (isAPTS) {
+      res.innerHTML = '✅ <strong style="color:#27ae60">Great news!</strong> We deliver to your area. <a href="https://wa.me/917207186844" target="_blank" style="color:var(--gold)">Order on WhatsApp →</a>';
+    } else {
+      res.innerHTML = '❌ <strong style="color:#e74c3c">Sorry!</strong> We currently do not deliver to this area.';
+    }
+  }
+  document.getElementById('pinInput').addEventListener('keydown', e => { if(e.key==='Enter') checkPin(); });
+</script>
 
 <script>
 let authCountdown;
@@ -482,15 +432,14 @@ function closeAuthModal() {
   if (authModalKeyboardHandler) { window.removeEventListener('keydown', authModalKeyboardHandler); authModalKeyboardHandler = null; }
 }
 
-function handleProtectedFeature(target, isExternalPage = false) {
+// FIX: handleProtectedFeature on index.html redirects to my-orders.html for order viewing
+// instead of trying to render orders inline (no #ordersList or #phoneInput on this page)
+function handleProtectedFeature(target, isExternalPage) {
   const isLoggedIn = localStorage.getItem('userLoggedInPhone');
   if (!isLoggedIn) { alert('Please log in with your mobile number to access this feature.'); openAuthModal(); }
   else {
     if (isExternalPage) { window.open(target, '_blank'); }
-    else {
-      window.location.hash = target;
-      if (target === '#myOrders') { if (document.getElementById('phoneInput')) document.getElementById('phoneInput').value = isLoggedIn; loadOrders(); }
-    }
+    else { window.location.href = target; }
   }
 }
 
@@ -500,7 +449,6 @@ async function handleSendLoginOTP() {
   const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
   if (!/^[6-9]\d{9}$/.test(clean)) { alert('Please enter a valid 10-digit mobile number.'); return; }
   if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
-  const formattedPhone = '+91' + clean;
   document.getElementById('displayLoginPhone').innerText = email;
   loginGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
   try {
@@ -543,10 +491,6 @@ function executeLoginSuccess(phone) {
   alert('Logged in successfully!');
   closeAuthModal();
   checkGlobalLoginState();
-  if (window.location.hash === '#myOrders') {
-    if (document.getElementById('phoneInput')) document.getElementById('phoneInput').value = phone;
-    loadOrders();
-  }
 }
 
 function handleLogout() {
@@ -554,7 +498,6 @@ function handleLogout() {
     localStorage.removeItem('userLoggedInPhone');
     alert('Logged out successfully.');
     checkGlobalLoginState();
-    document.getElementById('ordersList').innerHTML = '';
   }
 }
 
@@ -565,7 +508,6 @@ function checkGlobalLoginState() {
   if (sessionUser) {
     if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)"><i class="fas fa-sign-out-alt"></i> Logout (${sessionUser.substring(3)})</a>`;
     if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="handleLogout()" style="color:var(--gold)">Logout (${sessionUser.substring(3)})</a>`;
-    if (document.getElementById('phoneInput')) document.getElementById('phoneInput').value = sessionUser;
   } else {
     if (desktopLink) desktopLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()"><i class="fas fa-user-circle"></i> Login</a>`;
     if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="openAuthModal()">👤 Login / Sign Up</a>`;
@@ -577,8 +519,7 @@ function toggleMenu() {
   m.style.display = m.style.display === 'block' ? 'none' : 'block';
 }
 
-// FIX: scroll-reveal uses CSS class (reveal-card) set at stylesheet time,
-// so cards are always visible even if JS is slow — no flash of invisible content
+// FIX: scroll-reveal uses CSS class only — no inline opacity from JS — avoids flash of invisible content
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
@@ -641,9 +582,14 @@ window.addEventListener('storage', (e) => { if (e.key === 'theme') applyTheme();
     });
     animationId = requestAnimationFrame(drawParticles);
   }
+  // FIX: direct call after DOMContentLoaded check so canvas always initialises
   function init() { resize(); createParticles(); if (animationId) cancelAnimationFrame(animationId); drawParticles(); }
   window.addEventListener('resize', () => { resize(); createParticles(); });
-  window.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 </body>

@@ -156,6 +156,11 @@
           <input type="tel" id="globalAuthPhone" placeholder="Enter 10-digit number" maxlength="10" class="auth-input">
         </div>
       </div>
+      <!-- FIX: collections auth modal now also collects email so OTP can actually be delivered -->
+      <div class="auth-input-group" style="margin-top:1rem">
+        <label class="auth-input-label">Email Address (for OTP)</label>
+        <input type="email" id="globalAuthEmail" placeholder="your@email.com" class="auth-input" style="background:#222;border:1px solid rgba(200,169,107,0.15);padding:0.8rem;width:100%">
+      </div>
       <button class="auth-submit-btn" onclick="handleSendLoginOTP()">Continue</button>
     </div>
     <div id="authOtpView" style="display:none">
@@ -164,7 +169,7 @@
         <p style="font-size:0.8rem;margin-bottom:0.8rem;color:var(--muted)">Sent to <span id="displayLoginPhone" style="color:var(--text);font-weight:600"></span></p>
         <input type="text" id="globalAuthOtp" placeholder="Enter 6-digit code" maxlength="6" class="auth-input" style="border:1px solid rgba(200,169,107,0.15);padding:0.8rem;width:100%;letter-spacing:6px;text-align:center;background:#222;color:#fff;font-family:inherit">
       </div>
-      <button class="auth-submit-btn" onclick="handleVerifyLoginOTP()">Verify & Continue</button>
+      <button class="auth-submit-btn" onclick="handleVerifyLoginOTP()">Verify &amp; Continue</button>
       <div style="font-size:0.8rem;color:var(--muted);text-align:center;margin-top:0.8rem">
         <span id="loginTimerText">Resend code in 30s</span>
         <span id="loginResendBtn" onclick="handleSendLoginOTP()" style="display:none;color:var(--gold);cursor:pointer;font-weight:700;text-decoration:underline">Resend OTP</span>
@@ -230,7 +235,7 @@
   <button class="filter-btn" onclick="filterProducts('Retirement',this)">🏆 Retirement</button>
 </div>
 
-<!-- Recently Viewed placed ABOVE scripts so it's in DOM when JS runs -->
+<!-- FIX: Recently Viewed placed ABOVE scripts so DOM element exists when JS runs -->
 <div id="recentlyViewed" style="display:none;padding:2rem;max-width:1200px;margin:0 auto">
   <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);margin-bottom:1rem">Recently Viewed</h3>
   <div id="recentGrid" style="display:flex;gap:1rem;overflow-x:auto;padding-bottom:0.5rem"></div>
@@ -476,6 +481,8 @@
   let generatedOTP = '';
   let emailVerified = false;
   let appliedCoupon = null;
+  // FIX: declare currentCartIndex at top so it's available throughout
+  let currentCartIndex = 0;
 
   function isValidServicePincode(pincode) {
     const num = parseInt(pincode);
@@ -551,10 +558,13 @@
     const noP = document.getElementById('noProducts');
     if (!products || products.length === 0) { grid.innerHTML = ''; noP.style.display = 'block'; return; }
     noP.style.display = 'none';
-    // Store products in a map so we can reference them safely without inline JSON
+    // FIX: store products in a map — avoids embedding JSON in onclick (prevents double-quote injection)
     window._productMap = {};
     products.forEach(p => { window._productMap[p.id] = p; });
-    grid.innerHTML = products.map(p => `
+    // FIX: safe name escaping for share button only (not for onclick JSON)
+    grid.innerHTML = products.map(p => {
+      const safeName = p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      return `
       <div class="product-card">
         <a href="product.html?id=${p.id}" style="display:block">
           ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
@@ -582,14 +592,14 @@
             </button>
           </div>
           <div style="display:flex;gap:0.5rem">
-            <button onclick="shareOnWhatsApp('${p.name.replace(/\\/g, "\\\\").replace(/'/g,"\\'").replace(/"/g,'&quot;')}', ${p.price})" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
+            <button onclick="shareOnWhatsApp('${safeName}', ${p.price})" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
-  // FIX: safe product lookup by ID instead of inline JSON in onclick (avoids double-quote HTML injection)
+  // FIX: safe product lookup by ID (no inline JSON in onclick)
   function openOrderById(id) {
     const p = window._productMap && window._productMap[id];
     if (p) openOrder(p);
@@ -600,12 +610,12 @@
     if (p) addToCart(p);
   }
 
-  async function sendPushToAll(title, message, url = '/') {
+  async function sendPushToAll(title, message, url) {
     try {
       await fetch('/api/server', {
         method: 'POST',
         headers: {'Content-Type': 'application/json','x-admin-secret': 'sree-admin-2024-secret'},
-        body: JSON.stringify({ action: 'sendPush', title, message, url })
+        body: JSON.stringify({ action: 'sendPush', title, message, url: url || '/' })
       });
     } catch(e) { console.error('Push error:', e); }
   }
@@ -617,7 +627,7 @@
   }
 
   function focusInput(inputId) {
-    setTimeout(() => { const el = document.getElementById(inputId); if (el) { el.focus(); el.click(); } }, 100);
+    setTimeout(() => { const el = document.getElementById(inputId); if (el) { el.focus(); } }, 100);
   }
 
   let currentCategory = 'All';
@@ -666,12 +676,12 @@
     currentQty = 1;
     currentPayment = 'cod';
     emailVerified = false;
+    appliedCoupon = null;
+    generatedOTP = '';
     setTimeout(() => {
       const custPhoneField = document.getElementById('custPhone');
       if (custPhoneField) custPhoneField.value = activeUser.replace('+91', '');
     }, 100);
-    generatedOTP = '';
-    appliedCoupon = null;
     if (document.getElementById('orderCouponInput')) document.getElementById('orderCouponInput').value = '';
     if (document.getElementById('orderCouponMsg')) document.getElementById('orderCouponMsg').innerHTML = '';
     document.getElementById('modalProductName').textContent = product.name;
@@ -682,6 +692,7 @@
     document.getElementById('custEmail').value = '';
     document.getElementById('custAddress').value = '';
     document.getElementById('custPincode').value = '';
+    if (document.getElementById('giftMessage')) document.getElementById('giftMessage').value = '';
     document.getElementById('verifyEmailSection').style.display = 'none';
     document.getElementById('otpInput').value = '';
     document.getElementById('verifyBtn').style.display = 'none';
@@ -763,7 +774,6 @@
       });
       document.getElementById('verifyEmailSection').style.display = 'block';
       focusInput('otpInput');
-      document.getElementById('otpInput').select();
       btn.innerHTML = '<i class="fas fa-check"></i> Code Sent';
       btn.style.background = '#27ae60';
       setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-redo"></i> Resend Code'; btn.style.background = 'var(--gold)'; }, 3000);
@@ -804,7 +814,7 @@
     const orderModalActive = document.getElementById('orderModal').classList.contains('active');
     const orderInput = document.getElementById('orderCouponInput');
     const cartInput = document.getElementById('couponInput');
-    // FIX: null-check before using input reference
+    // FIX: null-check before using either input reference
     const input = orderModalActive ? orderInput : cartInput;
     if (!input) return;
     const msgId = orderModalActive ? 'orderCouponMsg' : 'couponMsg';
@@ -856,7 +866,6 @@
     if (appliedCoupon) {
       if (appliedCoupon.type === 'percent') discount = Math.round(subtotal * appliedCoupon.value / 100);
       else if (appliedCoupon.type === 'flat') discount = appliedCoupon.value;
-      else if (appliedCoupon.type === 'freeship') {}
     }
     const total = Math.max(0, subtotal + delivery - discount);
     const options = {
@@ -984,7 +993,7 @@
     if (!query || query.length < 2) { box.style.display = 'none'; return; }
     const matches = allProducts.filter(p => p.name.toLowerCase().includes(query)).slice(0, 6);
     if (!matches.length) { box.style.display = 'none'; return; }
-    // FIX: use data-id attribute instead of inline JSON to avoid double-quote injection
+    // FIX: use data-id attributes + event listeners instead of inline JSON to avoid double-quote injection
     box.innerHTML = matches.map(p => `
       <div data-id="${p.id}" class="suggestion-item"
         style="padding:0.7rem 1rem;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
@@ -1012,7 +1021,6 @@
   });
 
   let cart = [];
-  let currentCartIndex = 0;
 
   function addToCart(product) {
     const existing = cart.find(i => i.id === product.id);
@@ -1046,8 +1054,8 @@
         <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
           <span style="font-weight:700;font-size:0.9rem">${item.name}</span>
           <div style="display:flex;gap:0.5rem;align-items:center">
-            <button onclick="buySingleFromCart(${idx})" style="padding:0.3rem 0.8rem;background:var(--gold);color:var(--dark);border:none;cursor:pointer;font-size:0.75rem;font-family:'Manrope',sans-serif;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;transition:background 0.3s" onmouseover="this.style.background='#E8C98B'" onmouseout="this.style.background='var(--gold)'">Buy</button>
-            <button onclick="removeFromCart(${idx})" style="width:26px;height:26px;background:transparent;border:1px solid rgba(200,169,107,0.3);color:var(--muted);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s" onmouseover="this.style.borderColor='#e74c3c';this.style.color='#e74c3c'" onmouseout="this.style.borderColor='rgba(200,169,107,0.3)';this.style.color='var(--muted)'">✕</button>
+            <button onclick="buySingleFromCart(${idx})" style="padding:0.3rem 0.8rem;background:var(--gold);color:var(--dark);border:none;cursor:pointer;font-size:0.75rem;font-family:'Manrope',sans-serif;font-weight:700">Buy</button>
+            <button onclick="removeFromCart(${idx})" style="width:26px;height:26px;background:transparent;border:1px solid rgba(200,169,107,0.3);color:var(--muted);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center">✕</button>
           </div>
         </div>
         <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">${item.category}</div>
@@ -1093,12 +1101,19 @@
     document.getElementById('cartCheckoutTotal').textContent = '₹' + total.toLocaleString('en-IN');
     cartEmailVerified = false;
     cartGeneratedOTP = '';
+    // FIX: reset all cart checkout fields, not just email
+    document.getElementById('cartCustName').value = '';
+    document.getElementById('cartCustPhone').value = '';
     document.getElementById('cartCustEmail').value = '';
+    document.getElementById('cartCustAddress').value = '';
+    document.getElementById('cartCustPincode').value = '';
     document.getElementById('cartVerifyBtn').style.display = 'none';
     document.getElementById('cartVerifyEmailSection').style.display = 'none';
     document.getElementById('cartOtpInput').value = '';
     document.getElementById('cartConfirmBtn').disabled = true;
     document.getElementById('cartConfirmBtn').style.opacity = '0.5';
+    if (document.getElementById('couponInput')) document.getElementById('couponInput').value = '';
+    if (document.getElementById('couponMsg')) document.getElementById('couponMsg').innerHTML = '';
     document.getElementById('cartCheckoutModal').classList.add('active');
   }
 
@@ -1142,7 +1157,7 @@
     document.getElementById('custPhone').value = '';
     document.getElementById('custEmail').value = '';
     document.getElementById('custAddress').value = '';
-    // FIX: reset pincode so delivery charge shows correctly
+    // FIX: reset pincode so delivery charge calculates correctly from scratch
     document.getElementById('custPincode').value = '';
     document.getElementById('verifyEmailSection').style.display = 'none';
     document.getElementById('otpInput').value = '';
@@ -1181,7 +1196,8 @@
     let successCount = 0;
     for (const item of cart) {
       const orderData = {
-        customer_name: name, customer_phone: phone, customer_address: address,
+        customer_name: name, customer_phone: phone, customer_email: email,
+        customer_address: address,
         customer_pincode: pincode, product_id: item.id, product_name: item.name,
         product_price: item.price, quantity: item.qty,
         payment_method: cartPaymentMethod,
@@ -1195,7 +1211,15 @@
     const cartOrderId = 'CART-' + Date.now().toString().slice(-6);
     showResult(true, 'All Orders Placed! 🎉', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, cartOrderId);
     sendPushToAll('🛍️ New Cart Order!', `${name} placed ${successCount} order(s) — ₹${cartTotalAmt.toLocaleString('en-IN')}`, '/admin-login.html');
+    // FIX: send confirmation email to customer as well as owner for cart orders
     try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        customer_email: email, customer_name: name, customer_phone: phone,
+        order_id: cartOrderId, quantity: successCount,
+        total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'),
+        product_name: cartProductNames,
+        payment_method: cartPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'
+      });
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone,
         order_id: cartOrderId, quantity: successCount,
@@ -1206,6 +1230,7 @@
     } catch(e) { console.error('Owner email error:', e); }
   }
 
+  // Load cart from localStorage on page start
   cart = JSON.parse(localStorage.getItem('sreecart') || '[]');
   updateCartUI();
 
@@ -1222,15 +1247,19 @@
   let authCountdown;
   let pendingProduct = null;
   let authModalKeyboardHandler = null;
+  // FIX: separate OTP variable for auth modal (consistent with index.html)
+  let authGeneratedOTP = '';
 
-  function openAuthModal(product = null) {
-    pendingProduct = product;
+  function openAuthModal(product) {
+    pendingProduct = product || null;
     const modal = document.getElementById('globalAuthModal');
     modal.classList.add('active');
     document.getElementById('authPhoneView').style.display = 'block';
     document.getElementById('authOtpView').style.display = 'none';
     const phoneField = document.getElementById('globalAuthPhone');
     if (phoneField) { phoneField.value = ''; setTimeout(() => phoneField.focus(), 60); }
+    const emailField = document.getElementById('globalAuthEmail');
+    if (emailField) emailField.value = '';
     authModalKeyboardHandler = function(e) {
       if (e.key === 'Escape') closeAuthModal();
       else if (e.key === 'Enter') {
@@ -1248,31 +1277,32 @@
     if (authModalKeyboardHandler) { window.removeEventListener('keydown', authModalKeyboardHandler); authModalKeyboardHandler = null; }
   }
 
-  // FIX: Auth modal uses EmailJS OTP (same as index.html) so both pages are consistent
-  // and there's no dependency on /api/auth/send-otp server endpoint
-  let authGeneratedOTP = '';
-
+  // FIX: auth modal now uses real email for OTP delivery (collects email in the form)
   async function handleSendLoginOTP() {
     const phone = document.getElementById('globalAuthPhone').value.trim();
+    const emailEl = document.getElementById('globalAuthEmail');
+    const email = emailEl ? emailEl.value.trim() : '';
     const clean = phone.replace(/\s/g, '').replace(/^(\+91|91|0)/, '');
     if (!/^[6-9]\d{9}$/.test(clean)) { alert('Please enter a valid 10-digit mobile number.'); return; }
+    if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
     const formattedPhone = '+91' + clean;
-    document.getElementById('displayLoginPhone').innerText = formattedPhone;
+    document.getElementById('displayLoginPhone').innerText = email;
     authGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE_ID, {
-        customer_email: formattedPhone + '@placeholder.com',
+        customer_email: email,
         to_name: 'Customer',
         otp_code: authGeneratedOTP,
         message: `Your Sree Collections verification code is: ${authGeneratedOTP}`
       });
+      document.getElementById('authPhoneView').style.display = 'none';
+      document.getElementById('authOtpView').style.display = 'block';
+      startAuthTimer();
+      alert('✓ Verification code sent to ' + email);
     } catch(e) {
-      // Even if email fails, show OTP view so user can proceed if they have another channel
-      console.warn('OTP email failed, proceeding to OTP view');
+      console.error('OTP send failed:', e);
+      alert('Could not send verification code. Please try again.');
     }
-    document.getElementById('authPhoneView').style.display = 'none';
-    document.getElementById('authOtpView').style.display = 'block';
-    startAuthTimer();
   }
 
   function startAuthTimer() {
@@ -1302,6 +1332,7 @@
       executeLoginSuccess(formattedPhone);
     } else {
       alert('Invalid OTP. Please try again.');
+      document.getElementById('globalAuthOtp').value = '';
     }
   }
 
@@ -1425,7 +1456,9 @@
   function showRecentlyViewed() {
     const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
     if (!recent.length) return;
-    document.getElementById('recentlyViewed').style.display = 'block';
+    const rv = document.getElementById('recentlyViewed');
+    if (!rv) return;
+    rv.style.display = 'block';
     document.getElementById('recentGrid').innerHTML = recent.map(p => `
       <div style="min-width:160px;background:var(--card-bg);border:1px solid var(--border);padding:0.8rem;cursor:pointer;flex-shrink:0" onclick="openOrderById('${p.id}')">
         ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100px;object-fit:cover;display:block;margin-bottom:0.5rem">` : '<div style="width:100%;height:100px;background:var(--charcoal);display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:0.5rem">🎁</div>'}
