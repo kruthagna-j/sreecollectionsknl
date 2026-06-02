@@ -52,10 +52,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 .related-card-body{padding:1rem}
 .related-card-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.3rem}
 .related-card-price{color:var(--gold);font-weight:700}
-@media(max-width:768px){
-  .product-grid{grid-template-columns:1fr;gap:2rem}
-  .features{grid-template-columns:1fr}
-}
+@media(max-width:768px){.product-grid{grid-template-columns:1fr;gap:2rem}.features{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -74,12 +71,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
       Loading product...
     </div>
   </div>
-
   <div class="reviews-section" id="reviewsSection" style="display:none">
     <h2>Customer Reviews</h2>
     <div id="reviewsList"></div>
   </div>
-
   <div class="related-section" id="relatedSection" style="display:none">
     <h2>You May Also Like</h2>
     <div class="related-grid" id="relatedGrid"></div>
@@ -87,76 +82,52 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 </div>
 
 <script>
-const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
+const SUPABASE_URL='https://peqqtfvypljvgcorddbn.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
 
-async function sbFetch(method, table, body, filter) {
-  let url = `${SUPABASE_URL}/rest/v1/${table}`;
-  if (filter) url += `?${filter}`;
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    const text = await res.text();
-    return text ? JSON.parse(text) : [];
-  } catch(e) {
-    console.error('Fetch error:', e);
-    return null;
-  }
+/* FIX: HTML escape — prevents XSS from any DB-sourced string */
+function esc(s){
+  if(s==null)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-async function loadProduct() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
-  if (!id) { window.location.href = 'collections.html'; return; }
+async function sbFetch(method,table,body,filter){
+  let url=`${SUPABASE_URL}/rest/v1/${table}`;
+  if(filter)url+=`?${filter}`;
+  const res=await fetch(url,{method,headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  const text=await res.text();
+  return text?JSON.parse(text):[];
+}
 
-  const data = await sbFetch('GET', 'products', null, `id=eq.${id}`);
-  if (!data || data.length === 0) { window.location.href = 'collections.html'; return; }
-
-  const p = data[0];
-  document.title = p.name + ' – Sree Collections';
-
-  const stockBadge = p.stock_status === 'outofstock'
-    ? `<span class="stock-badge" style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)">❌ Out of Stock</span>`
-    : p.stock_status === 'lowstock'
-    ? `<span class="stock-badge" style="background:rgba(241,196,15,0.15);color:#f1c40f;border:1px solid rgba(241,196,15,0.3)">⚠️ Only a few left</span>`
-    : `<span class="stock-badge" style="background:rgba(39,174,96,0.15);color:#27ae60;border:1px solid rgba(39,174,96,0.3)">✅ In Stock</span>`;
-
-  // Escape for HTML attribute contexts
-  const safeWAMsg = encodeURIComponent('Hi! I want to order: ' + p.name + ' (₹' + Number(p.price).toLocaleString('en-IN') + ')');
-
-  document.getElementById('productDetail').innerHTML = `
+async function loadProduct(){
+  const params=new URLSearchParams(window.location.search);
+  const id=params.get('id');
+  if(!id){window.location.href='collections.html';return;}
+  const data=await sbFetch('GET','products',null,`id=eq.${encodeURIComponent(id)}`);
+  if(!data||data.length===0){window.location.href='collections.html';return;}
+  const p=data[0];
+  document.title=esc(p.name)+' – Sree Collections';
+  const stockBadge=p.stock_status==='outofstock'
+    ?`<span class="stock-badge" style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)">❌ Out of Stock</span>`
+    :p.stock_status==='lowstock'
+    ?`<span class="stock-badge" style="background:rgba(241,196,15,0.15);color:#f1c40f;border:1px solid rgba(241,196,15,0.3)">⚠️ Only a few left</span>`
+    :`<span class="stock-badge" style="background:rgba(39,174,96,0.15);color:#27ae60;border:1px solid rgba(39,174,96,0.3)">✅ In Stock</span>`;
+  document.getElementById('productDetail').innerHTML=`
     <div class="product-img-box">
-      ${p.image_url
-        ? `<img src="${p.image_url}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : ''
-      }
-      <div class="product-img-placeholder" ${p.image_url ? 'style="display:none"' : ''}>🎁</div>
+      ${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`:`<div class="product-img-placeholder">🎁</div>`}
     </div>
     <div>
-      <div class="product-category">${p.category}</div>
-      <h1 class="product-name">${p.name}</h1>
+      <div class="product-category">${esc(p.category)}</div>
+      <h1 class="product-name">${esc(p.name)}</h1>
       ${stockBadge}
       <div class="product-price">₹${Number(p.price).toLocaleString('en-IN')} <span>incl. taxes</span></div>
-      <p class="product-desc">${p.description || 'A premium gift from Sree Collections, Kurnool.'}</p>
+      <p class="product-desc">${esc(p.description||'A premium gift from Sree Collections, Kurnool.')}</p>
       <hr class="divider">
-      ${p.stock_status !== 'outofstock' ? `
-        <button class="btn-buy" onclick="buyNow()">
-          <i class="fas fa-bolt"></i> Buy Now
-        </button>
-        <button class="btn-cart" onclick="addToCartAndGo()">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      ` : `
-        <button class="btn-buy" disabled style="opacity:0.5;cursor:not-allowed">Out of Stock</button>
-      `}
-      <a href="https://wa.me/917207186844?text=${safeWAMsg}" target="_blank" class="btn-whatsapp">
+      ${p.stock_status!=='outofstock'?`
+        <button class="btn-buy" onclick="buyNow()"><i class="fas fa-bolt"></i> Buy Now</button>
+        <button class="btn-cart" onclick="addToCartAndGo()"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+      `:`<button class="btn-buy" disabled style="opacity:0.5;cursor:not-allowed">Out of Stock</button>`}
+      <a href="https://wa.me/917207186844?text=${encodeURIComponent('Hi! I want to order: '+p.name+' (₹'+Number(p.price).toLocaleString('en-IN')+')')}" target="_blank" class="btn-whatsapp">
         <i class="fab fa-whatsapp"></i> Order on WhatsApp
       </a>
       <div class="features">
@@ -165,81 +136,70 @@ async function loadProduct() {
         <div class="feature"><i class="fas fa-gift"></i> Premium packaging</div>
         <div class="feature"><i class="fas fa-headset"></i> WhatsApp support</div>
       </div>
-    </div>
-  `;
-
-  window.currentProductData = p;
+    </div>`;
+  window.currentProductData=p;
   loadReviews(p.id);
-  loadRelated(p.category, p.id);
+  loadRelated(p.category,p.id);
 }
 
-async function loadReviews(productId) {
-  const reviews = await sbFetch('GET', 'reviews', null,
-    `product_id=eq.${productId}&order=created_at.desc&limit=5`
-  );
-  if (!reviews || reviews.length === 0) return;
-  document.getElementById('reviewsSection').style.display = 'block';
-  document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+async function loadReviews(productId){
+  const reviews=await sbFetch('GET','reviews',null,`product_id=eq.${encodeURIComponent(productId)}&order=created_at.desc&limit=5`);
+  if(!reviews||reviews.length===0)return;
+  document.getElementById('reviewsSection').style.display='block';
+  document.getElementById('reviewsList').innerHTML=reviews.map(r=>`
     <div class="review-card">
-      <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
-      ${r.review ? `<div class="review-text">"${r.review}"</div>` : ''}
-      <div class="reviewer-name">${r.customer_name ? r.customer_name.charAt(0) + '***' : 'C***'} · ${new Date(r.created_at).toLocaleDateString('en-IN', {month:'long', year:'numeric'})}</div>
-    </div>
-  `).join('');
+      <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+      ${r.review?`<div class="review-text">"${esc(r.review)}"</div>`:''}
+      <div class="reviewer-name">${esc(r.customer_name||'Customer').charAt(0)}*** · ${new Date(r.created_at).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</div>
+    </div>`).join('');
 }
 
-async function loadRelated(category, currentId) {
-  const related = await sbFetch('GET', 'products', null,
-    `category=eq.${encodeURIComponent(category)}&id=neq.${currentId}&limit=4&order=created_at.desc`
-  );
-  if (!related || related.length === 0) return;
-  document.getElementById('relatedSection').style.display = 'block';
-  document.getElementById('relatedGrid').innerHTML = related.map(p => `
-    <a href="product.html?id=${p.id}" class="related-card">
-      ${p.image_url
-        ? `<img src="${p.image_url}" alt="${p.name}">`
-        : `<div style="height:160px;background:linear-gradient(135deg,#1F1F1F,#2A2A2A);display:flex;align-items:center;justify-content:center;font-size:3rem">🎁</div>`
-      }
+async function loadRelated(category,currentId){
+  const related=await sbFetch('GET','products',null,`category=eq.${encodeURIComponent(category)}&id=neq.${encodeURIComponent(currentId)}&limit=4&order=created_at.desc`);
+  if(!related||related.length===0)return;
+  document.getElementById('relatedSection').style.display='block';
+  document.getElementById('relatedGrid').innerHTML=related.map(p=>`
+    <a href="product.html?id=${encodeURIComponent(p.id)}" class="related-card">
+      ${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`:`<div style="height:160px;background:linear-gradient(135deg,#1F1F1F,#2A2A2A);display:flex;align-items:center;justify-content:center;font-size:3rem">🎁</div>`}
       <div class="related-card-body">
-        <div class="related-card-name">${p.name}</div>
+        <div class="related-card-name">${esc(p.name)}</div>
         <div class="related-card-price">₹${Number(p.price).toLocaleString('en-IN')}</div>
       </div>
-    </a>
-  `).join('');
+    </a>`).join('');
 }
 
-// FIX: &autoOrder=1 added so collections.html auto-opens the order modal
-function buyNow() {
-  const p = window.currentProductData;
-  if (!p) return;
-  window.location.href = `collections.html?buyNow=${p.id}&autoOrder=1`;
+function buyNow(){
+  const p=window.currentProductData;
+  if(!p)return;
+  /* FIX: added &autoOrder=1 so the modal actually opens */
+  window.location.href=`collections.html?buyNow=${encodeURIComponent(p.id)}&autoOrder=1`;
 }
 
-function addToCartAndGo() {
-  const p = window.currentProductData;
-  if (!p) return;
-  let cart = JSON.parse(localStorage.getItem('sreecart') || '[]');
-  const existing = cart.find(i => i.id === p.id);
-  if (existing) { existing.qty++; } else { cart.push({ ...p, qty: 1 }); }
-  localStorage.setItem('sreecart', JSON.stringify(cart));
-  window.location.href = 'collections.html';
+function addToCartAndGo(){
+  const p=window.currentProductData;
+  if(!p)return;
+  let cart=[];
+  try{cart=JSON.parse(localStorage.getItem('sreecart')||'[]');}catch(e){cart=[];}
+  const existing=cart.find(i=>i.id===p.id);
+  if(existing){existing.qty++;}else{cart.push({...p,qty:1});}
+  localStorage.setItem('sreecart',JSON.stringify(cart));
+  window.location.href='collections.html';
 }
 
-function setTheme(isLight) {
-  document.body.classList.toggle('light-mode', isLight);
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  const btn = document.getElementById('themeBtn');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+function setTheme(isLight){
+  document.body.classList.toggle('light-mode',isLight);
+  localStorage.setItem('theme',isLight?'light':'dark');
+  const btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=isLight?'☀️':'🌙';
 }
-function toggleTheme() { setTheme(!document.body.classList.contains('light-mode')); }
-function applyTheme() {
-  const saved = localStorage.getItem('theme');
-  const systemLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  setTheme(saved ? saved === 'light' : systemLight);
+function toggleTheme(){setTheme(!document.body.classList.contains('light-mode'));}
+function applyTheme(){
+  const saved=localStorage.getItem('theme');
+  const systemLight=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches;
+  setTheme(saved?saved==='light':systemLight);
 }
 applyTheme();
-
-window.addEventListener('DOMContentLoaded', loadProduct);
+window.addEventListener('DOMContentLoaded',loadProduct);
 </script>
 </body>
 </html>
