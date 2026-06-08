@@ -3,6 +3,7 @@
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sree Collections – Premium Gift Shop in Kurnool</title>
 <meta name="description" content="Sree Collections – Kurnool's most loved gift shop. Premium gifts for birthdays, weddings, anniversaries, corporate events & all occasions. 500+ varieties. Order online now.">
@@ -120,7 +121,6 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J8KF1GD5ZB');</script>
 </head>
-<body>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 window.OneSignalDeferred=window.OneSignalDeferred||[];
@@ -128,6 +128,7 @@ OneSignalDeferred.push(async function(OneSignal){
   await OneSignal.init({appId:"20b46cc0-1f20-4482-9879-f258a7234c13",safari_web_id:"web.onesignal.auto.040fbea3-5bf4-4f81-a6ad-042d48246d00",notifyButton:{enable:true}});
 });
 </script>
+<body>
 <canvas id="bgCanvas"></canvas>
 
 <!-- AUTH MODAL -->
@@ -169,7 +170,7 @@ OneSignalDeferred.push(async function(OneSignal){
   <a href="index.html" class="logo">Sree Collections</a>
   <ul class="nav-links">
     <li><a href="./collections.html">Collections</a></li>
-    <li><a href="./my-orders.html">My Orders</a></li>
+    <li><a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#reviews">Reviews</a></li>
     <li><a href="tel:+917207186844">Contact</a></li>
@@ -184,7 +185,8 @@ OneSignalDeferred.push(async function(OneSignal){
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="./collections.html" onclick="toggleMenu()">🛍️ Collections</a>
-  <a href="./my-orders.html" onclick="toggleMenu()">📦 My Orders</a>
+  <a href="javascript:void(0)" onclick="toggleMenu();handleProtectedFeature('#myOrders')">📦 My Orders</a>
+  <a href="my-orders.html" onclick="toggleMenu()">🔍 Track Order</a>
   <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
   <a href="#reviews" onclick="toggleMenu()">⭐ Reviews</a>
   <a href="tel:+917207186844" onclick="toggleMenu()">📞 Call Us</a>
@@ -303,7 +305,19 @@ OneSignalDeferred.push(async function(OneSignal){
     </div>
   </div>
 </section>
-  <div style="max-width:1200px;margin:0 auto">
+
+<section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
+  <div style="max-width:700px;margin:0 auto">
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+      <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
+      <button onclick="loadOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
+    </div>
+    <div id="ordersList"></div>
+  </div>
+</section>
+
 <footer>
   <div style="max-width:1200px;margin:0 auto">
     <div class="footer-grid">
@@ -326,7 +340,7 @@ OneSignalDeferred.push(async function(OneSignal){
       <div class="footer-col">
         <h4>Quick Links</h4>
         <a href="./collections.html">All Products</a>
-        <a href="./my-orders.html">My Orders</a>
+        <a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a>
         <a href="tel:+917207186844">Contact Us</a>
         <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
         <a href="javascript:void(0)" onclick="handleProtectedFeature('admin-login.html',true)" style="color:rgba(200,169,107,0.4);font-size:0.78rem"><i class="fas fa-lock"></i> Admin</a>
@@ -335,6 +349,10 @@ OneSignalDeferred.push(async function(OneSignal){
     <div class="footer-bottom">
       <span>© 2025 Sree Collections, Kurnool. All rights reserved.</span>
       <span>Made with ❤️ in Kurnool</span>
+    </div>
+    <div style="text-align:center;padding-top:1rem;font-size:0.78rem">
+      <a href="privacy.html" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Privacy Policy</a>
+      <a href="terms.html" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Terms &amp; Conditions</a>
     </div>
   </div>
 </footer>
@@ -401,9 +419,10 @@ async function cancelOrder(id){
   const phone=document.getElementById('phoneInput').value.trim();
   const clean=phone.replace(/\s/g,'').replace(/^(\+91|91|0)/,'');
   const searchPhone='+91'+clean;
-  await sbFetch('PATCH','orders',{status:'cancelled',cancelled_by:'customer'},`id=eq.${encodeURIComponent(id)}&customer_phone=eq.${encodeURIComponent(searchPhone)}`);
-  alert('Order cancelled successfully.');
-  loadOrders();
+const result=await sbFetch('PATCH','orders',{status:'cancelled',cancelled_by:'customer'},`id=eq.${encodeURIComponent(id)}&customer_phone=eq.${encodeURIComponent(searchPhone)}`);
+if(result&&!result.error){alert('Order cancelled successfully.');}
+else{alert('Could not cancel order. It may already be shipped, or try again.');}
+loadOrders();
 }
 
 function checkPin(){
@@ -444,12 +463,8 @@ function closeAuthModal(){
 
 function handleProtectedFeature(target,isExternalPage=false){
   const isLoggedIn=localStorage.getItem('userLoggedInPhone');
-  if(!isLoggedIn){
-    const isAdmin=isExternalPage&&target==='admin-login.html';
-    if(isAdmin){alert('⚠️ Admin access is restricted.\n\nPlease log in with your registered mobile number first.');}
-    else{alert('Please log in with your mobile number to access this feature.');}
-    openAuthModal();
-  }else{
+  if(!isLoggedIn){alert('Please log in with your mobile number to access this feature.');openAuthModal();}
+  else{
     if(isExternalPage){window.open(target,'_blank');}
     else{window.location.hash=target;if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn;loadOrders();}}
   }
@@ -460,7 +475,7 @@ async function handleSendLoginOTP(){
   const email=document.getElementById('globalAuthEmail').value.trim();
   const clean=phone.replace(/\s/g,'').replace(/^(\+91|91|0)/,'');
   if(!/^[6-9]\d{9}$/.test(clean)){alert('Please enter a valid 10-digit mobile number.');return;}
-  if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   const formattedPhone='+91'+clean;
   document.getElementById('displayLoginPhone').innerText=email;
   loginGeneratedOTP=Math.floor(100000+Math.random()*900000).toString();
@@ -508,20 +523,16 @@ function executeLoginSuccess(phone){
   localStorage.setItem('userLoggedInPhone',phone);
   alert('Logged in successfully!');
   closeAuthModal();checkGlobalLoginState();
-  if(window.location.hash==='#myOrders'){
-    const phoneEl=document.getElementById('phoneInput');
-    if(phoneEl)phoneEl.value=phone;
-    loadOrders();
-  }
+  if(window.location.hash==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=phone;loadOrders();}
 }
 
 function handleLogout(){
-  if(!confirm('Are you sure you want to logout?\n\nYou will need to verify your mobile number again to access My Orders or Admin.'))return;
   localStorage.removeItem('userLoggedInPhone');
-  alert('✅ Logged out successfully.\n\nTo log back in, use your mobile number and email OTP.');
+  alert('Logged out successfully.');
   checkGlobalLoginState();
   document.getElementById('ordersList').innerHTML='';
 }
+
 function checkGlobalLoginState(){
   const sessionUser=localStorage.getItem('userLoggedInPhone');
   const desktopLink=document.getElementById('navAuthLink');

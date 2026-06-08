@@ -125,6 +125,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
           <input type="tel" id="globalAuthPhone" placeholder="Enter 10-digit number" maxlength="10" class="auth-input">
         </div>
       </div>
+      <div style="margin-top:1rem">
+  <label style="font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.5rem">Email Address (for OTP)</label>
+  <input type="email" id="globalAuthEmail" placeholder="your@email.com" maxlength="200" style="width:100%;padding:0.8rem 1rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem;outline:none">
+</div>
       <button class="auth-submit-btn" onclick="handleSendLoginOTP()">Continue</button>
     </div>
     <div id="authOtpView" style="display:none">
@@ -485,17 +489,11 @@ function renderProducts(products){
           </button>
         </div>
         <div style="display:flex;gap:0.5rem">
-<button data-share-id="${esc(p.id)}" class="share-btn" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>        </div>
+          <button data-share-id="${esc(p.id)}" class="share-wa-btn" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
+        </div>
       </div>
     </div>`).join('');
 }
-
-document.getElementById('productsGrid').addEventListener('click',function(e){
-  const btn=e.target.closest('.share-btn');
-  if(!btn)return;
-  const p=window._productMap[btn.dataset.shareId];
-  if(p)shareOnWhatsApp(p.name);
-});
 
 function openOrderById(id){const p=window._productMap[id];if(p)openOrder(p);}
 function addToCartById(id){const p=window._productMap[id];if(p)addToCart(p);}
@@ -577,7 +575,7 @@ function closeModal(){
   document.getElementById('cartCheckoutModal').classList.remove('active');
 }
 
-function changeQty(d){currentQty=Math.max(1,currentQty+d);document.getElementById('qtyVal').textContent=currentQty;updateTotal();}
+function changeQty(d){currentQty=Math.min(99,Math.max(1,currentQty+d));document.getElementById('qtyVal').textContent=currentQty;updateTotal();}
 
 function updateTotal(){
   if(!currentProduct)return;
@@ -605,14 +603,14 @@ document.getElementById('custPincode').addEventListener('input',function(){updat
 
 document.getElementById('custEmail').addEventListener('blur',function(){
   const email=this.value.trim();
-  if(email&&email.includes('@')){document.getElementById('verifyBtn').style.display='inline-block';}
+  if(email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('verifyBtn').style.display='inline-block';}
   else{document.getElementById('verifyBtn').style.display='none';emailVerified=false;document.getElementById('confirmBtn').disabled=true;document.getElementById('confirmBtn').style.opacity='0.5';}
 });
 
 async function sendVerificationCode(){
   const email=document.getElementById('custEmail').value.trim();
   const name=document.getElementById('custName').value.trim();
-  if(!email||!email.includes('@')){alert('Please enter a valid email address');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address');return;}
   if(!name){alert('Please enter your name first');return;}
   const btn=document.getElementById('verifyBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
@@ -688,6 +686,9 @@ async function applyCoupon(){
 }
 
 async function confirmOrder(){
+  if(isPlacingOrder){alert('Your order is already being placed. Please wait.');return;}
+  if(Date.now()-lastOrderTime<ORDER_COOLDOWN_MS){alert('Please wait a moment before placing another order.');return;}
+  isPlacingOrder=true;
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
   const email=document.getElementById('custEmail').value.trim();
@@ -697,13 +698,15 @@ async function confirmOrder(){
   if(!/^\d{6}$/.test(pincode)){alert('Please enter a valid 6-digit pincode.');return;}
   if(!isValidServicePincode(pincode)){alert('Sorry, delivery available only in Andhra Pradesh and Telangana.');return;}
   if(!address){alert('Please enter your delivery address.');return;}
-  if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   if(!emailVerified){alert('Please verify your email first by clicking "Send Verification Code"');return;}
   const btn=document.getElementById('confirmBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Processing...';
   if(currentPayment==='cod'){await placeOrder(name,phone,email,'cod','pending',null);}
   else{await startRazorpay(name,phone,email);}
   btn.disabled=false;btn.innerHTML='<i class="fas fa-shopping-bag"></i> Confirm Order';
+  isPlacingOrder=false;
+  lastOrderTime=Date.now();
 }
 
 async function startRazorpay(name,phone,email){
@@ -762,6 +765,11 @@ async function placeOrder(name,phone,email,method,payStatus,payId){
     gift_message:document.getElementById('giftMessage')?.value.trim()||null
   };
   const result=await sbFetch('POST','orders',orderData);
+  /* FIX: increment coupon usage count */
+  if(appliedCoupon&&appliedCoupon.code){
+    const couponData=await sbFetch('GET','coupons',null,`code=eq.${encodeURIComponent(appliedCoupon.code)}`);
+    if(couponData&&couponData[0]){const newCount=(couponData[0].used_count||0)+1;await sbFetch('PATCH','coupons',{used_count:newCount},`code=eq.${encodeURIComponent(appliedCoupon.code)}`);}
+  }
   closeModal();
   const orderId=result&&result[0]?result[0].id:('ORD'+Date.now());
   const shortId=orderId.toString().substring(0,8).toUpperCase();
@@ -847,6 +855,9 @@ function searchProducts(){
 document.addEventListener('click',e=>{if(!e.target.closest('#searchInput')&&!e.target.closest('#searchSuggestions'))document.getElementById('searchSuggestions').style.display='none';});
 
 let cart=[];
+let isPlacingOrder=false;
+let lastOrderTime=0;
+const ORDER_COOLDOWN_MS=30000;
 let currentCartIndex=0;
 
 function addToCart(product){
@@ -890,7 +901,7 @@ function updateCartUI(){
 }
 
 function removeFromCart(idx){cart.splice(idx,1);updateCartUI();}
-function updateCartQty(idx,d){cart[idx].qty=Math.max(1,cart[idx].qty+d);updateCartUI();}
+function updateCartQty(idx,d){cart[idx].qty=Math.min(99,Math.max(1,cart[idx].qty+d));updateCartUI();}
 function clearCart(){if(!confirm('Clear all items?'))return;cart=[];updateCartUI();}
 
 function toggleCart(){
@@ -954,6 +965,8 @@ function selectCartPayment(method){
 }
 
 async function placeAllOrders(){
+  if(isPlacingOrder){alert('Orders are already being placed. Please wait.');return;}
+  isPlacingOrder=true;
   const name=document.getElementById('cartCustName').value.trim();
   const phone=document.getElementById('cartCustPhone').value.trim();
   const email=document.getElementById('cartCustEmail').value.trim();
@@ -962,7 +975,7 @@ async function placeAllOrders(){
   if(!/^\d{6}$/.test(pincode)){alert('Please enter a valid 6-digit pincode.');return;}
   if(!isValidServicePincode(pincode)){alert('Sorry, delivery available only in Andhra Pradesh and Telangana.');return;}
   if(!name||!phone){alert('Please enter your name and phone number.');return;}
-  if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   if(!cartEmailVerified){alert('Please verify your email first.');return;}
   if(!address){alert('Please enter your delivery address.');return;}
   document.getElementById('cartCheckoutModal').classList.remove('active');
@@ -983,6 +996,7 @@ async function placeAllOrders(){
   }
   cart=[];updateCartUI();lastOrder=null;
   const cartOrderId='CART-'+Date.now().toString().slice(-6);
+  isPlacingOrder=false;
   showResult(true,'All Orders Placed! 🎉',`${successCount} order(s) confirmed. We'll contact you at ${phone}.`,cartOrderId);
   sendPushToAll('🛍️ New Cart Order!',`${name} placed ${successCount} order(s) — ₹${cartTotalAmt.toLocaleString('en-IN')}`,'/admin-login.html');
   try{
@@ -1035,15 +1049,17 @@ function closeAuthModal(){
 /* FIX: auth uses EmailJS OTP — consistent with index.html, no server dependency */
 async function handleSendLoginOTP(){
   const phone=document.getElementById('globalAuthPhone').value.trim();
+  const emailVal=(document.getElementById('globalAuthEmail')||{}).value||'';
   const clean=phone.replace(/\s/g,'').replace(/^(\+91|91|0)/,'');
   if(!/^[6-9]\d{9}$/.test(clean)){alert('Please enter a valid 10-digit mobile number.');return;}
+  if(!emailVal||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){alert('Please enter a valid email address to receive the OTP.');return;}
   const formattedPhone='+91'+clean;
   document.getElementById('displayLoginPhone').innerText=formattedPhone;
   authGeneratedOTP=Math.floor(100000+Math.random()*900000).toString();
   authOtpAttempts=0;authOtpGeneratedAt=Date.now();
   try{
     await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_OTP_TEMPLATE_ID,{
-      customer_email:document.getElementById('globalAuthEmail')?.value.trim()||formattedPhone+'@sree-verify.local',
+      customer_email:emailVal.trim(),
       to_name:'Customer',otp_code:authGeneratedOTP,
       message:`Your Sree Collections verification code is: ${authGeneratedOTP}`
     });
@@ -1113,14 +1129,14 @@ document.getElementById('cartCustPincode').addEventListener('input',function(){
 
 document.getElementById('cartCustEmail').addEventListener('blur',function(){
   const email=this.value.trim();
-  if(email&&email.includes('@')){document.getElementById('cartVerifyBtn').style.display='inline-block';}
+  if(email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('cartVerifyBtn').style.display='inline-block';}
   else{document.getElementById('cartVerifyBtn').style.display='none';cartEmailVerified=false;document.getElementById('cartConfirmBtn').disabled=true;document.getElementById('cartConfirmBtn').style.opacity='0.5';}
 });
 
 async function sendCartVerificationCode(){
   const email=document.getElementById('cartCustEmail').value.trim();
   const name=document.getElementById('cartCustName').value.trim();
-  if(!email||!email.includes('@')){alert('Please enter a valid email address');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address');return;}
   if(!name){alert('Please enter your name first');return;}
   const btn=document.getElementById('cartVerifyBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
@@ -1192,6 +1208,19 @@ function showRecentlyViewed(){
       <div style="color:var(--gold);font-size:0.85rem;font-weight:700">₹${Number(p.price).toLocaleString('en-IN')}</div>
     </div>`).join('');
 }
+</script>
+<!-- Privacy & Terms links added for Razorpay compliance -->
+<script>
+// Add privacy/terms to page if not present
+document.addEventListener('DOMContentLoaded', function() {
+  var footer = document.querySelector('footer');
+  if(footer && !footer.querySelector('.privacy-link')) {
+    var div = document.createElement('div');
+    div.style.cssText = 'text-align:center;padding:0.5rem 2rem 1rem;font-size:0.78rem;';
+    div.innerHTML = '<a href="privacy.html" class="privacy-link" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Privacy Policy</a><a href="terms.html" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Terms & Conditions</a>';
+    footer.appendChild(div);
+  }
+});
 </script>
 </body>
 </html>

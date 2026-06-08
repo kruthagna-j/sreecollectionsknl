@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Orders – Sree Collections</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -84,8 +85,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 
 <div class="container">
   <h1 class="page-title">My Orders</h1>
-  <p style="color:var(--muted);font-size:0.88rem">Login to view your orders.</p>
-  <input type="hidden" id="phoneInput">
+  <p style="color:var(--muted);font-size:0.88rem">Enter the phone number you used when ordering.</p>
+  <div class="search-box">
+    <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15">
+    <button onclick="loadOrders()"><i class="fas fa-search"></i> Find Orders</button>
+  </div>
   <div id="ordersList"></div>
 </div>
 
@@ -311,6 +315,10 @@ function setRating(r){
 
 async function submitReview(){
   if(!selectedRating){alert('Please select a rating');return;}
+  /* FIX: prevent duplicate reviews on same order */
+  const orderId=document.getElementById('reviewOrderId').value;
+  const existingReview=await sbFetch('GET','reviews',null,`order_id=eq.${encodeURIComponent(orderId)}`);
+  if(existingReview&&existingReview.length>0){alert('You have already reviewed this order.');closeModal('reviewModal');return;}
   const phone=document.getElementById('phoneInput').value.trim();
   const clean=phone.replace(/\s/g,'').replace(/^(\+91|91|0)/,'');
   /* FIX: use the customer name from the order, not the phone number */
@@ -341,7 +349,7 @@ async function submitReturn(){
   if(desc.length>1000){alert('Description is too long. Please keep it under 1000 characters.');return;}
   const data={
     order_id:document.getElementById('returnOrderId').value,
-    customer_name:loadedOrders.find(o=>o.id===document.getElementById('returnOrderId').value)?.customer_name||'Customer',
+    customer_name:'Customer',
     customer_phone:'+91'+clean,
     reason,
     description:desc||null,
@@ -369,15 +377,9 @@ function applyTheme(){
 }
 applyTheme();
 
-(function(){
-  const session=localStorage.getItem('userLoggedInPhone');
-  if(!session){
-    document.getElementById('ordersList').innerHTML='<div class="empty"><i class="fas fa-lock"></i><p>Please <a href="index.html" style="color:var(--gold)">login</a> to view your orders.</p></div>';
-    return;
-  }
-  document.getElementById('phoneInput').value=session;
-  loadOrders();
-})();
+const urlParams=new URLSearchParams(window.location.search);
+const phone=urlParams.get('phone');
+if(phone){document.getElementById('phoneInput').value=phone;loadOrders();}
 </script>
 </body>
 </html>
