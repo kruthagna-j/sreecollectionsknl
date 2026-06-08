@@ -308,11 +308,8 @@ OneSignalDeferred.push(async function(OneSignal){
 <section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
   <div style="max-width:700px;margin:0 auto">
     <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
-    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
-      <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
-      <button onclick="loadOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
-    </div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Showing orders for your verified number.</p>
+    <input type="hidden" id="phoneInput">
     <div id="ordersList"></div>
   </div>
 </section>
@@ -460,7 +457,14 @@ function handleProtectedFeature(target,isExternalPage=false){
   if(!isLoggedIn){alert('Please log in with your mobile number to access this feature.');openAuthModal();}
   else{
     if(isExternalPage){window.open(target,'_blank');}
-    else{window.location.hash=target;if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn;loadOrders();}}
+    else{
+      window.location.hash=target;
+      if(target==='#myOrders'){
+        const phoneEl=document.getElementById('phoneInput');
+        if(phoneEl)phoneEl.value=isLoggedIn;
+        loadOrders();
+      }
+    }
   }
 }
 
@@ -517,10 +521,15 @@ function executeLoginSuccess(phone){
   localStorage.setItem('userLoggedInPhone',phone);
   alert('Logged in successfully!');
   closeAuthModal();checkGlobalLoginState();
-  if(window.location.hash==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=phone;loadOrders();}
+  if(window.location.hash==='#myOrders'){
+    const phoneEl=document.getElementById('phoneInput');
+    if(phoneEl)phoneEl.value=phone;
+    loadOrders();
+  }
 }
 
 function handleLogout(){
+  if(!confirm('Are you sure you want to logout?'))return;
   localStorage.removeItem('userLoggedInPhone');
   alert('Logged out successfully.');
   checkGlobalLoginState();

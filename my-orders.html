@@ -84,11 +84,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:fl
 
 <div class="container">
   <h1 class="page-title">My Orders</h1>
-  <p style="color:var(--muted);font-size:0.88rem">Enter the phone number you used when ordering.</p>
-  <div class="search-box">
-    <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15">
-    <button onclick="loadOrders()"><i class="fas fa-search"></i> Find Orders</button>
-  </div>
+  <p style="color:var(--muted);font-size:0.88rem">Login to view your orders.</p>
+  <input type="hidden" id="phoneInput">
   <div id="ordersList"></div>
 </div>
 
@@ -372,9 +369,15 @@ function applyTheme(){
 }
 applyTheme();
 
-const urlParams=new URLSearchParams(window.location.search);
-const phone=urlParams.get('phone');
-if(phone){document.getElementById('phoneInput').value=phone;loadOrders();}
+(function(){
+  const session=localStorage.getItem('userLoggedInPhone');
+  if(!session){
+    document.getElementById('ordersList').innerHTML='<div class="empty"><i class="fas fa-lock"></i><p>Please <a href="index.html" style="color:var(--gold)">login</a> to view your orders.</p></div>';
+    return;
+  }
+  document.getElementById('phoneInput').value=session;
+  loadOrders();
+})();
 </script>
 </body>
 </html>
