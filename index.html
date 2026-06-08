@@ -462,11 +462,16 @@ function closeAuthModal(){
 }
 
 function handleProtectedFeature(target,isExternalPage=false){
+  if(isExternalPage){
+    // Admin has its own session auth — go directly
+    window.open(target,'_blank');
+    return;
+  }
   const isLoggedIn=localStorage.getItem('userLoggedInPhone');
   if(!isLoggedIn){alert('Please log in with your mobile number to access this feature.');openAuthModal();}
   else{
-    if(isExternalPage){window.open(target,'_blank');}
-    else{window.location.hash=target;if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn;loadOrders();}}
+    window.location.hash=target;
+    if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn;loadOrders();}
   }
 }
 

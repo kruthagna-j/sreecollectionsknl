@@ -682,13 +682,11 @@ async function applyCoupon(){
     appliedCoupon=null;
     msg.innerHTML='<span style="color:#e74c3c">❌ Invalid coupon code</span>';
   }
-  updateTotal();
 }
 
 async function confirmOrder(){
   if(isPlacingOrder){alert('Your order is already being placed. Please wait.');return;}
   if(Date.now()-lastOrderTime<ORDER_COOLDOWN_MS){alert('Please wait a moment before placing another order.');return;}
-  isPlacingOrder=true;
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
   const email=document.getElementById('custEmail').value.trim();
@@ -700,6 +698,25 @@ async function confirmOrder(){
   if(!address){alert('Please enter your delivery address.');return;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   if(!emailVerified){alert('Please verify your email first by clicking "Send Verification Code"');return;}
+  isPlacingOrder=true;alert('✅ Coupon applied: ' + esc(COUPONS[code].label));
+  }
+  updateTotal();
+
+async function confirmOrder(){
+  if(isPlacingOrder){alert('Your order is already being placed. Please wait.');return;}
+  if(Date.now()-lastOrderTime<ORDER_COOLDOWN_MS){alert('Please wait a moment before placing another order.');return;}
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const email=document.getElementById('custEmail').value.trim();
+  if(!name||!phone){alert('Please enter your name and phone number.');return;}
+  const address=document.getElementById('custAddress').value.trim();
+  const pincode=document.getElementById('custPincode').value.trim();
+  if(!/^\d{6}$/.test(pincode)){alert('Please enter a valid 6-digit pincode.');return;}
+  if(!isValidServicePincode(pincode)){alert('Sorry, delivery available only in Andhra Pradesh and Telangana.');return;}
+  if(!address){alert('Please enter your delivery address.');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
+  if(!emailVerified){alert('Please verify your email first by clicking "Send Verification Code"');return;}
+  isPlacingOrder=true;
   const btn=document.getElementById('confirmBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Processing...';
   if(currentPayment==='cod'){await placeOrder(name,phone,email,'cod','pending',null);}
@@ -738,9 +755,10 @@ async function startRazorpay(name,phone,email){
 
 function getDeliveryCharge(pincode){
   const num=parseInt(pincode);
-  if(num>=518001&&num<=518599)return 0;
-  if(num>=500001&&num<=534999)return 100;
-  return 0;
+  if(!pincode||pincode.length!==6||isNaN(num))return 0;
+  if(num>=518001&&num<=518599)return 0;   // Kurnool city — free
+  if(num>=500001&&num<=534999)return 100; // Rest of AP/Telangana
+  return 0; // out-of-range — blocked at confirmOrder level anyway
 }
 
 async function placeOrder(name,phone,email,method,payStatus,payId){
@@ -758,10 +776,11 @@ async function placeOrder(name,phone,email,method,payStatus,payId){
     customer_name:name,customer_phone:phone,customer_email:email,
     customer_address:address||null,customer_pincode:pincode,
     product_id:currentProduct.id,product_name:currentProduct.name,
-    /* FIX: always use the DB-fetched price, never trust client-modified value */
     product_price:currentProduct.price,
     quantity:currentQty,payment_method:method,payment_status:payStatus,
     razorpay_payment_id:payId||null,status:'placed',
+    total_amount:total,
+    delivery_charge:deliveryCharge,
     gift_message:document.getElementById('giftMessage')?.value.trim()||null
   };
   const result=await sbFetch('POST','orders',orderData);
@@ -966,7 +985,6 @@ function selectCartPayment(method){
 
 async function placeAllOrders(){
   if(isPlacingOrder){alert('Orders are already being placed. Please wait.');return;}
-  isPlacingOrder=true;
   const name=document.getElementById('cartCustName').value.trim();
   const phone=document.getElementById('cartCustPhone').value.trim();
   const email=document.getElementById('cartCustEmail').value.trim();
@@ -978,6 +996,7 @@ async function placeAllOrders(){
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   if(!cartEmailVerified){alert('Please verify your email first.');return;}
   if(!address){alert('Please enter your delivery address.');return;}
+  isPlacingOrder=true;
   document.getElementById('cartCheckoutModal').classList.remove('active');
   const deliveryCharge=getDeliveryCharge(pincode);
   const cartTotalAmt=cart.reduce((s,i)=>s+(Number(i.price)*i.qty),0)+deliveryCharge;

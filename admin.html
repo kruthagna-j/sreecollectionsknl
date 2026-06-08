@@ -375,7 +375,7 @@ async function loadStats(){
   }
   if(orders){
     document.getElementById('statPending').textContent=orders.filter(o=>o.status==='placed').length;
-    const revenue=orders.reduce((sum,o)=>sum+(Number(o.product_price)*Number(o.quantity)),0);
+    const revenue=orders.reduce((sum,o)=>sum+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))),0);
     document.getElementById('statRevenue').textContent='₹'+revenue.toLocaleString('en-IN');
   }
 }
@@ -536,7 +536,7 @@ async function updateOrderStatus(id,status){
         template_params:{
           customer_email:o.customer_email,customer_name:o.customer_name,customer_phone:o.customer_phone,
           order_id:o.id.toString().substring(0,8).toUpperCase(),product_name:o.product_name,
-          quantity:o.quantity,total_amount:'₹'+(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN'),
+          quantity:o.quantity,total_amount:'₹'+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN'),
           payment_method:o.payment_method==='cod'?'Cash on Delivery':'Online Payment',
           order_status:statusMessages[status]||'Order status updated.'
         }

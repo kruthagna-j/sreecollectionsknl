@@ -193,7 +193,7 @@ async function loadOrders(){
   }
   const returns1=await sbFetch('GET','returns',null,`customer_phone=eq.${encodeURIComponent(clean)}`);
   const returns2=await sbFetch('GET','returns',null,`customer_phone=eq.${encodeURIComponent(searchPhone)}`);
-  const returns=[...(returns1||[]),(returns2||[])].flat();
+  const returns=[...(returns1||[]),...(returns2||[])];
   const returnedOrderIds=returns?returns.map(r=>r.order_id):[];
   el.innerHTML=orders.map(o=>renderOrder(o,returnedOrderIds)).join('');
 }
