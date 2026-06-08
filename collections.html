@@ -485,11 +485,17 @@ function renderProducts(products){
           </button>
         </div>
         <div style="display:flex;gap:0.5rem">
-          <button onclick="shareOnWhatsApp('${esc(p.name).replace(/'/g,'\\\'')}')" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>
-        </div>
+<button data-share-id="${esc(p.id)}" class="share-btn" style="flex:1;padding:0.6rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--border);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif"><i class="fas fa-share-alt"></i> Share</button>        </div>
       </div>
     </div>`).join('');
 }
+
+document.getElementById('productsGrid').addEventListener('click',function(e){
+  const btn=e.target.closest('.share-btn');
+  if(!btn)return;
+  const p=window._productMap[btn.dataset.shareId];
+  if(p)shareOnWhatsApp(p.name);
+});
 
 function openOrderById(id){const p=window._productMap[id];if(p)openOrder(p);}
 function addToCartById(id){const p=window._productMap[id];if(p)addToCart(p);}
@@ -1037,7 +1043,7 @@ async function handleSendLoginOTP(){
   authOtpAttempts=0;authOtpGeneratedAt=Date.now();
   try{
     await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_OTP_TEMPLATE_ID,{
-      customer_email:formattedPhone+'@sree-verify.local',
+      customer_email:document.getElementById('globalAuthEmail')?.value.trim()||formattedPhone+'@sree-verify.local',
       to_name:'Customer',otp_code:authGeneratedOTP,
       message:`Your Sree Collections verification code is: ${authGeneratedOTP}`
     });

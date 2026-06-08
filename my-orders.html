@@ -183,7 +183,7 @@ async function loadOrders(){
   const searchPhone='+91'+clean;
   const orders1=await sbFetch('GET','orders',null,`customer_phone=eq.${encodeURIComponent(clean)}&order=created_at.desc`);
   const orders2=await sbFetch('GET','orders',null,`customer_phone=eq.${encodeURIComponent(searchPhone)}&order=created_at.desc`);
-  const merged=[...(orders1||[]),(orders2||[])].flat();
+  const merged=[...(orders1||[]),...(orders2||[])];
   const orders=merged.filter((o,i,self)=>i===self.findIndex(x=>x.id===o.id));
   loadedOrders=orders;
   if(!orders||orders.length===0){
@@ -344,7 +344,7 @@ async function submitReturn(){
   if(desc.length>1000){alert('Description is too long. Please keep it under 1000 characters.');return;}
   const data={
     order_id:document.getElementById('returnOrderId').value,
-    customer_name:'Customer',
+    customer_name:loadedOrders.find(o=>o.id===document.getElementById('returnOrderId').value)?.customer_name||'Customer',
     customer_phone:'+91'+clean,
     reason,
     description:desc||null,

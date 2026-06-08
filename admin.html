@@ -336,6 +336,7 @@ function logout(){
 
 let currentEditId=null;
 let couponsData=[];
+let filteredOrders=[];
 let allOrders=[];
 
 async function sbFetch(method,table,body,filter){
@@ -585,8 +586,8 @@ async function loadDashboard(){
 
 /* FIX: export only currently filtered/visible orders */
 async function exportCSV(){
-  const ordersToExport=allOrders.length>0?allOrders:await sbFetch('GET','orders',null,'order=created_at.desc');
-  if(!ordersToExport||ordersToExport.length===0){alert('No orders to export.');return;}
+// NEW:
+const ordersToExport=filteredOrders.length>0?filteredOrders:(allOrders.length>0?allOrders:await sbFetch('GET','orders',null,'order=created_at.desc'));  if(!ordersToExport||ordersToExport.length===0){alert('No orders to export.');return;}
   const headers=['Order ID','Customer Name','Phone','Product','Qty','Price','Total','Payment','Status','Date'];
   const rows=ordersToExport.map(o=>[
     o.id.toString().substring(0,8).toUpperCase(),
@@ -638,6 +639,7 @@ function filterOrders(){
     return matchSearch&&matchStatus&&matchPayment&&matchFrom&&matchTo;
   });
   renderOrders(filtered);
+  filteredOrders=filtered;
 }
 
 function resetOrderFilters(){

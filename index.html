@@ -120,6 +120,7 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J8KF1GD5ZB');</script>
 </head>
+<body>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 window.OneSignalDeferred=window.OneSignalDeferred||[];
@@ -127,7 +128,6 @@ OneSignalDeferred.push(async function(OneSignal){
   await OneSignal.init({appId:"20b46cc0-1f20-4482-9879-f258a7234c13",safari_web_id:"web.onesignal.auto.040fbea3-5bf4-4f81-a6ad-042d48246d00",notifyButton:{enable:true}});
 });
 </script>
-<body>
 <canvas id="bgCanvas"></canvas>
 
 <!-- AUTH MODAL -->
@@ -169,7 +169,7 @@ OneSignalDeferred.push(async function(OneSignal){
   <a href="index.html" class="logo">Sree Collections</a>
   <ul class="nav-links">
     <li><a href="./collections.html">Collections</a></li>
-    <li><a href="my-orders.html">My Orders</a></li>
+    <li><a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#reviews">Reviews</a></li>
     <li><a href="tel:+917207186844">Contact</a></li>
@@ -184,13 +184,13 @@ OneSignalDeferred.push(async function(OneSignal){
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="./collections.html" onclick="toggleMenu()">🛍️ Collections</a>
-  <a href="./my-orders.html" onclick="toggleMenu()">📦 My Orders</a>
+  <a href="javascript:void(0)" onclick="toggleMenu();handleProtectedFeature('#myOrders')">📦 My Orders</a>
+  <a href="my-orders.html" onclick="toggleMenu()">🔍 Track Order</a>
   <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
   <a href="#reviews" onclick="toggleMenu()">⭐ Reviews</a>
   <a href="tel:+917207186844" onclick="toggleMenu()">📞 Call Us</a>
   <a href="https://wa.me/917207186844" target="_blank" onclick="toggleMenu()">💬 WhatsApp</a>
   <a href="#contact" onclick="toggleMenu()">📍 Visit Our Store</a>
-  <a href="admin-login.html" onclick="toggleMenu()">🔑 Admin</a>
   <div id="mobileAuthLink"><a href="javascript:void(0)" onclick="toggleMenu();openAuthModal();">👤 Login / Sign Up</a></div>
   <a href="./collections.html" style="color:var(--gold);font-weight:600;border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem">🎁 Shop Now</a>
   <a href="javascript:void(0)" onclick="toggleMenu();handleProtectedFeature('admin-login.html',true)" style="color:var(--muted);font-size:0.78rem">🔑 Admin Login</a>
@@ -304,7 +304,19 @@ OneSignalDeferred.push(async function(OneSignal){
     </div>
   </div>
 </section>
-  <div style="max-width:1200px;margin:0 auto">
+
+<section id="myOrders" style="background:var(--dark);padding:5rem 2rem">
+  <div style="max-width:700px;margin:0 auto">
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);margin-bottom:1rem">My Orders</h2>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Enter the phone number you used when placing your order.</p>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+      <input type="tel" id="phoneInput" placeholder="+91 XXXXX XXXXX" maxlength="15" style="flex:1;padding:0.75rem;background:var(--charcoal);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.9rem">
+      <button onclick="loadOrders()" style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Find Orders</button>
+    </div>
+    <div id="ordersList"></div>
+  </div>
+</section>
+
 <footer>
   <div style="max-width:1200px;margin:0 auto">
     <div class="footer-grid">
@@ -327,7 +339,7 @@ OneSignalDeferred.push(async function(OneSignal){
       <div class="footer-col">
         <h4>Quick Links</h4>
         <a href="./collections.html">All Products</a>
-        <a href="./my-orders.html">My Orders</a>
+        <a href="javascript:void(0)" onclick="handleProtectedFeature('#myOrders')">My Orders</a>
         <a href="tel:+917207186844">Contact Us</a>
         <a href="https://wa.me/917207186844" target="_blank">WhatsApp Order</a>
         <a href="javascript:void(0)" onclick="handleProtectedFeature('admin-login.html',true)" style="color:rgba(200,169,107,0.4);font-size:0.78rem"><i class="fas fa-lock"></i> Admin</a>
