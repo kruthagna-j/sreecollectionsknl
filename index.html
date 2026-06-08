@@ -490,7 +490,10 @@ async function handleSendLoginOTP(){
     document.getElementById('authPhoneView').style.display='none';
     document.getElementById('authOtpView').style.display='block';
     startAuthTimer();alert('✓ Verification code sent to '+email);
-  }catch(e){alert('Could not send verification code. Please try again.');}
+  }catch(e){
+    console.error('EmailJS error:', e);
+    alert('Could not send verification code. Please try again. Error: ' + e.text || e.message || 'Unknown');
+  }
 }
 
 function startAuthTimer(){
