@@ -416,7 +416,7 @@ function renderOrders(orders){
       <td>${esc(o.customer_name)}<br><small style="color:var(--muted)">${esc(o.customer_phone)}</small></td>
       <td>${esc(o.product_name)}</td>
       <td>${esc(String(o.quantity))}</td>
-      <td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td>
+      <td>₹${(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN')}</td>
       <td><span class="badge ${o.payment_method==='cod'?'badge-cod':'badge-online'}">${o.payment_method==='cod'?'COD':'Online'}</span></td>
       <td>
         <select onchange="updateOrderStatus('${esc(o.id)}',this.value)" style="background:var(--dark);border:1px solid var(--border);color:var(--text);padding:0.3rem;font-family:'Manrope',sans-serif;font-size:0.8rem">
@@ -548,10 +548,10 @@ async function updateOrderStatus(id,status){
 async function loadDashboard(){
   const orders=await sbFetch('GET','orders');
   if(!orders)return;
-  const totalRevenue=orders.reduce((s,o)=>s+(Number(o.product_price)*Number(o.quantity)),0);
+  const totalRevenue=orders.reduce((s,o)=>s+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))),0);
   const todayOrders=orders.filter(o=>new Date(o.created_at).toDateString()===new Date().toDateString()).length;
   const thisMonth=orders.filter(o=>{const d=new Date(o.created_at);const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();});
-  const monthRevenue=thisMonth.reduce((s,o)=>s+(Number(o.product_price)*Number(o.quantity)),0);
+  const monthRevenue=thisMonth.reduce((s,o)=>s+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))),0);
   document.getElementById('dashStats').innerHTML=`
     <div style="background:var(--card-bg);border:1px solid var(--border);padding:1.5rem"><div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Total Revenue</div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold)">₹${totalRevenue.toLocaleString('en-IN')}</div></div>
     <div style="background:var(--card-bg);border:1px solid var(--border);padding:1.5rem"><div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">This Month</div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold)">₹${monthRevenue.toLocaleString('en-IN')}</div></div>
@@ -575,7 +575,7 @@ async function loadDashboard(){
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     days.push(d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}));
-    revenues.push(orders.filter(o=>new Date(o.created_at).toDateString()===d.toDateString()).reduce((s,o)=>s+(Number(o.product_price)*Number(o.quantity)),0));
+    revenues.push(orders.filter(o=>new Date(o.created_at).toDateString()===d.toDateString()).reduce((s,o)=>s+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))),0));
   }
   const ctx=document.getElementById('revenueChart');
   if(ctx){
@@ -595,7 +595,7 @@ async function exportCSV(){
     o.customer_phone,
     `"${(o.product_name||'').replace(/"/g,'""')}"`,
     o.quantity,o.product_price,
-    Number(o.product_price)*Number(o.quantity),
+    o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity)),
     o.payment_method,o.status,
     new Date(o.created_at).toLocaleDateString('en-IN')
   ]);
@@ -696,7 +696,7 @@ function downloadAdminInvoice(id){
   if(!o){alert('Order not found. Please load the Orders tab first.');return;}
   /* FIX: escape all fields in invoice HTML */
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml"><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#222}h1{color:#C8A96B;font-size:24px;margin-bottom:4px}.sub{color:#888;font-size:13px;margin-bottom:30px}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1A1A1A;color:#C8A96B;padding:10px;text-align:left;font-size:12px;letter-spacing:1px}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.total{font-size:18px;font-weight:bold;color:#C8A96B;text-align:right;margin-top:10px}@media print{button{display:none}}</style></head><body><h1>SREE COLLECTIONS</h1><div class="sub">Kurnool, Andhra Pradesh · +91 72071 86844</div><div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><strong>Order ID:</strong> #${esc(o.id.toString().slice(-8).toUpperCase())}<br><strong>Date:</strong> ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div><div style="font-weight:bold;color:${o.status==='delivered'?'#2e7d32':'#e65100'}">${esc(o.status.toUpperCase())}</div></div><table><thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Payment</th></tr></thead><tbody><tr><td>${esc(o.customer_name)}</td><td>${esc(o.customer_phone)}</td><td>${esc(o.customer_address||'—')}</td><td>${o.payment_method==='cod'?'Cash on Delivery':'Online Payment'}</td></tr></tbody></table><table><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead><tbody><tr><td>${esc(o.product_name)}</td><td>₹${Number(o.product_price).toLocaleString('en-IN')}</td><td>${esc(String(o.quantity))}</td><td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td></tr></tbody></table><div class="total">Grand Total: ₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</div><div style="text-align:center;margin-top:40px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:10px 30px;font-size:14px;font-weight:bold;cursor:pointer">Print / Save PDF</button></div></body></html>`;
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml"><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#222}h1{color:#C8A96B;font-size:24px;margin-bottom:4px}.sub{color:#888;font-size:13px;margin-bottom:30px}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1A1A1A;color:#C8A96B;padding:10px;text-align:left;font-size:12px;letter-spacing:1px}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.total{font-size:18px;font-weight:bold;color:#C8A96B;text-align:right;margin-top:10px}@media print{button{display:none}}</style></head><body><h1>SREE COLLECTIONS</h1><div class="sub">Kurnool, Andhra Pradesh · +91 72071 86844</div><div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><strong>Order ID:</strong> #${esc(o.id.toString().slice(-8).toUpperCase())}<br><strong>Date:</strong> ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div><div style="font-weight:bold;color:${o.status==='delivered'?'#2e7d32':'#e65100'}">${esc(o.status.toUpperCase())}</div></div><table><thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Payment</th></tr></thead><tbody><tr><td>${esc(o.customer_name)}</td><td>${esc(o.customer_phone)}</td><td>${esc(o.customer_address||'—')}</td><td>${o.payment_method==='cod'?'Cash on Delivery':'Online Payment'}</td></tr></tbody></table><table><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead><tbody><tr><td>${esc(o.product_name)}</td><td>₹${Number(o.product_price).toLocaleString('en-IN')}</td><td>${esc(String(o.quantity))}</td><td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td></tr></tbody></table><div class=\"total\">Grand Total: ₹${(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN')}</div><div style="text-align:center;margin-top:40px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:10px 30px;font-size:14px;font-weight:bold;cursor:pointer">Print / Save PDF</button></div></body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);w.document.close();
 }

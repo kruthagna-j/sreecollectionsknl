@@ -469,12 +469,8 @@ function handleProtectedFeature(target,isExternalPage=false){
   }
   const isLoggedIn=localStorage.getItem('userLoggedInPhone');
   if(!isLoggedIn){alert('Please log in with your mobile number to access this feature.');openAuthModal();}
-  else{
-    window.location.hash=target;
-    if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn;loadOrders();}
-  }
+else{window.location.hash=target;if(target==='#myOrders'){if(document.getElementById('phoneInput'))document.getElementById('phoneInput').value=isLoggedIn.replace('+91','');loadOrders();}}
 }
-
 async function handleSendLoginOTP(){
   const phone=document.getElementById('globalAuthPhone').value.trim();
   const email=document.getElementById('globalAuthEmail').value.trim();

@@ -193,8 +193,7 @@ async function loadOrders(){
   }
   const returns1=await sbFetch('GET','returns',null,`customer_phone=eq.${encodeURIComponent(clean)}`);
   const returns2=await sbFetch('GET','returns',null,`customer_phone=eq.${encodeURIComponent(searchPhone)}`);
-  const returns=[...(returns1||[]),...(returns2||[])];
-  const returnedOrderIds=returns?returns.map(r=>r.order_id):[];
+const returns=[...(returns1||[]),...(returns2||[])];  const returnedOrderIds=returns?returns.map(r=>r.order_id):[];
   el.innerHTML=orders.map(o=>renderOrder(o,returnedOrderIds)).join('');
 }
 
@@ -265,13 +264,21 @@ function renderOrder(o,returnedOrderIds){
 
 async function cancelOrder(id){
   if(!confirm('Are you sure you want to cancel this order?'))return;
-  /* FIX: verify ownership before cancelling */
   const phone=document.getElementById('phoneInput').value.trim();
   const clean=phone.replace(/\s/g,'').replace(/^(\+91|91|0)/,'');
   const searchPhone='+91'+clean;
-  const check=await sbFetch('GET','orders',null,`id=eq.${encodeURIComponent(id)}&customer_phone=eq.${encodeURIComponent(searchPhone)}&select=id`);
+  const check=await sbFetch('GET','orders',null,`id=eq.${encodeURIComponent(id)}&customer_phone=eq.${encodeURIComponent(searchPhone)}&select=id,status`);
   if(!check||check.length===0){
     alert('Security error: You can only cancel your own orders.');
+    return;
+  }
+  const currentStatus=check[0].status;
+  if(currentStatus==='shipped'||currentStatus==='delivered'){
+    alert('This order has already been '+currentStatus+' and cannot be cancelled. Please use the Return / Refund option.');
+    return;
+  }
+  if(currentStatus==='cancelled'){
+    alert('This order is already cancelled.');
     return;
   }
   await sbFetch('PATCH','orders',{status:'cancelled',cancelled_by:'customer'},`id=eq.${encodeURIComponent(id)}&customer_phone=eq.${encodeURIComponent(searchPhone)}`);

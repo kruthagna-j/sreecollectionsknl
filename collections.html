@@ -1184,7 +1184,7 @@
       const noP = document.getElementById('noProducts');
       if (!products || products.length === 0) { grid.innerHTML = ''; noP.style.display = 'block'; return; }
       noP.style.display = 'none';
-      products.forEach(p => { window._productMap[p.id] = p; });
+     products.forEach(p => { window._productMap[p.id] = p; });
       grid.innerHTML = products.map(p => `
     <div class="product-card">
       <a href="product.html?id=${encodeURIComponent(p.id)}" style="display:block">
@@ -1215,6 +1215,16 @@
         </div>
       </div>
     </div>`).join('');
+    // Attach share button listeners after innerHTML render
+      grid.querySelectorAll('.share-wa-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.dataset.shareId;
+          const p = window._productMap[id];
+          if (!p) return;
+          const msg = `🎁 Check out this amazing gift at Sree Collections, Kurnool!\n\n*${p.name}* — ₹${Number(p.price).toLocaleString('en-IN')}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
+          window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+        });
+      });
     }
 
     function openOrderById(id) { const p = window._productMap[id]; if (p) openOrder(p); }
@@ -1408,7 +1418,7 @@
         updateTotal();
       } else {
         const pincode = document.getElementById('cartCustPincode') ? document.getElementById('cartCustPincode').value.trim() : '';
-        const delivery = getDeliveryCharge(pincode);
+        let delivery = getDeliveryCharge(pincode);
         if (typeof cart !== 'undefined') {
           const subtotal = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
           let discount = 0;
@@ -1717,19 +1727,83 @@
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
       if (!cartEmailVerified) { alert('Please verify your email first.'); return; }
       if (!address) { alert('Please enter your delivery address.'); return; }
-      isPlacingOrder = true;
+isPlacingOrder = true;
       document.getElementById('cartCheckoutModal').classList.remove('active');
       const deliveryCharge = getDeliveryCharge(pincode);
       const cartTotalAmt = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0) + deliveryCharge;
       const cartProductNames = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+
+      if (cartPaymentMethod === 'online') {
+        // Razorpay for cart — single charge for full cart total
+        const options = {
+          key: RZP_KEY,
+          amount: Math.max(1, cartTotalAmt) * 100,
+          currency: 'INR',
+          name: 'Sree Collections',
+          description: cartProductNames.length > 100 ? cartProductNames.substring(0, 97) + '...' : cartProductNames,
+          prefill: { name, contact: phone, email },
+          theme: { color: '#C8A96B' },
+          method: { upi: true, card: true, netbanking: true, wallet: true },
+          handler: async function(response) {
+            // Payment succeeded — now insert all orders as paid
+            let successCount = 0;
+            for (const item of cart) {
+              const orderData = {
+                customer_name: name, customer_phone: phone, customer_email: email,
+                customer_address: address, customer_pincode: pincode,
+                product_id: item.id, product_name: item.name,
+                product_price: item.price,
+                quantity: item.qty, payment_method: 'online', payment_status: 'paid',
+                razorpay_payment_id: response.razorpay_payment_id,
+                status: 'placed',
+                total_amount: cartTotalAmt,
+                delivery_charge: deliveryCharge
+              };
+              const result = await sbFetch('POST', 'orders', orderData);
+              if (result) successCount++;
+            }
+            const cartOrderId = 'CART-' + Date.now().toString().slice(-6);
+            cart = []; updateCartUI(); lastOrder = null;
+            isPlacingOrder = false;
+            showResult(true, 'Payment Successful! ✅', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, cartOrderId);
+            sendPushToAll('🛍️ New Cart Order (Paid)!', `${name} paid ₹${cartTotalAmt.toLocaleString('en-IN')} for ${successCount} item(s)`, '/admin-login.html');
+            try {
+              await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone, order_id: cartOrderId, quantity: successCount, total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'), product_name: cartProductNames, payment_method: 'Online Payment' });
+            } catch (e) { console.error('Owner email error:', e); }
+          },
+          modal: {
+            ondismiss: function() {
+              isPlacingOrder = false;
+              showResult(false, 'Payment Cancelled ❌', 'You closed the payment window. No charges made.', null);
+            }
+          }
+        };
+        try {
+          const rzp = new Razorpay(options);
+          rzp.on('payment.failed', function() {
+            isPlacingOrder = false;
+            showResult(false, 'Payment Failed ❌', 'Payment could not be processed. Please try again.', null);
+          });
+          rzp.open();
+        } catch(e) {
+          isPlacingOrder = false;
+          showResult(false, 'Error', 'Could not open payment gateway.', null);
+        }
+        return; // Razorpay handler takes over from here
+      }
+
+      // COD path
       let successCount = 0;
       for (const item of cart) {
         const orderData = {
-          customer_name: name, customer_phone: phone, customer_address: address, customer_pincode: pincode,
+          customer_name: name, customer_phone: phone, customer_email: email,
+          customer_address: address, customer_pincode: pincode,
           product_id: item.id, product_name: item.name,
-          /* FIX: always use DB-fetched price */
           product_price: item.price,
-          quantity: item.qty, payment_method: cartPaymentMethod, payment_status: 'pending', status: 'placed'
+          quantity: item.qty, payment_method: 'cod', payment_status: 'pending',
+          status: 'placed',
+          total_amount: cartTotalAmt,
+          delivery_charge: deliveryCharge
         };
         const result = await sbFetch('POST', 'orders', orderData);
         if (result) successCount++;
@@ -1740,10 +1814,9 @@
       showResult(true, 'All Orders Placed! 🎉', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, cartOrderId);
       sendPushToAll('🛍️ New Cart Order!', `${name} placed ${successCount} order(s) — ₹${cartTotalAmt.toLocaleString('en-IN')}`, '/admin-login.html');
       try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone, order_id: cartOrderId, quantity: successCount, total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'), product_name: cartProductNames, payment_method: cartPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment' });
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone, order_id: cartOrderId, quantity: successCount, total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'), product_name: cartProductNames, payment_method: 'Cash on Delivery' });
       } catch (e) { console.error('Owner email error:', e); }
     }
-
     /* FIX: safe cart parse with try/catch */
     try { cart = JSON.parse(localStorage.getItem('sreecart') || '[]'); if (!Array.isArray(cart)) cart = []; } catch (e) { cart = []; }
     updateCartUI();
@@ -1953,19 +2026,14 @@
     </div>`).join('');
     }
   </script>
-  <!-- Privacy & Terms links added for Razorpay compliance -->
-  <script>
-    // Add privacy/terms to page if not present
-    document.addEventListener('DOMContentLoaded', function () {
-      var footer = document.querySelector('footer');
-      if (footer && !footer.querySelector('.privacy-link')) {
-        var div = document.createElement('div');
-        div.style.cssText = 'text-align:center;padding:0.5rem 2rem 1rem;font-size:0.78rem;';
-        div.innerHTML = '<a href="privacy.html" class="privacy-link" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Privacy Policy</a><a href="terms.html" style="color:var(--muted);text-decoration:none;margin:0 0.8rem">Terms & Conditions</a>';
-        footer.appendChild(div);
-      }
-    });
-  </script>
+  <!-- Privacy & Terms — Razorpay compliance -->
+  <footer style="text-align:center;padding:1.5rem 2rem;border-top:1px solid var(--border);background:var(--charcoal)">
+    <div style="font-size:0.78rem;color:var(--muted)">
+      © 2025 Sree Collections, Kurnool · 
+      <a href="privacy.html" style="color:var(--muted);text-decoration:none;margin:0 0.5rem">Privacy Policy</a>·
+      <a href="terms.html" style="color:var(--muted);text-decoration:none;margin:0 0.5rem">Terms &amp; Conditions</a>
+    </div>
+  </footer>
 </body>
 
 </html>
