@@ -678,7 +678,7 @@ async function loadCustomers(){
     const key=o.customer_phone;
     if(!map[key]){map[key]={name:o.customer_name,phone:o.customer_phone,email:o.customer_email||'—',orders:0,spent:0,lastOrder:o.created_at};}
     map[key].orders++;
-    map[key].spent+=Number(o.product_price)*Number(o.quantity);
+    map[key].spent+=o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity));
     if(new Date(o.created_at)>new Date(map[key].lastOrder))map[key].lastOrder=o.created_at;
   });
   const customers=Object.values(map).sort((a,b)=>b.spent-a.spent);
