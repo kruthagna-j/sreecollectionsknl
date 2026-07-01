@@ -11,8 +11,8 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop Gifts – Sree Collections Kurnool</title>
-  <meta name="description" content="Shop premium gifts online at Sree Collections, Kurnool.">
+  <title>Shop Gifts – Thiranex Kurnool</title>
+  <meta name="description" content="Shop premium gifts online at Thiranex, Kurnool.">
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap"
     rel="stylesheet">
@@ -763,7 +763,7 @@
   </div>
 
   <nav>
-    <a href="index.html" class="logo">Sree Collections</a>
+    <a href="index.html" class="logo">Thiranex</a>
     <div style="display:flex;align-items:center;gap:1.5rem">
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
       <button onclick="toggleTheme()" id="themeBtn" title="Toggle theme"
@@ -1221,7 +1221,7 @@
           const id = this.dataset.shareId;
           const p = window._productMap[id];
           if (!p) return;
-          const msg = `🎁 Check out this amazing gift at Sree Collections, Kurnool!\n\n*${p.name}* — ₹${Number(p.price).toLocaleString('en-IN')}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
+          const msg = `🎁 Check out this amazing gift at Thiranex, Kurnool!\n\n*${p.name}* — ₹${Number(p.price).toLocaleString('en-IN')}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
           window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
         });
       });
@@ -1470,7 +1470,7 @@
       const total = Math.max(1, subtotal + delivery - discount);
       const options = {
         key: RZP_KEY, amount: total * 100, currency: 'INR',
-        name: 'Sree Collections', description: currentProduct.name,
+        name: 'Thiranex', description: currentProduct.name,
         prefill: { name, contact: phone, email },
         theme: { color: '#C8A96B' },
         method: { upi: true, card: true, netbanking: true, wallet: true },
@@ -1536,6 +1536,8 @@
       const msg = method === 'cod' ? `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.` : `Thank you ${name}! Payment received. We'll contact you at ${phone} shortly.`;
       showResult(true, title, msg, shortId);
       sendPushToAll('🛍️ New Order Received!', `${name} ordered ${currentProduct.name} — ₹${total.toLocaleString('en-IN')}`, '/admin-login.html');
+      const waMsg = `🛍️ *New Order – Thiranex*\n\nCustomer: ${name}\nPhone: ${phone}\nProduct: ${currentProduct.name} x${currentQty}\nTotal: ₹${total.toLocaleString('en-IN')}\nPayment: ${method === 'cod' ? 'COD' : 'Online'}\nOrder ID: ${shortId}`;
+fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-cors'}).catch(()=>{});
       if (email) sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, method === 'cod' ? 'Cash on Delivery' : 'Online Payment');
     }
 
@@ -1563,7 +1565,7 @@
       if (!lastOrder) return;
       const o = lastOrder;
       /* FIX: escape all data in invoice */
-      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>SREE COLLECTIONS</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Tax Invoice</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="row"><span class="label">Payment</span><span class="value">${esc(o.method)}</span></div><div class="total-row"><span>Total Amount</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>Thank you for shopping at Sree Collections!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
+      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>Thiranex</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Tax Invoice</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="row"><span class="label">Payment</span><span class="value">${esc(o.method)}</span></div><div class="total-row"><span>Total Amount</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>Thank you for shopping at Thiranex!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
       const blob = new Blob([invoiceHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = `Invoice-${o.id}-SreeCollections.html`; a.click();
@@ -1739,7 +1741,7 @@ isPlacingOrder = true;
           key: RZP_KEY,
           amount: Math.max(1, cartTotalAmt) * 100,
           currency: 'INR',
-          name: 'Sree Collections',
+          name: 'Thiranex',
           description: cartProductNames.length > 100 ? cartProductNames.substring(0, 97) + '...' : cartProductNames,
           prefill: { name, contact: phone, email },
           theme: { color: '#C8A96B' },
@@ -1756,7 +1758,7 @@ isPlacingOrder = true;
                 quantity: item.qty, payment_method: 'online', payment_status: 'paid',
                 razorpay_payment_id: response.razorpay_payment_id,
                 status: 'placed',
-                total_amount: cartTotalAmt,
+                total_amount: (Number(item.price) * item.qty) + deliveryCharge,
                 delivery_charge: deliveryCharge
               };
               const result = await sbFetch('POST', 'orders', orderData);
@@ -1874,7 +1876,7 @@ isPlacingOrder = true;
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE_ID, {
           customer_email: emailVal.trim(),
           to_name: 'Customer', otp_code: authGeneratedOTP,
-          message: `Your Sree Collections verification code is: ${authGeneratedOTP}`
+          message: `Your Thiranex verification code is: ${authGeneratedOTP}`
         });
       } catch (e) { console.warn('OTP email failed, continuing:', e); }
       document.getElementById('authPhoneView').style.display = 'none';
@@ -1925,7 +1927,7 @@ isPlacingOrder = true;
     function shareOnWhatsApp(name) {
       const p = allProducts.find(x => x.name === name) || currentProduct;
       const price = p ? Number(p.price).toLocaleString('en-IN') : '';
-      const msg = `🎁 Check out this amazing gift at Sree Collections, Kurnool!\n\n*${name}* — ₹${price}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
+      const msg = `🎁 Check out this amazing gift at Thiranex, Kurnool!\n\n*${name}* — ₹${price}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
 
@@ -2029,7 +2031,7 @@ isPlacingOrder = true;
   <!-- Privacy & Terms — Razorpay compliance -->
   <footer style="text-align:center;padding:1.5rem 2rem;border-top:1px solid var(--border);background:var(--charcoal)">
     <div style="font-size:0.78rem;color:var(--muted)">
-      © 2025 Sree Collections, Kurnool · 
+      © 2025 Thiranex, Kurnool · 
       <a href="privacy.html" style="color:var(--muted);text-decoration:none;margin:0 0.5rem">Privacy Policy</a>·
       <a href="terms.html" style="color:var(--muted);text-decoration:none;margin:0 0.5rem">Terms &amp; Conditions</a>
     </div>
