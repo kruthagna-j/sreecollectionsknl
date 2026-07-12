@@ -17,7 +17,6 @@
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root {
@@ -781,7 +780,7 @@
 
   <div class="page-header">
     <h1 id="pageTitle">Our Gift Collections</h1>
-    <p>Premium gifts for every occasion · Order online · Pay securely</p>
+    <p>Premium gifts for every occasion · Order online · Cash on Delivery</p>
   </div>
 
   <!-- SEARCH -->
@@ -975,10 +974,8 @@
       </div>
       <div class="form-group"><label>Payment Method</label>
         <div class="payment-methods">
-          <div class="payment-method selected" id="cart-pm-cod" onclick="selectCartPayment('cod')"><i
+          <div class="payment-method selected" id="cart-pm-cod"><i
               class="fas fa-money-bill-wave"></i><span>Cash on Delivery</span></div>
-          <div class="payment-method" id="cart-pm-online" onclick="selectCartPayment('online')"><i
-              class="fas fa-credit-card"></i><span>Pay Online (UPI/Card)</span></div>
         </div>
       </div>
       <div class="modal-btns">
@@ -1051,10 +1048,8 @@
       </div>
       <div class="form-group"><label>Payment Method</label>
         <div class="payment-methods">
-          <div class="payment-method selected" id="pm-cod" onclick="selectPayment('cod')"><i
+          <div class="payment-method selected" id="pm-cod"><i
               class="fas fa-money-bill-wave"></i><span>Cash on Delivery</span></div>
-          <div class="payment-method" id="pm-online" onclick="selectPayment('online')"><i
-              class="fas fa-credit-card"></i><span>Pay Online (UPI/Card)</span></div>
         </div>
       </div>
       <div style="background:var(--dark);border:1px solid var(--border);padding:1rem;margin-bottom:0.5rem">
@@ -1099,7 +1094,6 @@
   <script>
     const SUPABASE_URL = 'https://peqqtfvypljvgcorddbn.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
-    const RZP_KEY = 'rzp_test_SrsY668SBTZFfn'; // TODO: Replace with rzp_live_XXXX before going live
     const EMAILJS_PUBLIC_KEY = '9fGahlws55ZA4Hq9S';
     const EMAILJS_SERVICE_ID = 'service_fxctnxu';
     const EMAILJS_TEMPLATE_ID = 'template_detul3i';
@@ -1298,7 +1292,6 @@
       document.getElementById('confirmBtn').style.opacity = '0.5';
       updateTotal();
       document.getElementById('pm-cod').classList.add('selected');
-      document.getElementById('pm-online').classList.remove('selected');
       document.getElementById('orderModal').classList.add('active');
     }
 
@@ -1329,7 +1322,7 @@
       document.getElementById('deliveryEstimate').textContent = `Estimated delivery: ${deliveryDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`;
     }
 
-    function selectPayment(method) { currentPayment = method; document.getElementById('pm-cod').classList.toggle('selected', method === 'cod'); document.getElementById('pm-online').classList.toggle('selected', method === 'online'); }
+
 
     document.getElementById('custPincode').addEventListener('input', function () { updateTotal(); });
 
@@ -1450,38 +1443,10 @@
       isPlacingOrder = true;
       const btn = document.getElementById('confirmBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-      if (currentPayment === 'cod') { await placeOrder(name, phone, email, 'cod', 'pending', null); }
-      else { await startRazorpay(name, phone, email); }
+      await placeOrder(name, phone, email, 'cod', 'pending', null);
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Confirm Order';
       isPlacingOrder = false;
       lastOrderTime = Date.now();
-    }
-
-    async function startRazorpay(name, phone, email) {
-      const subtotal = Number(currentProduct.price) * currentQty;
-      const pincode = document.getElementById('custPincode').value.trim();
-      let delivery = getDeliveryCharge(pincode);
-      let discount = 0;
-      if (appliedCoupon) {
-        if (appliedCoupon.type === 'percent') discount = Math.round(subtotal * appliedCoupon.value / 100);
-        else if (appliedCoupon.type === 'flat') discount = appliedCoupon.value;
-        else if (appliedCoupon.type === 'freeship') delivery = 0;
-      }
-      const total = Math.max(1, subtotal + delivery - discount);
-      const options = {
-        key: RZP_KEY, amount: total * 100, currency: 'INR',
-        name: 'Sree Collections', description: currentProduct.name,
-        prefill: { name, contact: phone, email },
-        theme: { color: '#C8A96B' },
-        method: { upi: true, card: true, netbanking: true, wallet: true },
-        handler: async function (response) { await placeOrder(name, phone, email, 'online', 'paid', response.razorpay_payment_id); },
-        modal: { ondismiss: function () { showResult(false, 'Payment Cancelled ❌', 'You closed the payment window. No charges made.', null); } }
-      };
-      try {
-        const rzp = new Razorpay(options);
-        rzp.on('payment.failed', function () { showResult(false, 'Payment Failed ❌', 'Payment could not be processed. Please try again.', null); });
-        closeModal(); rzp.open();
-      } catch (e) { showResult(false, 'Error', 'Could not open payment gateway.', null); }
     }
 
     function getDeliveryCharge(pincode) {
@@ -1509,7 +1474,7 @@
         product_id: currentProduct.id, product_name: currentProduct.name,
         product_price: currentProduct.price,
         quantity: currentQty, payment_method: method, payment_status: payStatus,
-        razorpay_payment_id: payId || null, status: 'placed',
+        status: 'placed',
         total_amount: total,
         delivery_charge: deliveryCharge,
         gift_message: document.getElementById('giftMessage')?.value.trim() || null
@@ -1527,18 +1492,16 @@
         id: shortId, name, phone, email, address,
         product: currentProduct.name, category: currentProduct.category,
         price: currentProduct.price, qty: currentQty, total,
-        method: method === 'cod' ? 'Cash on Delivery' : 'Online Payment (UPI/Card)',
+        method: 'Cash on Delivery',
         payStatus,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
         time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       };
-      const title = method === 'cod' ? 'Order Placed! 🎉' : 'Payment Successful! ✅';
-      const msg = method === 'cod' ? `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.` : `Thank you ${name}! Payment received. We'll contact you at ${phone} shortly.`;
-      showResult(true, title, msg, shortId);
+      showResult(true, 'Order Placed! 🎉', `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.`, shortId);
       sendPushToAll('🛍️ New Order Received!', `${name} ordered ${currentProduct.name} — ₹${total.toLocaleString('en-IN')}`, '/admin-login.html');
-      const waMsg = `🛍️ *New Order – Sree Collections*\n\nCustomer: ${name}\nPhone: ${phone}\nProduct: ${currentProduct.name} x${currentQty}\nTotal: ₹${total.toLocaleString('en-IN')}\nPayment: ${method === 'cod' ? 'COD' : 'Online'}\nOrder ID: ${shortId}`;
+      const waMsg = `🛍️ *New Order – Sree Collections*\n\nCustomer: ${name}\nPhone: ${phone}\nProduct: ${currentProduct.name} x${currentQty}\nTotal: ₹${total.toLocaleString('en-IN')}\nPayment: COD\nOrder ID: ${shortId}`;
 fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-cors'}).catch(()=>{});
-      if (email) sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, method === 'cod' ? 'Cash on Delivery' : 'Online Payment');
+      if (email) sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, 'Cash on Delivery');
     }
 
     async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty, total, method) {
@@ -1552,7 +1515,7 @@ fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-
     }
 
     function showResult(success, title, msg, orderId) {
-      document.getElementById('successIcon').textContent = success ? (lastOrder && lastOrder.method.includes('Online') ? '✅' : '🎉') : '❌';
+      document.getElementById('successIcon').textContent = success ? '🎉' : '❌';
       document.getElementById('successTitle').textContent = title;
       document.getElementById('successMsg').textContent = msg;
       document.getElementById('successOrderId').textContent = orderId ? 'Order ID: ' + orderId : '';
@@ -1705,16 +1668,11 @@ fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-
       document.getElementById('verifyBtn').style.display = 'none';
       document.getElementById('confirmBtn').disabled = true; document.getElementById('confirmBtn').style.opacity = '0.5';
       updateTotal();
-      document.getElementById('pm-cod').classList.add('selected'); document.getElementById('pm-online').classList.remove('selected');
+      document.getElementById('pm-cod').classList.add('selected');
       document.getElementById('orderModal').classList.add('active');
     }
 
-    let cartPaymentMethod = 'cod';
-    function selectCartPayment(method) {
-      cartPaymentMethod = method;
-      document.getElementById('cart-pm-cod').classList.toggle('selected', method === 'cod');
-      document.getElementById('cart-pm-online').classList.toggle('selected', method === 'online');
-    }
+    const cartPaymentMethod = 'cod';
 
     async function placeAllOrders() {
       if (isPlacingOrder) { alert('Orders are already being placed. Please wait.'); return; }
@@ -1734,65 +1692,6 @@ isPlacingOrder = true;
       const deliveryCharge = getDeliveryCharge(pincode);
       const cartTotalAmt = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0) + deliveryCharge;
       const cartProductNames = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-
-      if (cartPaymentMethod === 'online') {
-        // Razorpay for cart — single charge for full cart total
-        const options = {
-          key: RZP_KEY,
-          amount: Math.max(1, cartTotalAmt) * 100,
-          currency: 'INR',
-          name: 'Sree Collections',
-          description: cartProductNames.length > 100 ? cartProductNames.substring(0, 97) + '...' : cartProductNames,
-          prefill: { name, contact: phone, email },
-          theme: { color: '#C8A96B' },
-          method: { upi: true, card: true, netbanking: true, wallet: true },
-          handler: async function(response) {
-            // Payment succeeded — now insert all orders as paid
-            let successCount = 0;
-            for (const item of cart) {
-              const orderData = {
-                customer_name: name, customer_phone: phone, customer_email: email,
-                customer_address: address, customer_pincode: pincode,
-                product_id: item.id, product_name: item.name,
-                product_price: item.price,
-                quantity: item.qty, payment_method: 'online', payment_status: 'paid',
-                razorpay_payment_id: response.razorpay_payment_id,
-                status: 'placed',
-                total_amount: (Number(item.price) * item.qty) + deliveryCharge,
-                delivery_charge: deliveryCharge
-              };
-              const result = await sbFetch('POST', 'orders', orderData);
-              if (result) successCount++;
-            }
-            const cartOrderId = 'CART-' + Date.now().toString().slice(-6);
-            cart = []; updateCartUI(); lastOrder = null;
-            isPlacingOrder = false;
-            showResult(true, 'Payment Successful! ✅', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, cartOrderId);
-            sendPushToAll('🛍️ New Cart Order (Paid)!', `${name} paid ₹${cartTotalAmt.toLocaleString('en-IN')} for ${successCount} item(s)`, '/admin-login.html');
-            try {
-              await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone, order_id: cartOrderId, quantity: successCount, total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'), product_name: cartProductNames, payment_method: 'Online Payment' });
-            } catch (e) { console.error('Owner email error:', e); }
-          },
-          modal: {
-            ondismiss: function() {
-              isPlacingOrder = false;
-              showResult(false, 'Payment Cancelled ❌', 'You closed the payment window. No charges made.', null);
-            }
-          }
-        };
-        try {
-          const rzp = new Razorpay(options);
-          rzp.on('payment.failed', function() {
-            isPlacingOrder = false;
-            showResult(false, 'Payment Failed ❌', 'Payment could not be processed. Please try again.', null);
-          });
-          rzp.open();
-        } catch(e) {
-          isPlacingOrder = false;
-          showResult(false, 'Error', 'Could not open payment gateway.', null);
-        }
-        return; // Razorpay handler takes over from here
-      }
 
       // COD path
       let successCount = 0;
@@ -2028,7 +1927,7 @@ isPlacingOrder = true;
     </div>`).join('');
     }
   </script>
-  <!-- Privacy & Terms — Razorpay compliance -->
+  <!-- Privacy & Terms -->
   <footer style="text-align:center;padding:1.5rem 2rem;border-top:1px solid var(--border);background:var(--charcoal)">
     <div style="font-size:0.78rem;color:var(--muted)">
       © 2025 Sree Collections, Kurnool · 

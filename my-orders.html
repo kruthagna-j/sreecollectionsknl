@@ -230,7 +230,7 @@ function renderOrder(o,returnedOrderIds){
       <div class="order-product">
         <div>
           <div class="order-product-name">${esc(o.product_name)}</div>
-          <div style="font-size:0.8rem;color:var(--muted)">Qty: ${esc(String(o.quantity))} · ${o.payment_method==='cod'?'Cash on Delivery':'Online Payment'}</div>
+          <div style="font-size:0.8rem;color:var(--muted)">Qty: ${esc(String(o.quantity))} · Cash on Delivery</div>
         </div>
         <div class="order-product-price">₹${total.toLocaleString('en-IN')}</div>
       </div>
