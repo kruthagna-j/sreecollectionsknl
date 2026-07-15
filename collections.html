@@ -428,39 +428,6 @@
       text-align: center
     }
 
-    .payment-methods {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin-bottom: 1.5rem
-    }
-
-    .payment-method {
-      padding: 1rem;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.3s;
-      text-align: center
-    }
-
-    .payment-method.selected {
-      border-color: var(--gold);
-      background: rgba(200, 169, 107, 0.08)
-    }
-
-    .payment-method i {
-      font-size: 1.5rem;
-      color: var(--gold);
-      display: block;
-      margin-bottom: 0.4rem
-    }
-
-    .payment-method span {
-      font-size: 0.8rem;
-      color: var(--muted);
-      font-weight: 500
-    }
-
     .modal-btns {
       display: flex;
       gap: 0.8rem
@@ -701,10 +668,6 @@
     }
 
     @media(max-width:600px) {
-      .payment-methods {
-        grid-template-columns: 1fr
-      }
-
       .modal {
         padding: 1.5rem
       }
@@ -767,12 +730,6 @@
       <a href="my-orders.html" class="nav-back"><i class="fas fa-box"></i> My Orders</a>
       <button onclick="toggleTheme()" id="themeBtn" title="Toggle theme"
         style="background:none;border:1px solid var(--border);color:var(--gold);width:36px;height:36px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">🌙</button>
-      <button onclick="toggleCart()"
-        style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;position:relative;padding:0.3rem">
-        <i class="fas fa-shopping-cart"></i>
-        <span id="cartCount"
-          style="position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;display:none;align-items:center;justify-content:center">0</span>
-      </button>
       <a href="admin-login.html" target="_blank" class="nav-back"
         style="font-size:0.78rem;color:rgba(200,169,107,0.5)"><i class="fas fa-lock"></i> Admin</a>
     </div>
@@ -780,7 +737,7 @@
 
   <div class="page-header">
     <h1 id="pageTitle">Our Gift Collections</h1>
-    <p>Premium gifts for every occasion · Order online · Cash on Delivery</p>
+    <p>Premium gifts for every occasion</p>
   </div>
 
   <!-- SEARCH -->
@@ -895,97 +852,6 @@
     </div>
   </div>
 
-  <!-- CART DRAWER -->
-  <div id="cartDrawer"
-    style="display:none;position:fixed;top:0;right:0;width:100%;max-width:400px;height:100vh;background:var(--charcoal);border-left:1px solid var(--border);z-index:250;overflow-y:auto;padding:2rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
-      <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold)">Your Cart</h2>
-      <button onclick="toggleCart()"
-        style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer">&times;</button>
-    </div>
-    <div id="cartItems"></div>
-    <div id="cartFooter" style="display:none;margin-top:2rem;border-top:1px solid var(--border);padding-top:1.5rem">
-      <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
-        <span style="color:var(--muted)">Total</span>
-        <strong id="cartTotal" style="color:var(--gold);font-size:1.2rem">₹0</strong>
-      </div>
-      <button onclick="checkoutCart()"
-        style="width:100%;padding:1rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'Manrope',sans-serif"><i
-          class="fas fa-shopping-bag"></i> Buy All</button>
-      <button onclick="clearCart()"
-        style="width:100%;padding:0.7rem;background:transparent;color:#e74c3c;border:1px solid #e74c3c;font-size:0.8rem;cursor:pointer;font-family:'Manrope',sans-serif;margin-top:0.5rem">Clear
-        Cart</button>
-    </div>
-    <div id="cartEmpty" style="text-align:center;padding:3rem 0;color:var(--muted)">
-      <i class="fas fa-shopping-cart" style="font-size:3rem;color:var(--gold);display:block;margin-bottom:1rem"></i>
-      Your cart is empty
-    </div>
-  </div>
-  <div id="cartOverlay" onclick="toggleCart()"
-    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:240"></div>
-
-  <!-- CART CHECKOUT MODAL -->
-  <div class="modal-overlay" id="cartCheckoutModal">
-    <div class="modal">
-      <h2>Order Summary</h2>
-      <div id="cartCheckoutItems"></div>
-      <div
-        style="display:flex;justify-content:space-between;padding:1rem 0;margin-top:0.5rem;border-top:2px solid var(--gold)">
-        <strong>Total</strong><strong id="cartCheckoutTotal" style="color:var(--gold);font-size:1.2rem"></strong>
-      </div>
-      <div class="form-group" style="margin-top:1rem"><label>Your Name *</label><input type="text" id="cartCustName"
-          placeholder="Enter your full name" maxlength="100"></div>
-      <div class="form-group"><label>Phone Number *</label><input type="tel" id="cartCustPhone"
-          placeholder="+91 XXXXX XXXXX" maxlength="15"></div>
-      <div class="form-group">
-        <label>Email Address <span style="color:var(--gold);font-size:0.7rem">* required for OTP</span></label>
-        <input type="email" id="cartCustEmail" placeholder="your@email.com" maxlength="200">
-        <button type="button" id="cartVerifyBtn" onclick="sendCartVerificationCode()"
-          style="display:none;margin-top:0.6rem;padding:0.6rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;font-size:0.82rem">✉
-          Send Verification Code</button>
-      </div>
-      <div id="cartVerifyEmailSection" style="display:none;margin-bottom:1.2rem">
-        <label
-          style="display:block;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">Enter
-          Verification Code</label>
-        <div style="display:flex;gap:0.5rem">
-          <input type="text" id="cartOtpInput" placeholder="6-digit code" maxlength="6"
-            style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif">
-          <button onclick="verifyCartOTP()"
-            style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">✓
-            Verify</button>
-        </div>
-      </div>
-      <div class="form-group"><label>Delivery Address *</label><textarea id="cartCustAddress" rows="2"
-          placeholder="Enter your full delivery address" maxlength="500"></textarea></div>
-      <div class="form-group"><label>Pincode *</label><input type="text" id="cartCustPincode" maxlength="6"
-          placeholder="Enter 6-digit pincode"
-          style="width:100%;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif">
-      </div>
-      <div class="form-group">
-        <label>Coupon Code <span style="color:var(--muted);font-size:0.7rem">(optional)</span></label>
-        <div style="display:flex;gap:0.5rem">
-          <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="30"
-            style="flex:1;padding:0.75rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-size:0.9rem;font-family:'Manrope',sans-serif;text-transform:uppercase">
-          <button onclick="applyCoupon()"
-            style="padding:0.75rem 1.2rem;background:var(--gold);color:var(--dark);border:none;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">Apply</button>
-        </div>
-        <div id="couponMsg" style="font-size:0.8rem;margin-top:0.4rem;min-height:16px"></div>
-      </div>
-      <div class="form-group"><label>Payment Method</label>
-        <div class="payment-methods">
-          <div class="payment-method selected" id="cart-pm-cod"><i
-              class="fas fa-money-bill-wave"></i><span>Cash on Delivery</span></div>
-        </div>
-      </div>
-      <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" id="cartConfirmBtn" onclick="placeAllOrders()" style="opacity:0.5" disabled><i
-            class="fas fa-shopping-bag"></i> Confirm All Orders</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal">
@@ -1046,30 +912,21 @@
         </div>
         <div id="orderCouponMsg" style="font-size:0.8rem;margin-top:0.4rem;min-height:16px"></div>
       </div>
-      <div class="form-group"><label>Payment Method</label>
-        <div class="payment-methods">
-          <div class="payment-method selected" id="pm-cod"><i
-              class="fas fa-money-bill-wave"></i><span>Cash on Delivery</span></div>
-        </div>
-      </div>
       <div style="background:var(--dark);border:1px solid var(--border);padding:1rem;margin-bottom:0.5rem">
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.5rem"><span
             style="color:var(--muted)">Product Total</span><span id="modalSubtotal">₹0</span></div>
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.5rem"><span
             style="color:var(--muted)">Discount</span><span id="modalDiscount" style="color:#27ae60">—</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.5rem"><span
-            style="color:var(--muted)">Delivery Charge</span><span id="modalDelivery" style="color:#27ae60">₹0</span>
-        </div>
         <div style="border-top:1px solid var(--border);padding-top:0.8rem;display:flex;justify-content:space-between">
-          <span style="color:var(--muted)">Total Amount</span><strong id="modalTotal"
+          <span style="color:var(--muted)">Estimated Total</span><strong id="modalTotal"
             style="color:var(--gold);font-size:1.2rem">₹0</strong></div>
       </div>
       <div id="deliveryEstimate" style="font-size:0.82rem;color:#27ae60;margin-bottom:1rem;text-align:center"><i
-          class="fas fa-truck"></i> Estimated delivery: calculating...</div>
+          class="fas fa-truck"></i> We'll confirm delivery timing with you directly</div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" id="confirmBtn" onclick="confirmOrder()"><i class="fas fa-shopping-bag"></i> Confirm
-          Order</button>
+        <button class="btn-confirm" id="confirmBtn" onclick="confirmOrder()"><i class="fas fa-paper-plane"></i> Submit
+          Order Request</button>
       </div>
     </div>
   </div>
@@ -1084,7 +941,7 @@
       <div class="email-status" id="emailStatus"></div>
       <div class="success-actions">
         <button class="btn-invoice" id="invoiceBtn" onclick="downloadInvoice()" style="display:none"><i
-            class="fas fa-download"></i> Download Invoice</button>
+            class="fas fa-download"></i> Download Summary</button>
         <button class="btn-done" onclick="document.getElementById('successOverlay').classList.remove('active')">Continue
           Shopping</button>
       </div>
@@ -1096,7 +953,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcXF0ZnZ5cGxqdmdjb3JkZGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDU1OTAsImV4cCI6MjA5NDgyMTU5MH0.J364P7n9HazV0F8Bd9o_OKBsfKbfLAbW1vCRjIflLtE';
     const EMAILJS_PUBLIC_KEY = '9fGahlws55ZA4Hq9S';
     const EMAILJS_SERVICE_ID = 'service_fxctnxu';
-    const EMAILJS_TEMPLATE_ID = 'template_detul3i';
     const EMAILJS_OTP_TEMPLATE_ID = 'template_yvs3q48';
     const OWNER_EMAIL = '2103iare@gmail.com';
 
@@ -1111,7 +967,6 @@
     let allProducts = [];
     let currentProduct = null;
     let currentQty = 1;
-    let currentPayment = 'cod';
     let lastOrder = null;
     let generatedOTP = '';
     let emailVerified = false;
@@ -1198,10 +1053,7 @@
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
           <button class="btn-buy" style="flex:1;${p.stock_status === 'outofstock' ? 'opacity:0.5;cursor:not-allowed' : ''}"
             ${p.stock_status === 'outofstock' ? 'disabled' : `onclick="openOrderById('${esc(p.id)}')"`}>
-            <i class="fas fa-bolt"></i> ${p.stock_status === 'outofstock' ? 'Out of Stock' : 'Buy Now'}
-          </button>
-          <button class="btn-buy" style="width:48px;background:var(--charcoal);border:1px solid var(--gold)" onclick="addToCartById('${esc(p.id)}')">
-            <i class="fas fa-cart-plus" style="color:var(--gold)"></i>
+            <i class="fas fa-paper-plane"></i> ${p.stock_status === 'outofstock' ? 'Out of Stock' : 'Order Now'}
           </button>
         </div>
         <div style="display:flex;gap:0.5rem">
@@ -1222,7 +1074,6 @@
     }
 
     function openOrderById(id) { const p = window._productMap[id]; if (p) openOrder(p); }
-    function addToCartById(id) { const p = window._productMap[id]; if (p) addToCart(p); }
 
     async function sendPushToAll(title, message, url = '/') {
       try { await fetch('/api/server', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-secret': 'sree-admin-2024-secret' }, body: JSON.stringify({ action: 'sendPush', title, message, url }) }); }
@@ -1271,7 +1122,7 @@
       if (!activeUser) { openAuthModal(product); return; }
       currentProduct = product;
       trackRecentlyViewed(product);
-      currentQty = 1; currentPayment = 'cod'; emailVerified = false;
+      currentQty = 1; emailVerified = false;
       generatedOTP = ''; otpAttempts = 0; otpGeneratedAt = 0;
       appliedCoupon = null;
       setTimeout(() => { const f = document.getElementById('custPhone'); if (f) f.value = activeUser.replace('+91', ''); }, 100);
@@ -1291,13 +1142,11 @@
       document.getElementById('confirmBtn').disabled = true;
       document.getElementById('confirmBtn').style.opacity = '0.5';
       updateTotal();
-      document.getElementById('pm-cod').classList.add('selected');
       document.getElementById('orderModal').classList.add('active');
     }
 
     function closeModal() {
       document.getElementById('orderModal').classList.remove('active');
-      document.getElementById('cartCheckoutModal').classList.remove('active');
     }
 
     function changeQty(d) { currentQty = Math.min(99, Math.max(1, currentQty + d)); document.getElementById('qtyVal').textContent = currentQty; updateTotal(); }
@@ -1305,26 +1154,18 @@
     function updateTotal() {
       if (!currentProduct) return;
       const subtotal = Number(currentProduct.price) * currentQty;
-      const pincode = document.getElementById('custPincode')?.value.trim() || '';
-      let delivery = getDeliveryCharge(pincode);
       let discount = 0;
       if (appliedCoupon) {
         if (appliedCoupon.type === 'percent') discount = Math.round(subtotal * appliedCoupon.value / 100);
         else if (appliedCoupon.type === 'flat') discount = appliedCoupon.value;
-        else if (appliedCoupon.type === 'freeship') delivery = 0;
       }
-      const total = Math.max(0, subtotal + delivery - discount);
+      const total = Math.max(0, subtotal - discount);
       if (document.getElementById('modalSubtotal')) document.getElementById('modalSubtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
-      if (document.getElementById('modalDelivery')) document.getElementById('modalDelivery').textContent = delivery === 0 ? '✅ Free' : '₹' + delivery;
       if (document.getElementById('modalDiscount')) document.getElementById('modalDiscount').textContent = discount > 0 ? '-₹' + discount.toLocaleString('en-IN') : '—';
       document.getElementById('modalTotal').textContent = '₹' + total.toLocaleString('en-IN');
-      const deliveryDate = new Date(); deliveryDate.setDate(deliveryDate.getDate() + 3);
-      document.getElementById('deliveryEstimate').textContent = `Estimated delivery: ${deliveryDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`;
     }
 
 
-
-    document.getElementById('custPincode').addEventListener('input', function () { updateTotal(); });
 
     document.getElementById('custEmail').addEventListener('blur', function () {
       const email = this.value.trim();
@@ -1388,11 +1229,9 @@
     }
 
     async function applyCoupon() {
-      const orderModalActive = document.getElementById('orderModal').classList.contains('active');
-      const input = orderModalActive ? document.getElementById('orderCouponInput') : document.getElementById('couponInput');
+      const input = document.getElementById('orderCouponInput');
       if (!input) return;
-      const msgId = orderModalActive ? 'orderCouponMsg' : 'couponMsg';
-      const msg = document.getElementById(msgId);
+      const msg = document.getElementById('orderCouponMsg');
       if (!msg) return;
       const code = input.value.trim().toUpperCase();
       /* FIX: validate coupon code format */
@@ -1407,23 +1246,7 @@
         appliedCoupon = null;
         msg.innerHTML = '<span style="color:#e74c3c">❌ Invalid coupon code</span>';
       }
-      if (orderModalActive) {
-        updateTotal();
-      } else {
-        const pincode = document.getElementById('cartCustPincode') ? document.getElementById('cartCustPincode').value.trim() : '';
-        let delivery = getDeliveryCharge(pincode);
-        if (typeof cart !== 'undefined') {
-          const subtotal = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
-          let discount = 0;
-          if (appliedCoupon) {
-            if (appliedCoupon.type === 'percent') discount = Math.round(subtotal * appliedCoupon.value / 100);
-            else if (appliedCoupon.type === 'flat') discount = appliedCoupon.value;
-            else if (appliedCoupon.type === 'freeship') delivery = 0;
-          }
-          const el = document.getElementById('cartCheckoutTotal');
-          if (el) el.textContent = '₹' + Math.max(0, subtotal + delivery - discount).toLocaleString('en-IN');
-        }
-      }
+      updateTotal();
     }
 
     async function confirmOrder() {
@@ -1443,40 +1266,30 @@
       isPlacingOrder = true;
       const btn = document.getElementById('confirmBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-      await placeOrder(name, phone, email, 'cod', 'pending', null);
-      btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Confirm Order';
+      await placeOrder(name, phone, email);
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
       isPlacingOrder = false;
       lastOrderTime = Date.now();
     }
 
-    function getDeliveryCharge(pincode) {
-      const num = parseInt(pincode);
-      if (!pincode || pincode.length !== 6 || isNaN(num)) return 0;
-      if (num >= 518001 && num <= 518599) return 0;   // Kurnool city — free
-      if (num >= 500001 && num <= 534999) return 100; // Rest of AP/Telangana
-      return 0; // out-of-range — blocked at confirmOrder level anyway
-    }
-
-    async function placeOrder(name, phone, email, method, payStatus, payId) {
+    async function placeOrder(name, phone, email) {
       const address = document.getElementById('custAddress').value.trim();
       const pincode = document.getElementById('custPincode').value.trim();
-      const deliveryCharge = getDeliveryCharge(pincode);
       const subtotal = Number(currentProduct.price) * currentQty;
       let discount = 0;
       if (appliedCoupon) {
         if (appliedCoupon.type === 'percent') discount = Math.round(subtotal * appliedCoupon.value / 100);
         else if (appliedCoupon.type === 'flat') discount = appliedCoupon.value;
       }
-      const total = Math.max(0, subtotal + deliveryCharge - discount);
+      const total = Math.max(0, subtotal - discount);
       const orderData = {
         customer_name: name, customer_phone: phone, customer_email: email,
         customer_address: address || null, customer_pincode: pincode,
         product_id: currentProduct.id, product_name: currentProduct.name,
         product_price: currentProduct.price,
-        quantity: currentQty, payment_method: method, payment_status: payStatus,
+        quantity: currentQty,
         status: 'placed',
         total_amount: total,
-        delivery_charge: deliveryCharge,
         gift_message: document.getElementById('giftMessage')?.value.trim() || null
       };
       const result = await sbFetch('POST', 'orders', orderData);
@@ -1492,26 +1305,13 @@
         id: shortId, name, phone, email, address,
         product: currentProduct.name, category: currentProduct.category,
         price: currentProduct.price, qty: currentQty, total,
-        method: 'Cash on Delivery',
-        payStatus,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
         time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       };
-      showResult(true, 'Order Placed! 🎉', `Thank you ${name}! Order confirmed. We'll contact you at ${phone}.`, shortId);
-      sendPushToAll('🛍️ New Order Received!', `${name} ordered ${currentProduct.name} — ₹${total.toLocaleString('en-IN')}`, '/admin-login.html');
-      const waMsg = `🛍️ *New Order – Sree Collections*\n\nCustomer: ${name}\nPhone: ${phone}\nProduct: ${currentProduct.name} x${currentQty}\nTotal: ₹${total.toLocaleString('en-IN')}\nPayment: COD\nOrder ID: ${shortId}`;
+      showResult(true, 'Order Request Sent! 🎉', `Thank you ${name}! We've received your order request and will contact you at ${phone} to confirm details.`, shortId);
+      sendPushToAll('🛍️ New Order Request!', `${name} requested ${currentProduct.name} — ₹${total.toLocaleString('en-IN')}`, '/admin-login.html');
+      const waMsg = `🛍️ *New Order Request – Sree Collections*\n\nCustomer: ${name}\nPhone: ${phone}\nProduct: ${currentProduct.name} x${currentQty}\nEstimated Total: ₹${total.toLocaleString('en-IN')}\nOrder ID: ${shortId}`;
 fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-cors'}).catch(()=>{});
-      if (email) sendConfirmationEmail(email, name, phone, shortId, currentProduct.name, currentQty, total, 'Cash on Delivery');
-    }
-
-    async function sendConfirmationEmail(toEmail, name, phone, orderId, product, qty, total, method) {
-      const statusEl = document.getElementById('emailStatus');
-      statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending confirmation...';
-      try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: toEmail, customer_name: name, customer_phone: phone, order_id: orderId, product_name: product, quantity: qty, total_amount: '₹' + Number(total).toLocaleString('en-IN'), payment_method: method });
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW ORDER)', customer_phone: phone, order_id: orderId, product_name: product, quantity: qty, total_amount: '₹' + Number(total).toLocaleString('en-IN'), payment_method: method });
-        statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60"></i> Confirmation sent';
-      } catch (e) { statusEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e74c3c"></i> Email could not be sent'; }
     }
 
     function showResult(success, title, msg, orderId) {
@@ -1527,11 +1327,11 @@ fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-
     function downloadInvoice() {
       if (!lastOrder) return;
       const o = lastOrder;
-      /* FIX: escape all data in invoice */
-      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>Sree Collections</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Tax Invoice</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="row"><span class="label">Payment</span><span class="value">${esc(o.method)}</span></div><div class="total-row"><span>Total Amount</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>Thank you for shopping at Sree Collections!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
+      /* FIX: escape all data in summary */
+      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Order Summary – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>Sree Collections</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Order Request Summary</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="total-row"><span>Estimated Total</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>We'll contact you shortly to confirm this order. Thank you for choosing Sree Collections!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
       const blob = new Blob([invoiceHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `Invoice-${o.id}-SreeCollections.html`; a.click();
+      const a = document.createElement('a'); a.href = url; a.download = `OrderSummary-${o.id}-SreeCollections.html`; a.click();
       URL.revokeObjectURL(url);
     }
 
@@ -1569,165 +1369,13 @@ fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-
 
     document.addEventListener('click', e => { if (!e.target.closest('#searchInput') && !e.target.closest('#searchSuggestions')) document.getElementById('searchSuggestions').style.display = 'none'; });
 
-    let cart = [];
     let isPlacingOrder = false;
     let lastOrderTime = 0;
     const ORDER_COOLDOWN_MS = 30000;
-    let currentCartIndex = 0;
-
-    function addToCart(product) {
-      const existing = cart.find(i => i.id === product.id);
-      if (existing) { existing.qty++; } else { cart.push({ ...product, qty: 1 }); }
-      updateCartUI();
-      const n = document.createElement('div');
-      n.textContent = '✓ ' + product.name + ' added to cart';
-      n.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark);padding:0.8rem 1.5rem;font-weight:700;font-size:0.85rem;z-index:999;font-family:Manrope,sans-serif';
-      document.body.appendChild(n); setTimeout(() => n.remove(), 2500);
-    }
-
-    function updateCartUI() {
-      try { localStorage.setItem('sreecart', JSON.stringify(cart)); } catch (e) { }
-      const count = cart.reduce((sum, i) => sum + i.qty, 0);
-      const countEl = document.getElementById('cartCount');
-      countEl.textContent = count; countEl.style.display = count > 0 ? 'flex' : 'none';
-      document.getElementById('cartTotal').textContent = '₹' + cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0).toLocaleString('en-IN');
-      const cartItems = document.getElementById('cartItems');
-      if (cart.length === 0) { document.getElementById('cartEmpty').style.display = 'block'; document.getElementById('cartFooter').style.display = 'none'; cartItems.innerHTML = ''; return; }
-      document.getElementById('cartEmpty').style.display = 'none'; document.getElementById('cartFooter').style.display = 'block';
-      cartItems.innerHTML = cart.map((item, idx) => `
-    <div style="background:var(--card-bg);border:1px solid var(--border);padding:1rem;margin-bottom:0.8rem">
-      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
-        <span style="font-weight:700;font-size:0.9rem">${esc(item.name)}</span>
-        <div style="display:flex;gap:0.5rem;align-items:center">
-          <button onclick="buySingleFromCart(${idx})" style="padding:0.3rem 0.8rem;background:var(--gold);color:var(--dark);border:none;cursor:pointer;font-size:0.75rem;font-family:'Manrope',sans-serif;font-weight:700">Buy</button>
-          <button onclick="removeFromCart(${idx})" style="width:26px;height:26px;background:transparent;border:1px solid rgba(200,169,107,0.3);color:var(--muted);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center">✕</button>
-        </div>
-      </div>
-      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">${esc(item.category)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;align-items:center;gap:0.5rem">
-          <button onclick="updateCartQty(${idx},-1)" style="width:28px;height:28px;background:var(--dark);border:1px solid var(--border);color:var(--text);cursor:pointer">−</button>
-          <span style="font-weight:700">${item.qty}</span>
-          <button onclick="updateCartQty(${idx},1)" style="width:28px;height:28px;background:var(--dark);border:1px solid var(--border);color:var(--text);cursor:pointer">+</button>
-        </div>
-        <span style="color:var(--gold);font-weight:700">₹${(Number(item.price) * item.qty).toLocaleString('en-IN')}</span>
-      </div>
-    </div>`).join('');
-    }
-
-    function removeFromCart(idx) { cart.splice(idx, 1); updateCartUI(); }
-    function updateCartQty(idx, d) { cart[idx].qty = Math.min(99, Math.max(1, cart[idx].qty + d)); updateCartUI(); }
-    function clearCart() { if (!confirm('Clear all items?')) return; cart = []; updateCartUI(); }
-
-    function toggleCart() {
-      const drawer = document.getElementById('cartDrawer');
-      const overlay = document.getElementById('cartOverlay');
-      const isOpen = drawer.style.display === 'block';
-      drawer.style.display = isOpen ? 'none' : 'block';
-      overlay.style.display = isOpen ? 'none' : 'block';
-      if (!isOpen) updateCartUI();
-    }
-
-    function checkoutCart() {
-      if (cart.length === 0) return;
-      const activeUser = localStorage.getItem('userLoggedInPhone');
-      if (!activeUser) { toggleCart(); openAuthModal(null); pendingProduct = 'cart'; return; }
-      toggleCart(); openCartCheckoutModal();
-    }
-
-    function openCartCheckoutModal() {
-      const total = cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0);
-      /* FIX: escape cart item names */
-      document.getElementById('cartCheckoutItems').innerHTML = cart.map(i => `<div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);font-size:0.85rem"><span>${esc(i.name)} <span style="color:var(--muted)">x${i.qty}</span></span><span style="color:var(--gold)">₹${(Number(i.price) * i.qty).toLocaleString('en-IN')}</span></div>`).join('');
-      document.getElementById('cartCheckoutTotal').textContent = '₹' + total.toLocaleString('en-IN');
-      cartEmailVerified = false; cartGeneratedOTP = ''; cartOtpAttempts = 0;
-      document.getElementById('cartCustEmail').value = '';
-      document.getElementById('cartVerifyBtn').style.display = 'none';
-      document.getElementById('cartVerifyEmailSection').style.display = 'none';
-      document.getElementById('cartOtpInput').value = '';
-      document.getElementById('cartConfirmBtn').disabled = true;
-      document.getElementById('cartConfirmBtn').style.opacity = '0.5';
-      document.getElementById('cartCheckoutModal').classList.add('active');
-    }
-
-    function buySingleFromCart(idx) {
-      toggleCart(); currentCartIndex = idx;
-      const item = cart[idx];
-      currentProduct = item; currentQty = item.qty; currentPayment = 'cod';
-      emailVerified = false; generatedOTP = ''; otpAttempts = 0; otpGeneratedAt = 0;
-      document.getElementById('modalProductName').textContent = item.name;
-      document.getElementById('modalProductCategory').textContent = item.category;
-      document.getElementById('modalProductPrice').textContent = '₹' + Number(item.price).toLocaleString('en-IN');
-      document.getElementById('qtyVal').textContent = item.qty;
-      document.getElementById('custName').value = ''; document.getElementById('custPhone').value = '';
-      document.getElementById('custEmail').value = ''; document.getElementById('custAddress').value = '';
-      /* FIX: reset pincode so delivery shows correctly */
-      document.getElementById('custPincode').value = '';
-      document.getElementById('verifyEmailSection').style.display = 'none';
-      document.getElementById('otpInput').value = '';
-      document.getElementById('verifyBtn').style.display = 'none';
-      document.getElementById('confirmBtn').disabled = true; document.getElementById('confirmBtn').style.opacity = '0.5';
-      updateTotal();
-      document.getElementById('pm-cod').classList.add('selected');
-      document.getElementById('orderModal').classList.add('active');
-    }
-
-    const cartPaymentMethod = 'cod';
-
-    async function placeAllOrders() {
-      if (isPlacingOrder) { alert('Orders are already being placed. Please wait.'); return; }
-      const name = document.getElementById('cartCustName').value.trim();
-      const phone = document.getElementById('cartCustPhone').value.trim();
-      const email = document.getElementById('cartCustEmail').value.trim();
-      const address = document.getElementById('cartCustAddress').value.trim();
-      const pincode = document.getElementById('cartCustPincode').value.trim();
-      if (!/^\d{6}$/.test(pincode)) { alert('Please enter a valid 6-digit pincode.'); return; }
-      if (!isValidServicePincode(pincode)) { alert('Sorry, delivery available only in Andhra Pradesh and Telangana.'); return; }
-      if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
-      if (!cartEmailVerified) { alert('Please verify your email first.'); return; }
-      if (!address) { alert('Please enter your delivery address.'); return; }
-isPlacingOrder = true;
-      document.getElementById('cartCheckoutModal').classList.remove('active');
-      const deliveryCharge = getDeliveryCharge(pincode);
-      const cartTotalAmt = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0) + deliveryCharge;
-      const cartProductNames = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-
-      // COD path
-      let successCount = 0;
-      for (const item of cart) {
-        const orderData = {
-          customer_name: name, customer_phone: phone, customer_email: email,
-          customer_address: address, customer_pincode: pincode,
-          product_id: item.id, product_name: item.name,
-          product_price: item.price,
-          quantity: item.qty, payment_method: 'cod', payment_status: 'pending',
-          status: 'placed',
-          total_amount: cartTotalAmt,
-          delivery_charge: deliveryCharge
-        };
-        const result = await sbFetch('POST', 'orders', orderData);
-        if (result) successCount++;
-      }
-      cart = []; updateCartUI(); lastOrder = null;
-      const cartOrderId = 'CART-' + Date.now().toString().slice(-6);
-      isPlacingOrder = false;
-      showResult(true, 'All Orders Placed! 🎉', `${successCount} order(s) confirmed. We'll contact you at ${phone}.`, cartOrderId);
-      sendPushToAll('🛍️ New Cart Order!', `${name} placed ${successCount} order(s) — ₹${cartTotalAmt.toLocaleString('en-IN')}`, '/admin-login.html');
-      try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { customer_email: OWNER_EMAIL, customer_name: name + ' (NEW CART ORDER)', customer_phone: phone, order_id: cartOrderId, quantity: successCount, total_amount: '₹' + cartTotalAmt.toLocaleString('en-IN'), product_name: cartProductNames, payment_method: 'Cash on Delivery' });
-      } catch (e) { console.error('Owner email error:', e); }
-    }
-    /* FIX: safe cart parse with try/catch */
-    try { cart = JSON.parse(localStorage.getItem('sreecart') || '[]'); if (!Array.isArray(cart)) cart = []; } catch (e) { cart = []; }
-    updateCartUI();
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         document.getElementById('orderModal').classList.remove('active');
-        document.getElementById('cartCheckoutModal').classList.remove('active');
-        const drawer = document.getElementById('cartDrawer');
-        if (drawer.style.display === 'block') toggleCart();
       }
     });
 
@@ -1819,8 +1467,7 @@ isPlacingOrder = true;
       closeAuthModal();
       const custPhone = document.getElementById('custPhone');
       if (custPhone) custPhone.value = phone.replace('+91', '');
-      if (pendingProduct === 'cart') { pendingProduct = null; openCartCheckoutModal(); }
-      else if (pendingProduct) { const p = pendingProduct; pendingProduct = null; openOrder(p); }
+      if (pendingProduct) { const p = pendingProduct; pendingProduct = null; openOrder(p); }
     }
 
     function shareOnWhatsApp(name) {
@@ -1828,66 +1475,6 @@ isPlacingOrder = true;
       const price = p ? Number(p.price).toLocaleString('en-IN') : '';
       const msg = `🎁 Check out this amazing gift at Sree Collections, Kurnool!\n\n*${name}* — ₹${price}\n\nOrder now: https://sreecollections.vercel.app/collections.html`;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-    }
-
-    let cartGeneratedOTP = '';
-    let cartEmailVerified = false;
-    let cartOtpAttempts = 0;
-    let cartOtpGeneratedAt = 0;
-
-    document.getElementById('cartCustPincode').addEventListener('input', function () {
-      const delivery = getDeliveryCharge(this.value.trim());
-      const subtotal = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
-      document.getElementById('cartCheckoutTotal').textContent = '₹' + (subtotal + delivery).toLocaleString('en-IN');
-    });
-
-    document.getElementById('cartCustEmail').addEventListener('blur', function () {
-      const email = this.value.trim();
-      if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('cartVerifyBtn').style.display = 'inline-block'; }
-      else { document.getElementById('cartVerifyBtn').style.display = 'none'; cartEmailVerified = false; document.getElementById('cartConfirmBtn').disabled = true; document.getElementById('cartConfirmBtn').style.opacity = '0.5'; }
-    });
-
-    async function sendCartVerificationCode() {
-      const email = document.getElementById('cartCustEmail').value.trim();
-      const name = document.getElementById('cartCustName').value.trim();
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address'); return; }
-      if (!name) { alert('Please enter your name first'); return; }
-      const btn = document.getElementById('cartVerifyBtn');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-      cartGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-      cartOtpAttempts = 0; cartOtpGeneratedAt = Date.now();
-      try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE_ID, { customer_email: email, to_name: name, otp_code: cartGeneratedOTP, message: `Your verification code is: ${cartGeneratedOTP}` });
-        document.getElementById('cartVerifyEmailSection').style.display = 'block';
-        document.getElementById('cartOtpInput').focus();
-        btn.innerHTML = '<i class="fas fa-check"></i> Code Sent'; btn.style.background = '#27ae60';
-        setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-redo"></i> Resend Code'; btn.style.background = 'var(--gold)'; }, 3000);
-        alert('✓ Verification code sent to ' + email);
-      } catch (e) {
-        console.error('Email error:', e);
-        alert('Could not send verification code. Please try again. Error: ' + e.text || e.message || 'Unknown');
-        btn.disabled = false; btn.innerHTML = '✉ Send Verification Code';
-      }
-    }
-
-    function verifyCartOTP() {
-      const entered = document.getElementById('cartOtpInput').value.trim();
-      if (!entered) { alert('Please enter the verification code'); return; }
-      /* FIX: brute-force and expiry protection for cart OTP */
-      if (cartOtpAttempts >= MAX_OTP_ATTEMPTS) { alert('Too many failed attempts. Please request a new code.'); return; }
-      if (Date.now() - cartOtpGeneratedAt > OTP_EXPIRY_MS) { alert('Code has expired. Please request a new one.'); document.getElementById('cartVerifyEmailSection').style.display = 'none'; document.getElementById('cartVerifyBtn').style.display = 'inline-block'; return; }
-      if (entered === cartGeneratedOTP) {
-        cartEmailVerified = true;
-        document.getElementById('cartVerifyEmailSection').innerHTML = '<p style="color:#27ae60;font-size:0.85rem;margin:0"><i class="fas fa-check-circle"></i> Email verified successfully!</p>';
-        document.getElementById('cartConfirmBtn').disabled = false; document.getElementById('cartConfirmBtn').style.opacity = '1';
-        alert('✓ Email verified! You can now confirm your order.');
-      } else {
-        cartOtpAttempts++;
-        const rem = MAX_OTP_ATTEMPTS - cartOtpAttempts;
-        if (rem > 0) { alert(`❌ Invalid code. ${rem} attempt(s) remaining.`); }
-        else { alert('Too many failed attempts. Please request a new code.'); document.getElementById('cartVerifyEmailSection').style.display = 'none'; }
-        document.getElementById('cartOtpInput').value = '';
-      }
     }
 
     function setTheme(isLight) { document.body.classList.toggle('light-mode', isLight); localStorage.setItem('theme', isLight ? 'light' : 'dark'); const btn = document.getElementById('themeBtn'); if (btn) btn.textContent = isLight ? '☀️' : '🌙'; }

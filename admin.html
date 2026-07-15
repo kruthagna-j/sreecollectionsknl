@@ -57,7 +57,6 @@ tr:hover{background:rgba(200,169,107,0.03)}
 .badge-success{background:rgba(39,174,96,0.2);color:#27ae60;border:1px solid rgba(39,174,96,0.3)}
 .badge-pending{background:rgba(241,196,15,0.2);color:#f1c40f;border:1px solid rgba(241,196,15,0.3)}
 .badge-cod{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid rgba(52,152,219,0.3)}
-.badge-online{background:rgba(155,89,182,0.2);color:#9b59b6;border:1px solid rgba(155,89,182,0.3)}
 .action-btns{display:flex;gap:0.5rem}
 .btn-small{padding:0.4rem 0.8rem;font-size:0.75rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.3s}
 .btn-small:hover{border-color:var(--gold);color:var(--gold)}
@@ -210,9 +209,6 @@ tr:hover{background:rgba(200,169,107,0.03)}
       <option value="">All Statuses</option><option value="placed">Placed</option><option value="shipping">Shipping</option>
       <option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option>
     </select>
-    <select id="orderPaymentFilter" onchange="filterOrders()" style="padding:0.7rem;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:0.85rem;display:none">
-      <option value="">All Payments</option><option value="cod">COD</option>
-    </select>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
       <div style="display:flex;flex-direction:column;gap:0.4rem">
         <label style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">From Date</label>
@@ -228,7 +224,7 @@ tr:hover{background:rgba(200,169,107,0.03)}
     <table><thead><tr>
       <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="cursor:pointer"></th>
       <th>Order ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th>
-      <th>Payment</th><th>Status</th><th>Cancelled By</th><th>Date</th><th>Actions</th>
+      <th>Status</th><th>Cancelled By</th><th>Date</th><th>Actions</th>
     </tr></thead><tbody id="ordersBody"></tbody></table>
   </div>
 </div>
@@ -351,13 +347,6 @@ async function sbFetch(method,table,body,filter){
     return text?JSON.parse(text):[];
   }catch(e){console.error('API error:',e);alert('Something went wrong. Please try again.');return null;}
 }
-  if(filter)url+=`?${filter}`;
-  try{
-    const res=await fetch(url,{method,headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''},body:body?JSON.stringify(body):undefined});
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    const text=await res.text();
-    return text?JSON.parse(text):[];
-  }catch(e){console.error('Supabase error:',e);alert('Something went wrong. Please try again.');return null;}
 
 async function sendPushToAll(title,message,url='/'){
   try{
@@ -416,7 +405,7 @@ async function loadOrders(){
 
 function renderOrders(orders){
   const tbody=document.getElementById('ordersBody');
-  if(!orders||orders.length===0){tbody.innerHTML='<tr><td colspan="11"><div class="empty-state"><i class="fas fa-receipt"></i><p>No orders found.</p></div></td></tr>';return;}
+  if(!orders||orders.length===0){tbody.innerHTML='<tr><td colspan="10"><div class="empty-state"><i class="fas fa-receipt"></i><p>No orders found.</p></div></td></tr>';return;}
   /* FIX: all order data escaped to prevent stored XSS */
   tbody.innerHTML=orders.map(o=>`
     <tr>
@@ -426,7 +415,6 @@ function renderOrders(orders){
       <td>${esc(o.product_name)}</td>
       <td>${esc(String(o.quantity))}</td>
       <td>₹${(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN')}</td>
-      <td><span class="badge ${o.payment_method==='cod'?'badge-cod':'badge-online'}">${o.payment_method==='cod'?'COD':'Online'}</span></td>
       <td>
         <select onchange="updateOrderStatus('${esc(o.id)}',this.value)" style="background:var(--dark);border:1px solid var(--border);color:var(--text);padding:0.3rem;font-family:'Manrope',sans-serif;font-size:0.8rem">
           <option value="placed" ${o.status==='placed'?'selected':''}>Placed</option>
@@ -443,7 +431,7 @@ function renderOrders(orders){
         ${o.delivered_at?`<div style="font-size:0.75rem;color:#27ae60;margin-top:0.3rem">✅ ${new Date(o.delivered_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
       </td>
       <td><div class="action-btns">
-        <button class="btn-small" onclick="downloadAdminInvoice('${esc(o.id)}')" title="Invoice" style="padding:0.4rem 0.6rem"><i class="fas fa-download"></i></button>
+        <button class="btn-small" onclick="downloadAdminInvoice('${esc(o.id)}')" title="Summary" style="padding:0.4rem 0.6rem"><i class="fas fa-download"></i></button>
         <button class="btn-small btn-delete" onclick="deleteOrder('${esc(o.id)}')" title="Delete" style="padding:0.4rem 0.6rem;border-color:#e74c3c;color:#e74c3c"><i class="fas fa-trash"></i></button>
       </div></td>
     </tr>`).join('');
@@ -536,22 +524,6 @@ async function updateOrderStatus(id,status){
   const o=orders[0];
   const statusMessages={shipping:'Order Shipping 🚚',shipped:'Order Shipped 📦',delivered:'Order Delivered 🎁',cancelled:'Order Cancelled ❌',placed:'Order Confirmed ✅'};
   if(statusMessages[status]){sendPushToAll('Order Update – Sree Collections',statusMessages[status],'/my-orders.html');}
-  if(!o.customer_email)return;
-  try{
-    await fetch('https://api.emailjs.com/api/v1.0/email/send',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        service_id:'service_fxctnxu',template_id:'template_detul3i',user_id:'9fGahlws55ZA4Hq9S',
-        template_params:{
-          customer_email:o.customer_email,customer_name:o.customer_name,customer_phone:o.customer_phone,
-          order_id:o.id.toString().substring(0,8).toUpperCase(),product_name:o.product_name,
-          quantity:o.quantity,total_amount:'₹'+(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN'),
-          payment_method:o.payment_method==='cod'?'Cash on Delivery':'Online Payment',
-          order_status:statusMessages[status]||'Order status updated.'
-        }
-      })
-    });
-  }catch(e){console.error('Email error:',e);}
 }
 
 async function loadDashboard(){
@@ -597,7 +569,7 @@ async function loadDashboard(){
 async function exportCSV(){
   const ordersToExport=allOrders.length>0?allOrders:await sbFetch('GET','orders',null,'order=created_at.desc');
   if(!ordersToExport||ordersToExport.length===0){alert('No orders to export.');return;}
-  const headers=['Order ID','Customer Name','Phone','Product','Qty','Price','Total','Payment','Status','Date'];
+  const headers=['Order ID','Customer Name','Phone','Product','Qty','Price','Total','Status','Date'];
   const rows=ordersToExport.map(o=>[
     o.id.toString().substring(0,8).toUpperCase(),
     `"${(o.customer_name||'').replace(/"/g,'""')}"`,
@@ -605,7 +577,7 @@ async function exportCSV(){
     `"${(o.product_name||'').replace(/"/g,'""')}"`,
     o.quantity,o.product_price,
     o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity)),
-    o.payment_method,o.status,
+    o.status,
     new Date(o.created_at).toLocaleDateString('en-IN')
   ]);
   const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
@@ -635,17 +607,15 @@ function startOrderPolling(){
 function filterOrders(){
   const search=document.getElementById('orderSearch').value.toLowerCase();
   const status=document.getElementById('orderStatusFilter').value;
-  const payment=document.getElementById('orderPaymentFilter').value;
   const dateFrom=document.getElementById('orderDateFrom').value;
   const dateTo=document.getElementById('orderDateTo').value;
   let filtered=allOrders.filter(o=>{
     const matchSearch=!search||o.customer_name?.toLowerCase().includes(search)||o.customer_phone?.toLowerCase().includes(search)||o.product_name?.toLowerCase().includes(search)||o.id.toString().includes(search);
     const matchStatus=!status||o.status===status;
-    const matchPayment=!payment||o.payment_method===payment;
     const orderDate=new Date(o.created_at);
     const matchFrom=!dateFrom||orderDate>=new Date(dateFrom);
     const matchTo=!dateTo||orderDate<=new Date(dateTo+'T23:59:59');
-    return matchSearch&&matchStatus&&matchPayment&&matchFrom&&matchTo;
+    return matchSearch&&matchStatus&&matchFrom&&matchTo;
   });
   renderOrders(filtered);
 }
@@ -653,7 +623,6 @@ function filterOrders(){
 function resetOrderFilters(){
   document.getElementById('orderSearch').value='';
   document.getElementById('orderStatusFilter').value='';
-  document.getElementById('orderPaymentFilter').value='';
   document.getElementById('orderDateFrom').value='';
   document.getElementById('orderDateTo').value='';
   renderOrders(allOrders);
@@ -703,9 +672,9 @@ async function loadCustomers(){
 function downloadAdminInvoice(id){
   const o=allOrders.find(x=>x.id===id);
   if(!o){alert('Order not found. Please load the Orders tab first.');return;}
-  /* FIX: escape all fields in invoice HTML */
+  /* FIX: escape all fields in the summary sheet */
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml"><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#222}h1{color:#C8A96B;font-size:24px;margin-bottom:4px}.sub{color:#888;font-size:13px;margin-bottom:30px}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1A1A1A;color:#C8A96B;padding:10px;text-align:left;font-size:12px;letter-spacing:1px}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.total{font-size:18px;font-weight:bold;color:#C8A96B;text-align:right;margin-top:10px}@media print{button{display:none}}</style></head><body><h1>Sree Collections</h1><div class="sub">Kurnool, Andhra Pradesh · +91 72071 86844</div><div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><strong>Order ID:</strong> #${esc(o.id.toString().slice(-8).toUpperCase())}<br><strong>Date:</strong> ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div><div style="font-weight:bold;color:${o.status==='delivered'?'#2e7d32':'#e65100'}">${esc(o.status.toUpperCase())}</div></div><table><thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Payment</th></tr></thead><tbody><tr><td>${esc(o.customer_name)}</td><td>${esc(o.customer_phone)}</td><td>${esc(o.customer_address||'—')}</td><td>${o.payment_method==='cod'?'Cash on Delivery':'Online Payment'}</td></tr></tbody></table><table><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead><tbody><tr><td>${esc(o.product_name)}</td><td>₹${Number(o.product_price).toLocaleString('en-IN')}</td><td>${esc(String(o.quantity))}</td><td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td></tr></tbody></table><div class=\"total\">Grand Total: ₹${(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN')}</div><div style="text-align:center;margin-top:40px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:10px 30px;font-size:14px;font-weight:bold;cursor:pointer">Print / Save PDF</button></div></body></html>`;
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A1A1A'/><text y='72' x='50' text-anchor='middle' font-size='55' font-family='serif' fill='%23C8A96B'>SC</text></svg>" type="image/svg+xml"><title>Order Summary</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#222}h1{color:#C8A96B;font-size:24px;margin-bottom:4px}.sub{color:#888;font-size:13px;margin-bottom:30px}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1A1A1A;color:#C8A96B;padding:10px;text-align:left;font-size:12px;letter-spacing:1px}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.total{font-size:18px;font-weight:bold;color:#C8A96B;text-align:right;margin-top:10px}@media print{button{display:none}}</style></head><body><h1>Sree Collections</h1><div class="sub">Kurnool, Andhra Pradesh · +91 72071 86844</div><div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><strong>Order ID:</strong> #${esc(o.id.toString().slice(-8).toUpperCase())}<br><strong>Date:</strong> ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div><div style="font-weight:bold;color:${o.status==='delivered'?'#2e7d32':'#e65100'}">${esc(o.status.toUpperCase())}</div></div><table><thead><tr><th>Customer</th><th>Phone</th><th>Address</th></tr></thead><tbody><tr><td>${esc(o.customer_name)}</td><td>${esc(o.customer_phone)}</td><td>${esc(o.customer_address||'—')}</td></tr></tbody></table><table><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead><tbody><tr><td>${esc(o.product_name)}</td><td>₹${Number(o.product_price).toLocaleString('en-IN')}</td><td>${esc(String(o.quantity))}</td><td>₹${(Number(o.product_price)*Number(o.quantity)).toLocaleString('en-IN')}</td></tr></tbody></table><div class=\"total\">Grand Total: ₹${(o.total_amount?Number(o.total_amount):(Number(o.product_price)*Number(o.quantity))).toLocaleString('en-IN')}</div><div style="text-align:center;margin-top:40px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:10px 30px;font-size:14px;font-weight:bold;cursor:pointer">Print / Save PDF</button></div></body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);w.document.close();
 }

@@ -290,7 +290,7 @@ OneSignalDeferred.push(async function(OneSignal){
       <div class="why-card reveal-card"><div class="why-num">01</div><div class="why-title">500+ Unique Varieties</div><div class="why-desc">The widest selection of premium gifts in Kurnool — all under one roof.</div></div>
       <div class="why-card reveal-card"><div class="why-num">02</div><div class="why-title">Custom Hampers</div><div class="why-desc">We personalise every hamper to your budget, occasion and recipient.</div></div>
       <div class="why-card reveal-card"><div class="why-num">03</div><div class="why-title">Premium Packaging</div><div class="why-desc">Luxurious gift-ready packaging that makes the unboxing moment magical.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">04</div><div class="why-title">Online Ordering</div><div class="why-desc">Browse and order online, pay cash on delivery — pick up in store or get it delivered.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">04</div><div class="why-title">Easy Enquiries</div><div class="why-desc">Browse online and send us an order request — we'll confirm every detail with you personally.</div></div>
       <div class="why-card reveal-card"><div class="why-num">05</div><div class="why-title">4.4★ on Google</div><div class="why-desc">66+ genuine reviews from happy customers across Kurnool.</div></div>
       <div class="why-card reveal-card"><div class="why-num">06</div><div class="why-title">All Budgets Welcome</div><div class="why-desc">From ₹299 to premium ₹5000+ hampers — great gifts for every budget.</div></div>
     </div>
@@ -453,7 +453,7 @@ async function loadOrders(){
         <span style="color:var(--gold);font-weight:700">${esc(o.product_name)}</span>
         <span style="color:var(--muted);font-size:0.8rem">${new Date(o.created_at).toLocaleDateString('en-IN')}</span>
       </div>
-      <div style="font-size:0.85rem;color:var(--muted)">Qty: ${esc(String(o.quantity))} · ₹${Number(o.product_price*o.quantity).toLocaleString('en-IN')} · Cash on Delivery</div>
+      <div style="font-size:0.85rem;color:var(--muted)">Qty: ${esc(String(o.quantity))} · ₹${Number(o.product_price*o.quantity).toLocaleString('en-IN')}</div>
       <div style="margin-top:0.5rem;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center">
         <span>Status: <span style="color:${o.status==='cancelled'?'#e74c3c':'var(--gold)'}">${esc(o.status==='cancelled'?(o.cancelled_by==='customer'?'Cancelled by customer':'Cancelled by Admin'):o.status)}</span></span>
         ${o.status==='placed'?`<button onclick="cancelOrder('${esc(o.id)}')" style="padding:0.4rem 0.8rem;background:transparent;border:1px solid #e74c3c;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'Manrope',sans-serif">Cancel Order</button>`:''}
