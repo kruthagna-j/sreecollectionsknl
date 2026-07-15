@@ -985,7 +985,7 @@
       if (filter) url += `?${filter}`;
       try {
         const res = await fetch(url, { method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': method === 'POST' ? 'return=representation' : '' }, body: body ? JSON.stringify(body) : undefined });
-        if (!res.ok) { console.error('Supabase:', res.status); return null; }
+        if (!res.ok) { const errBody = await res.text().catch(() => ''); console.error('Supabase error:', res.status, errBody); return null; }
         const text = await res.text();
         return text ? JSON.parse(text) : [];
       } catch (e) { console.error('Fetch error:', e); return null; }
@@ -1290,9 +1290,17 @@
         quantity: currentQty,
         status: 'placed',
         total_amount: total,
-        gift_message: document.getElementById('giftMessage')?.value.trim() || null
+        gift_message: document.getElementById('giftMessage')?.value.trim() || null,
+        /* FIX: kept for DB compatibility — some orders tables have these as NOT NULL columns from the old checkout flow. Not shown anywhere in the UI. */
+        payment_method: 'enquiry', payment_status: 'pending'
       };
       const result = await sbFetch('POST', 'orders', orderData);
+      /* FIX: detect a failed insert instead of showing false success */
+      if (!result || !result[0]) {
+        closeModal();
+        showResult(false, 'Something Went Wrong ❌', 'We could not submit your order request. Please try again, or contact us directly on WhatsApp.', null);
+        return;
+      }
       /* FIX: increment coupon usage count */
       if (appliedCoupon && appliedCoupon.code) {
         const couponData = await sbFetch('GET', 'coupons', null, `code=eq.${encodeURIComponent(appliedCoupon.code)}`);
