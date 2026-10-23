@@ -58,24 +58,28 @@ for(const [x,z] of [[-5.9,4.7],[6.1,0.1],[-5.8,-5.2],[6.05,-9.8],[-5.9,-14.7],[6
  teddy(world,x,1.55,z,.72, z%2?'#c6a27f':'#9b7962');
  if(z<0) toy(world,x+(x<0?.75:-.75),1.55,z-.3,.85,z%3?'#c56d7a':'#8b9a6b');
 }
-// Simple articulated shop staff with gentle walk cycles; kept at a believable scale.
+// Real human photography replaces the toy-like procedural staff figures.
+// The image panels are positioned inside the boutique as photographic staff portraits.
 const staff=[];
-function makeStaff(x,z,shirt='#eee1d0',trouser='#39232c',facing=0){
- const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=facing;world.add(g);
- const skin=mat('#b77d5d',0,.75),top=mat(shirt,.04,.7),pants=mat(trouser,.08,.62),shoe=mat('#211a1c',.12,.5);
- box(g,.48,.72,.28,top,0,1.28,0);sphere(g,.19,skin,0,1.86,0,1,1.12,.95);
- // hair and a restrained collar detail
- sphere(g,.195,mat('#2c2020',0,.9),0,1.98,-.025,1, .55,1);
- box(g,.17,.07,.035,gold,0,1.62,.15,false);
- const arms=[];
- for(const side of [-1,1]){const arm=new THREE.Group();arm.position.set(side*.31,1.52,0);g.add(arm);const limb=new THREE.Mesh(new THREE.CapsuleGeometry(.075,.42,3,7),top);limb.position.y=-.22;arm.add(limb);const hand=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),skin);hand.position.y=-.48;arm.add(hand);arms.push(arm)}
- const legs=[];
- for(const side of [-1,1]){const leg=new THREE.Group();leg.position.set(side*.14,.93,0);g.add(leg);const limb=new THREE.Mesh(new THREE.CapsuleGeometry(.085,.48,3,7),pants);limb.position.y=-.28;leg.add(limb);const foot=box(leg,.15,.1,.28,shoe,0,-.55,.07,false);legs.push(leg)}
- staff.push({g,arms,legs,phase:Math.random()*6.28,baseX:x,baseZ:z});return g;
+function addRealPersonPhoto(url,x,y,z,height=2.75,flip=false){
+ const loader=new THREE.TextureLoader();
+ loader.setCrossOrigin('anonymous');
+ loader.load(url,texture=>{
+   texture.colorSpace=THREE.SRGBColorSpace;
+   const ratio=texture.image.width/texture.image.height;
+   const material=new THREE.MeshBasicMaterial({map:texture,transparent:false,side:THREE.DoubleSide});
+   const panel=new THREE.Mesh(new THREE.PlaneGeometry(height*ratio,height),material);
+   panel.position.set(x,y,z);panel.rotation.y=flip?Math.PI:0;
+   // soft brass frame, behind the photograph
+   const frame=box(world,height*ratio+.10,height+.10,.055,brass,x,y,z-.045,false);
+   frame.material=brass;
+   world.add(panel);
+ });
 }
-makeStaff(-1.05,-2.4,'#d8b77b','#3d2931',.15);
-makeStaff(1.25,-10.5,'#e8dfd0','#59404a',Math.PI);
-makeStaff(-1.15,-18.2,'#a9b6a0','#33242a',-.12);
+// Genuine photographic people, not low-poly or primitive 3D characters.
+addRealPersonPhoto('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=85',-2.25,1.85,-2.4,2.55,false);
+addRealPersonPhoto('https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85',2.35,1.85,-10.5,2.55,true);
+addRealPersonPhoto('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85',-2.2,1.85,-18.2,2.55,false);
 
 const displays=[];
 for(const side of [-1,1])for(let row=0;row<6;row++){const z=5-row*4.8,x=side*6.1;box(world,3.2,.18,3.4,dark,x,1.15,z);for(const y of [2.65,4.1,5.55])box(world,3.2,.15,3.4,gold,x,y,z);box(world,.12,5.4,.12,gold,x-1.55,3.2,z-1.55);box(world,.12,5.4,.12,gold,x+1.55,3.2,z-1.55);const d=new THREE.Group();d.position.set(x,0,z);world.add(d);displays.push(d);
