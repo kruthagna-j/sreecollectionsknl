@@ -117,6 +117,33 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 .auth-submit-btn:hover{background:var(--gold-light)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:768px){.nav-links,.nav-cta{display:none}.hamburger{display:flex}.hero h1{font-size:2.8rem}.hero-stats{gap:1.5rem}.contact-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}}
+
+/* Clear, image-led homepage refresh */
+.hero-premium{min-height:100svh;max-width:none;padding:8.5rem max(5vw,24px) 5rem;display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:clamp(2rem,5vw,5rem);align-items:center;text-align:left;background:radial-gradient(ellipse at 80% 25%,rgba(200,169,107,.12),transparent 48%),var(--dark)}
+.hero-copy{max-width:590px;margin:0 auto;width:100%;z-index:2}
+.hero-eyebrow{font-size:.76rem!important;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)!important;margin:0 0 1rem!important}
+.hero-premium .hero-badge{margin-bottom:1.4rem}
+.hero-premium h1{font-size:clamp(3.4rem,6.1vw,6.3rem);letter-spacing:-.035em;margin-bottom:1.15rem}
+.hero-premium .hero-intro{font-size:1.05rem;line-height:1.75;max-width:420px;margin:0 0 1.8rem;color:var(--muted)}
+.hero-premium .hero-btns{justify-content:flex-start}
+.hero-premium .btn-primary,.hero-premium .btn-outline{display:inline-flex;align-items:center;gap:.65rem}
+.hero-proof{display:flex;gap:1.3rem;flex-wrap:wrap;margin-top:2rem;color:var(--muted);font-size:.78rem}
+.hero-proof span{display:inline-flex;align-items:center;gap:.5rem}.hero-proof i{color:var(--gold)}
+.hero-visual{position:relative;width:100%;max-width:690px;height:clamp(390px,43vw,600px);margin:0 auto;perspective:1100px;isolation:isolate}
+.hero-photo{position:absolute;overflow:hidden;border:1px solid rgba(232,201,139,.35);box-shadow:0 24px 70px rgba(0,0,0,.35);background:var(--charcoal);will-change:transform}
+.hero-photo img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s}
+.hero-photo:hover img{transform:scale(1.045)}
+.hero-photo-main{inset:3% 14% 13% 8%;border-radius:3px 70px 3px 3px;transform:rotateY(-5deg) rotateZ(-1deg)}
+.hero-photo-small{width:35%;height:37%;right:0;top:2%;border-radius:3px 3px 3px 38px;transform:rotateY(-4deg) rotateZ(3deg)}
+.hero-photo-detail{width:38%;height:36%;left:0;bottom:0;border-radius:3px 34px 3px 3px;transform:rotateY(5deg) rotateZ(-3deg)}
+.hero-note{position:absolute;right:0;bottom:8%;display:flex;align-items:center;gap:.75rem;padding:1rem 1.15rem;background:var(--charcoal);border:1px solid var(--border);box-shadow:0 14px 40px rgba(0,0,0,.25);z-index:3}
+.hero-note-mark{font-size:1.6rem;color:var(--gold)}.hero-note strong,.hero-note small{display:block}.hero-note strong{font-size:.82rem}.hero-note small{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+@media(min-width:769px){.hero-premium .hero-copy>*{animation:fadeUp .7s both}.hero-premium .hero-copy>*:nth-child(2){animation-delay:.06s}.hero-premium .hero-copy>*:nth-child(3){animation-delay:.12s}.hero-premium .hero-visual{animation:heroFloatIn .9s .12s both}}
+@keyframes heroFloatIn{from{opacity:0;transform:translateY(20px) rotateX(3deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
+@media(max-width:900px){.hero-premium{grid-template-columns:1fr;gap:2.2rem;padding-top:8rem}.hero-copy{max-width:700px}.hero-visual{height:clamp(340px,68vw,500px);max-width:650px;width:100%}.hero-premium .hero-intro{margin-left:0}.hero-premium .hero-btns{justify-content:flex-start}}
+@media(max-width:520px){.hero-premium{padding:7.5rem 1.15rem 3rem;gap:1.4rem}.hero-premium h1{font-size:clamp(3rem,13vw,4rem)}.hero-premium .hero-intro{font-size:.98rem}.hero-premium .btn-primary,.hero-premium .btn-outline{padding:.85rem 1rem;font-size:.75rem}.hero-proof{gap:.65rem;flex-direction:column}.hero-visual{height:340px}.hero-photo-main{inset:5% 10% 13% 5%}.hero-photo-small{width:37%;height:34%;right:0}.hero-photo-detail{width:39%;height:31%}.hero-note{right:0;bottom:5%;padding:.75rem}.hero-note small{max-width:150px}}
+@media(prefers-reduced-motion:reduce){.hero-premium .hero-copy>*,.hero-premium .hero-visual{animation:none!important}.hero-photo img{transition:none}}
+
 </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J8KF1GD5ZB');</script>
@@ -197,21 +224,23 @@ OneSignalDeferred.push(async function(OneSignal){
   <a href="javascript:void(0)" onclick="toggleMenu();handleProtectedFeature('admin-login.html',true)" style="color:var(--muted);font-size:0.78rem">🔑 Admin Login</a>
 </div>
 
-<section class="hero">
-  <div>
-    <div class="hero-badge"><i class="fas fa-star"></i> 4.4★ Rating · 66+ Reviews</div>
-    <h1>Gifts That<br>Create <em>Memories</em></h1>
-    <p>Kurnool's most trusted gift destination. 500+ handpicked varieties for every occasion, emotion, and person you love.</p>
+<section class="hero hero-premium">
+  <div class="hero-copy">
+    <div class="hero-badge"><i class="fas fa-star"></i> 4.4★ · 66+ Reviews</div>
+    <p class="hero-eyebrow">SREE COLLECTIONS · KURNOOL</p>
+    <h1>Make every<br>moment <em>special.</em></h1>
+    <p class="hero-intro">Thoughtful gifts for birthdays, celebrations and the people you love.</p>
     <div class="hero-btns">
-      <a href="./collections.html" class="btn-primary">Explore Collections</a>
-      <a href="tel:+917207186844" class="btn-outline"><i class="fas fa-phone"></i> Call Us</a>
+      <a href="./collections.html" class="btn-primary">Shop Gifts <i class="fas fa-arrow-right"></i></a>
+      <a href="https://wa.me/917207186844" class="btn-outline" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Ask on WhatsApp</a>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Gift Varieties</div></div>
-      <div class="stat"><div class="stat-num">4.4★</div><div class="stat-label">Google Rating</div></div>
-      <div class="stat"><div class="stat-num">66+</div><div class="stat-label">Reviews</div></div>
-      <div class="stat"><div class="stat-num">12+</div><div class="stat-label">Categories</div></div>
-    </div>
+    <div class="hero-proof"><span><i class="fas fa-gift"></i> Gifts for every occasion</span><span><i class="fas fa-map-marker-alt"></i> Gandhi Nagar, Kurnool</span></div>
+  </div>
+  <div class="hero-visual" aria-label="Gift boxes, flowers and teddy bears">
+    <div class="hero-photo hero-photo-main"><img src="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?auto=format&fit=crop&w=1200&q=85" alt="Beautifully wrapped gifts" fetchpriority="high"></div>
+    <div class="hero-photo hero-photo-small"><img src="https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=700&q=85" alt="Fresh bouquet of flowers" loading="lazy"></div>
+    <div class="hero-photo hero-photo-detail"><img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=700&q=85" alt="Gift wrapping and ribbons" loading="lazy"></div>
+    <div class="hero-note"><span class="hero-note-mark">✦</span><span><strong>For every occasion</strong><small>Find a gift they'll remember</small></span></div>
   </div>
 </section>
 
@@ -656,5 +685,26 @@ window.addEventListener('storage',e=>{if(e.key==='theme')applyTheme();});
   window.addEventListener('DOMContentLoaded',init);
 })();
 </script>
+
+<script>
+(function(){
+  const visual=document.querySelector('.hero-visual');
+  if(!visual || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const photos=[...visual.querySelectorAll('.hero-photo')];
+  let ticking=false;
+  function update(){
+    const rect=visual.getBoundingClientRect();
+    const progress=Math.max(-1,Math.min(1,(window.innerHeight*.5-(rect.top+rect.height*.5))/window.innerHeight));
+    photos.forEach((photo,i)=>{
+      const depth=[-9,13,18][i]||0;
+      photo.style.translate='0 '+(progress*depth)+'px';
+    });
+    ticking=false;
+  }
+  window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true;}},{passive:true});
+  update();
+})();
+</script>
+
 </body>
 </html>
