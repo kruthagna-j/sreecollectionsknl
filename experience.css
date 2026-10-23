@@ -9,3 +9,6 @@
 @media(max-width:700px){.velvet-curtains.opened .curtain-logo{left:6vw;top:22px;width:48px;height:48px}.curtain-logo{width:132px;height:132px}}
 
 #story{position:relative;z-index:2}.curtain-logo{cursor:default}.velvet-curtains:not(.opened) .curtain{transform:translateX(0)}.velvet-curtains.opened .curtain-seam{opacity:0}
+
+/* Keep a real document scroll range even while the cinematic panels are visually empty. */
+html,body{min-height:100%;}body{min-height:500vh;}#story{min-height:500vh;}#story>.panel{height:100vh;min-height:100vh;overflow:visible;pointer-events:none;}
