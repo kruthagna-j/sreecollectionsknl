@@ -5,12 +5,12 @@ const canvas=document.querySelector('#experience');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.42;
 const scene=new THREE.Scene();scene.background=new THREE.Color('#170f12');scene.fog=new THREE.FogExp2('#170f12',.032);
 const camera=new THREE.PerspectiveCamera(43,innerWidth/innerHeight,.1,120);camera.position.set(0,2.5,13);
-scene.add(new THREE.HemisphereLight('#ffe8ca','#24121a',1.55));scene.add(new THREE.AmbientLight('#c7a4a0',.4));
+scene.add(new THREE.HemisphereLight('#ffe8ca','#24121a',2.2));scene.add(new THREE.AmbientLight('#e0b8a0',.8));
 function light(c,power,pos,dist=32){const l=new THREE.PointLight(c,power,dist,2);l.position.set(...pos);scene.add(l)}
-light('#ffd99a',115,[0,5,5]);light('#bf7b3c',80,[-6,3,-7]);light('#ffdfaa',85,[5,4,-17]);
+light('#ffd99a',180,[0,5,5],40);light('#bf7b3c',135,[-6,3,-7],35);light('#ffdfaa',155,[5,4,-17],38);
 const mat=(color,metalness=.05,roughness=.45)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
 const gold=mat('#c6a15e',.78,.25),cream=mat('#e6d7c2',.08,.45),burgundy=mat('#702b42',.15,.4),dark=mat('#29151d',.1,.7),green=mat('#3c5844',.05,.7),pink=mat('#d98f9c',.05,.55),red=mat('#a83243',.05,.5),ribbon=mat('#e2c17e',.42,.28);
 function box(parent,w,h,d,m,x,y,z,cast=true){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;parent.add(o);return o}
@@ -78,7 +78,15 @@ makeStaff(1.25,-10.5,'#e8dfd0','#59404a',Math.PI);
 makeStaff(-1.15,-18.2,'#a9b6a0','#33242a',-.12);
 
 const displays=[];
-for(const side of [-1,1])for(let row=0;row<6;row++){const z=5-row*4.8,x=side*6.1;box(world,3.2,.18,3.4,dark,x,1.15,z);for(const y of [2.65,4.1,5.55])box(world,3.2,.15,3.4,gold,x,y,z);box(world,.12,5.4,.12,gold,x-1.55,3.2,z-1.55);box(world,.12,5.4,.12,gold,x+1.55,3.2,z-1.55);const d=new THREE.Group();d.position.set(x,0,z);world.add(d);displays.push(d);if((row+side)%3===0){gift(d,-.55,1.5,0,.75,row%2?'#8e2f4a':'#d8c4a3');gift(d,.45,1.5,-.1,.55,'#52644c')}else if((row+side)%3===1){gift(d,-.8,1.5,0,.9,'#8d344d');gift(d,.15,1.5,-.1,.7,'#e4d3b5');bouquet(d,.9,1.45,.1,.75)}else{bouquet(d,-.85,1.4,0,.8);gift(d,.1,1.5,.1,.8,'#52644c');gift(d,.85,1.5,-.1,.62,'#b34a55')}const spot=new THREE.PointLight('#ffcc82',8,5,2);spot.position.set(x,5.4,z);world.add(spot)}
+for(const side of [-1,1])for(let row=0;row<6;row++){const z=5-row*4.8,x=side*6.1;box(world,3.2,.18,3.4,dark,x,1.15,z);for(const y of [2.65,4.1,5.55])box(world,3.2,.15,3.4,gold,x,y,z);box(world,.12,5.4,.12,gold,x-1.55,3.2,z-1.55);box(world,.12,5.4,.12,gold,x+1.55,3.2,z-1.55);const d=new THREE.Group();d.position.set(x,0,z);world.add(d);displays.push(d);
+for(const sy of [2.82,4.27,5.72]){
+ const pick=(row+Math.round(sy*10)+side+10)%4;
+ if(pick===0){gift(d,-.92,sy,0,.58,'#8d344d');gift(d,.02,sy,-.05,.48,'#d8c4a3');bouquet(d,.98,sy-.05,.05,.48)}
+ else if(pick===1){gift(d,-.72,sy,0,.56,'#52644c');bouquet(d,.35,sy-.05,.05,.56);gift(d,1.02,sy,-.1,.4,'#b34a55')}
+ else if(pick===2){bouquet(d,-.88,sy-.05,0,.53);gift(d,.05,sy,-.05,.62,'#8e2f4a');gift(d,.92,sy,-.1,.42,'#d8c4a3')}
+ else {gift(d,-.95,sy,0,.45,'#d8c4a3');gift(d,-.12,sy,-.08,.58,'#8d344d');gift(d,.82,sy,-.08,.48,'#52644c')}
+}
+if((row+side)%3===0){gift(d,-.55,1.5,0,.75,row%2?'#8e2f4a':'#d8c4a3');gift(d,.45,1.5,-.1,.55,'#52644c')}else if((row+side)%3===1){gift(d,-.8,1.5,0,.9,'#8d344d');gift(d,.15,1.5,-.1,.7,'#e4d3b5');bouquet(d,.9,1.45,.1,.75)}else{bouquet(d,-.85,1.4,0,.8);gift(d,.1,1.5,.1,.8,'#52644c');gift(d,.85,1.5,-.1,.62,'#b34a55')}const spot=new THREE.PointLight('#ffcc82',22,8,1.6);spot.position.set(x,6.5,z);world.add(spot);const shelfGlow=new THREE.Mesh(new THREE.BoxGeometry(3,.025,.035),new THREE.MeshBasicMaterial({color:'#ffda91'}));shelfGlow.position.set(x,2.73,z+1.55);world.add(shelfGlow)}
 for(let i=0;i<5;i++){const z=3-i*6.2;box(world,2.4,.25,1.8,gold,0,.35,z);box(world,2.15,.7,1.55,burgundy,0,.8,z);gift(world,-.55,1.35,z,.65,'#d8c5aa');gift(world,.25,1.35,z-.1,.75,'#9c304a');if(i%2===0)bouquet(world,.8,1.2,z+.1,.6);else gift(world,.8,1.3,z+.1,.52,'#52644c')}
 for(let z=5;z>-25;z-=7){const cord=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,1.5,8),dark);cord.position.set(0,6.4,z);world.add(cord);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.16,14,10),new THREE.MeshStandardMaterial({color:'#ffe1a4',emissive:'#ffb84c',emissiveIntensity:2.2}));bulb.position.set(0,5.65,z);world.add(bulb);const l=new THREE.PointLight('#ffc976',14,8,2);l.position.set(0,5.5,z);world.add(l)}
 
@@ -100,11 +108,8 @@ const chandeliers=[chandelier(4,1.12),chandelier(-5.5,.96),chandelier(-14.5,.96)
 const moteCount=260,positions=new Float32Array(moteCount*3);for(let i=0;i<moteCount;i++){positions[i*3]=(Math.random()-.5)*16;positions[i*3+1]=Math.random()*7;positions[i*3+2]=-Math.random()*38+8}const dustGeo=new THREE.BufferGeometry();dustGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e6c17a',size:.03,transparent:true,opacity:.62}));scene.add(dust);
 let target=0,current=0;
 const curtainLayer=document.querySelector('#velvet-curtains');
-const openingMark=document.querySelector('#opening-mark');
-let curtainOpened=false;
-openingMark?.addEventListener('click',event=>{event.preventDefault();if(!curtainOpened){curtainOpened=true;curtainLayer?.classList.add('opened');setTimeout(()=>lenis.scrollTo(window.innerHeight*.68,{duration:2.0}),900);}else{lenis.scrollTo(0,{duration:1.4});}});
 const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
-function readScroll(value){const scroll=value??lenis.scroll;const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scroll/max:0}
+function readScroll(value){const scroll=value??lenis.scroll;const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scroll/max:0;curtainLayer?.classList.toggle('opened',scroll>80)}
 lenis.on('scroll',({scroll})=>readScroll(scroll));readScroll(0);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01=v=>Math.max(0,Math.min(1,v));
