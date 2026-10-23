@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+import Lenis from 'https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.mjs';
 
 const canvas=document.querySelector('#experience');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
@@ -80,10 +81,29 @@ const displays=[];
 for(const side of [-1,1])for(let row=0;row<6;row++){const z=5-row*4.8,x=side*6.1;box(world,3.2,.18,3.4,dark,x,1.15,z);for(const y of [2.65,4.1,5.55])box(world,3.2,.15,3.4,gold,x,y,z);box(world,.12,5.4,.12,gold,x-1.55,3.2,z-1.55);box(world,.12,5.4,.12,gold,x+1.55,3.2,z-1.55);const d=new THREE.Group();d.position.set(x,0,z);world.add(d);displays.push(d);if((row+side)%3===0){gift(d,-.55,1.5,0,.75,row%2?'#8e2f4a':'#d8c4a3');gift(d,.45,1.5,-.1,.55,'#52644c')}else if((row+side)%3===1){gift(d,-.8,1.5,0,.9,'#8d344d');gift(d,.15,1.5,-.1,.7,'#e4d3b5');bouquet(d,.9,1.45,.1,.75)}else{bouquet(d,-.85,1.4,0,.8);gift(d,.1,1.5,.1,.8,'#52644c');gift(d,.85,1.5,-.1,.62,'#b34a55')}const spot=new THREE.PointLight('#ffcc82',8,5,2);spot.position.set(x,5.4,z);world.add(spot)}
 for(let i=0;i<5;i++){const z=3-i*6.2;box(world,2.4,.25,1.8,gold,0,.35,z);box(world,2.15,.7,1.55,burgundy,0,.8,z);gift(world,-.55,1.35,z,.65,'#d8c5aa');gift(world,.25,1.35,z-.1,.75,'#9c304a');if(i%2===0)bouquet(world,.8,1.2,z+.1,.6);else gift(world,.8,1.3,z+.1,.52,'#52644c')}
 for(let z=5;z>-25;z-=7){const cord=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,1.5,8),dark);cord.position.set(0,6.4,z);world.add(cord);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.16,14,10),new THREE.MeshStandardMaterial({color:'#ffe1a4',emissive:'#ffb84c',emissiveIntensity:2.2}));bulb.position.set(0,5.65,z);world.add(bulb);const l=new THREE.PointLight('#ffc976',14,8,2);l.position.set(0,5.5,z);world.add(l)}
+
+// Crystal chandeliers: layered brass rings, crystal drops and warm candle bulbs.
+const crystal=new THREE.MeshPhysicalMaterial({color:'#f8e7c5',metalness:.08,roughness:.08,transmission:.35,thickness:.4,clearcoat:1,clearcoatRoughness:.06});
+const brass=mat('#d8b56d',.86,.19);
+function chandelier(z,scale=1){
+ const rig=new THREE.Group();rig.position.set(0,6.55,z);rig.scale.setScalar(scale);world.add(rig);
+ const cord=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.8,10),brass);cord.position.y=.4;rig.add(cord);
+ for(const [r,y,tube] of [[.72,0,.045],[.48,-.23,.035],[.25,-.43,.025]]){
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(r,tube,10,64),brass);ring.rotation.x=Math.PI/2;ring.position.y=y;rig.add(ring);
+  for(let i=0;i<12;i++){const a=i*Math.PI/6;const drop=new THREE.Mesh(new THREE.OctahedronGeometry(.09,0),crystal);drop.position.set(Math.cos(a)*r,y-.17,Math.sin(a)*r);drop.scale.set(.55,1.7,.55);rig.add(drop)}
+ }
+ for(let i=0;i<8;i++){const a=i*Math.PI/4,x=Math.cos(a)*.66,zz=Math.sin(a)*.66;const flame=new THREE.Mesh(new THREE.SphereGeometry(.085,12,10),new THREE.MeshStandardMaterial({color:'#fff0bf',emissive:'#ffc65c',emissiveIntensity:3.4}));flame.position.set(x,-.13,zz);rig.add(flame)}
+ const glow=new THREE.PointLight('#ffd18a',scale*28,12,2);glow.position.y=-.55;rig.add(glow);return rig;
+}
+const chandeliers=[chandelier(4,1.12),chandelier(-5.5,.96),chandelier(-14.5,.96),chandelier(-23,.9)];
+
 const moteCount=260,positions=new Float32Array(moteCount*3);for(let i=0;i<moteCount;i++){positions[i*3]=(Math.random()-.5)*16;positions[i*3+1]=Math.random()*7;positions[i*3+2]=-Math.random()*38+8}const dustGeo=new THREE.BufferGeometry();dustGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e6c17a',size:.03,transparent:true,opacity:.62}));scene.add(dust);
-let target=0,current=0;function readScroll(){const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scrollY/max:0}addEventListener('scroll',readScroll,{passive:true});readScroll();
+let target=0,current=0;
+const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
+function readScroll(value){const scroll=value??lenis.scroll;const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scroll/max:0}
+lenis.on('scroll',({scroll})=>readScroll(scroll));readScroll(0);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01=v=>Math.max(0,Math.min(1,v));
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=THREE.MathUtils.damp(current,target,reduced?20:2.7,dt);const opening=THREE.MathUtils.smoothstep(current,.015,.16);leftHinge.rotation.y=-opening*1.08;rightHinge.rotation.y=opening*1.08;const travel=current*35;camera.position.x=THREE.MathUtils.damp(camera.position.x,Math.sin(current*Math.PI*2)*.72,2,dt);camera.position.y=THREE.MathUtils.damp(camera.position.y,2.5+Math.sin(current*Math.PI*3)*.2,2,dt);camera.position.z=THREE.MathUtils.damp(camera.position.z,13-travel,2.8,dt);camera.lookAt(Math.sin(current*5)*.22,2.2,-7-travel*.38);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staff.forEach((p,i)=>{const walk=t*1.7+p.phase;p.g.position.x=p.baseX+Math.sin(t*.22+p.phase)*.16;p.g.position.z=p.baseZ+Math.sin(t*.31+p.phase)*.22;p.legs.forEach((l,j)=>{l.rotation.x=Math.sin(walk+j*Math.PI)*.34});p.arms.forEach((a,j)=>{a.rotation.x=Math.sin(walk+j*Math.PI+Math.PI)*.22});p.g.position.y=Math.abs(Math.sin(walk*2))*.018});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
+function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*35;camera.position.x=Math.sin(current*Math.PI*2)*.52;camera.position.y=2.5+Math.sin(current*Math.PI*3)*.12;camera.position.z=13-travel;camera.lookAt(Math.sin(current*5)*.16,2.3,-7-travel*.38);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staff.forEach((p,i)=>{const walk=t*1.7+p.phase;p.g.position.x=p.baseX+Math.sin(t*.22+p.phase)*.16;p.g.position.z=p.baseZ+Math.sin(t*.31+p.phase)*.22;p.legs.forEach((l,j)=>{l.rotation.x=Math.sin(walk+j*Math.PI)*.34});p.arms.forEach((a,j)=>{a.rotation.x=Math.sin(walk+j*Math.PI+Math.PI)*.22});p.g.position.y=Math.abs(Math.sin(walk*2))*.018});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<700?53:43;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6))});
