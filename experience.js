@@ -115,6 +115,7 @@ const chandeliers=[chandelier(4,1.12),chandelier(-5.5,.96),chandelier(-14.5,.96)
 
 const moteCount=260,positions=new Float32Array(moteCount*3);for(let i=0;i<moteCount;i++){positions[i*3]=(Math.random()-.5)*16;positions[i*3+1]=Math.random()*7;positions[i*3+2]=-Math.random()*38+8}const dustGeo=new THREE.BufferGeometry();dustGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e6c17a',size:.03,transparent:true,opacity:.62}));scene.add(dust);
 let target=0,current=0;
+const clamp01=v=>Math.max(0,Math.min(1,v));
 const curtainLayer=document.querySelector('#velvet-curtains');
 const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
 function readScroll(value){const scroll=typeof value==='number'?value:(window.scrollY||lenis.scroll||0);const max=Math.max(document.documentElement.scrollHeight-innerHeight,1);target=clamp01(scroll/max);curtainLayer?.classList.toggle('opened',scroll>40)}
@@ -123,7 +124,6 @@ addEventListener('scroll',()=>readScroll(window.scrollY),{passive:true});
 addEventListener('wheel',event=>{if(Math.abs(event.deltaY)>0){requestAnimationFrame(()=>readScroll(window.scrollY))}},{passive:true});
 readScroll(window.scrollY);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const clamp01=v=>Math.max(0,Math.min(1,v));
 function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*33.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,4.65,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-26.55,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staffMixers.forEach(mixer=>mixer.update(Math.min(characterClock.getDelta(),.05)));staff.forEach((p)=>{p.model.position.x=p.baseX+Math.sin(t*.18+p.phase)*.025;p.model.position.z=p.baseZ+Math.sin(t*.14+p.phase)*.025});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
 requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<700?53:43;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6))});
