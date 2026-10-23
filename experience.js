@@ -5,12 +5,12 @@ const canvas=document.querySelector('#experience');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.42;
-const scene=new THREE.Scene();scene.background=new THREE.Color('#170f12');scene.fog=new THREE.FogExp2('#170f12',.032);
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.75;
+const scene=new THREE.Scene();scene.background=new THREE.Color('#e8d5b8');scene.fog=new THREE.FogExp2('#d8c09b',.009);
 const camera=new THREE.PerspectiveCamera(43,innerWidth/innerHeight,.1,120);camera.position.set(0,2.5,13);
-scene.add(new THREE.HemisphereLight('#ffe8ca','#24121a',2.2));scene.add(new THREE.AmbientLight('#e0b8a0',.8));
+scene.add(new THREE.HemisphereLight('#fff4dc','#6f4b37',3.1));scene.add(new THREE.AmbientLight('#fff0d4',1.65));
 function light(c,power,pos,dist=32){const l=new THREE.PointLight(c,power,dist,2);l.position.set(...pos);scene.add(l)}
-light('#ffd99a',180,[0,5,5],40);light('#bf7b3c',135,[-6,3,-7],35);light('#ffdfaa',155,[5,4,-17],38);
+light('#ffe5b1',260,[0,5,5],40);light('#efb96d',185,[-6,3,-7],35);light('#fff0ce',230,[5,4,-17],38);light('#fff0d0',190,[0,5,-22],32);
 const mat=(color,metalness=.05,roughness=.45)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
 const gold=mat('#c6a15e',.78,.25),cream=mat('#e6d7c2',.08,.45),burgundy=mat('#702b42',.15,.4),dark=mat('#29151d',.1,.7),green=mat('#3c5844',.05,.7),pink=mat('#d98f9c',.05,.55),red=mat('#a83243',.05,.5),ribbon=mat('#e2c17e',.42,.28);
 function box(parent,w,h,d,m,x,y,z,cast=true){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;parent.add(o);return o}
@@ -18,12 +18,10 @@ function sphere(parent,r,m,x,y,z,sx=1,sy=1,sz=1){const o=new THREE.Mesh(new THRE
 function gift(parent,x,y,z,s,c){const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);box(g,s,s*.72,s,mat(c,.08,.32),0,0,0);box(g,s*1.04,s*.1,s*1.04,ribbon,0,s*.2,0);box(g,s*.13,s*.75,s*1.05,ribbon,0,0,0);sphere(g,s*.13,ribbon,-s*.15,s*.48,0,1,.5,.6);sphere(g,s*.13,ribbon,s*.15,s*.48,0,1,.5,.6);return g}
 function bouquet(parent,x,y,z,s=1){const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);for(let i=0;i<7;i++){const a=i*Math.PI*2/7;const stem=new THREE.Mesh(new THREE.CylinderGeometry(.012,.018,.65*s,7),green);stem.position.set(Math.cos(a)*.13*s,.5*s,Math.sin(a)*.13*s);stem.rotation.z=-Math.cos(a)*.25;g.add(stem);sphere(g,.11*s,i%2?pink:red,Math.cos(a)*.18*s,.86*s,Math.sin(a)*.18*s,1,.7,1)}sphere(g,.12*s,cream,0,.94*s,0,1,.7,1);box(g,.35*s,.36*s,.35*s,burgundy,0,.18*s,0)}
 const world=new THREE.Group();scene.add(world);
-box(world,30,.25,60,mat('#6c4a43',.25,.3),0,-.16,-12,false);box(world,30,10,.35,dark,0,5,-27,false);box(world,.25,10,60,dark,-8,5,-12,false);box(world,.25,10,60,dark,8,5,-12,false);
+box(world,30,.25,60,mat('#c3a184',.18,.36),0,-.16,-12,false);box(world,30,10,.35,mat('#cbb69b',.08,.68),0,5,-27,false);box(world,.25,10,60,mat('#d9c5a8',.12,.55),-8,5,-12,false);box(world,.25,10,60,mat('#d9c5a8',.12,.55),8,5,-12,false);
 for(let z=7;z>-29;z-=4){box(world,16,.12,.18,gold,0,7.3,z,false);for(const x of [-7.6,7.6])box(world,.12,7,.12,gold,x,3.6,z,false)}
 for(const x of [-4.2,4.2])box(world,.17,6,.18,gold,x,2.9,8,false);box(world,8.55,.18,.2,gold,0,5.9,8,false);
-// A real textured sign sits on the rear wall and comes into view as the camera travels.
-const signCanvas=document.createElement('canvas');signCanvas.width=1200;signCanvas.height=300;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#24151b';ctx.fillRect(0,0,1200,300);ctx.strokeStyle='#d8b77b';ctx.lineWidth=4;ctx.strokeRect(16,16,1168,268);ctx.textAlign='center';ctx.fillStyle='#e4c58b';ctx.font='58px Georgia';ctx.fillText('SREE COLLECTIONS',600,135);ctx.font='28px Arial';ctx.fillText('SINCE 1998',600,205);const tex=new THREE.CanvasTexture(signCanvas);tex.colorSpace=THREE.SRGBColorSpace;const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.4,1.35),new THREE.MeshBasicMaterial({map:tex}));sign.position.set(0,5,-26.75);world.add(sign);
-
+// No end-wall brand billboard; the cinematic reveal transitions to the collection cards.
 // Grand hinged entrance doors: the first scroll beat opens the boutique.
 const entrance=new THREE.Group();world.add(entrance);entrance.position.set(0,0,8.1);
 box(entrance,8.8,.22,.55,gold,0,6.3,0,false);
@@ -118,12 +116,12 @@ let target=0,current=0;
 const clamp01=v=>Math.max(0,Math.min(1,v));
 const curtainLayer=document.querySelector('#velvet-curtains');
 const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
-function readScroll(value){const scroll=typeof value==='number'?value:(window.scrollY||lenis.scroll||0);const max=Math.max(document.documentElement.scrollHeight-innerHeight,1);target=clamp01(scroll/max);curtainLayer?.classList.toggle('opened',scroll>40)}
+function readScroll(value){const scroll=typeof value==='number'?value:(window.scrollY||lenis.scroll||0);const story=document.querySelector('#story');const max=Math.max((story?.offsetHeight||document.documentElement.scrollHeight)-innerHeight,1);target=clamp01(scroll/max);curtainLayer?.classList.toggle('opened',scroll>40)}
 lenis.on('scroll',({scroll})=>readScroll(scroll));
 addEventListener('scroll',()=>readScroll(window.scrollY),{passive:true});
 addEventListener('wheel',event=>{if(Math.abs(event.deltaY)>0){requestAnimationFrame(()=>readScroll(window.scrollY))}},{passive:true});
 readScroll(window.scrollY);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*33.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,4.65,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-26.55,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staffMixers.forEach(mixer=>mixer.update(Math.min(characterClock.getDelta(),.05)));staff.forEach((p)=>{p.model.position.x=p.baseX+Math.sin(t*.18+p.phase)*.025;p.model.position.z=p.baseZ+Math.sin(t*.14+p.phase)*.025});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
+function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*29.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,3.25,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-20.5,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staffMixers.forEach(mixer=>mixer.update(Math.min(characterClock.getDelta(),.05)));staff.forEach((p)=>{const stride=t*.24+p.phase;p.model.position.x=p.baseX+Math.sin(stride)*.42;p.model.position.z=p.baseZ+Math.cos(stride*.7)*.65;p.model.rotation.y=Math.sin(stride)*.28+(p.baseX<0?-.18:Math.PI+.18)});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
 requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<700?53:43;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6))});
