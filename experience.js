@@ -98,7 +98,11 @@ function chandelier(z,scale=1){
 const chandeliers=[chandelier(4,1.12),chandelier(-5.5,.96),chandelier(-14.5,.96),chandelier(-23,.9)];
 
 const moteCount=260,positions=new Float32Array(moteCount*3);for(let i=0;i<moteCount;i++){positions[i*3]=(Math.random()-.5)*16;positions[i*3+1]=Math.random()*7;positions[i*3+2]=-Math.random()*38+8}const dustGeo=new THREE.BufferGeometry();dustGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e6c17a',size:.03,transparent:true,opacity:.62}));scene.add(dust);
-let target=0,current=0;\nlet curtainOpened=false;\nconst curtainLayer=document.querySelector('#velvet-curtains');\nconst openingMark=document.querySelector('#opening-mark');\nopeningMark?.addEventListener('click',event=>{event.preventDefault();if(curtainOpened){lenis.scrollTo(0,{duration:1.4});return;}curtainOpened=true;curtainLayer?.classList.add('opened');setTimeout(()=>lenis.scrollTo(window.innerHeight*.72,{duration:2.2}),850);});
+let target=0,current=0;
+const curtainLayer=document.querySelector('#velvet-curtains');
+const openingMark=document.querySelector('#opening-mark');
+let curtainOpened=false;
+openingMark?.addEventListener('click',event=>{event.preventDefault();if(!curtainOpened){curtainOpened=true;curtainLayer?.classList.add('opened');setTimeout(()=>lenis.scrollTo(window.innerHeight*.68,{duration:2.0}),900);}else{lenis.scrollTo(0,{duration:1.4});}});
 const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
 function readScroll(value){const scroll=value??lenis.scroll;const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scroll/max:0}
 lenis.on('scroll',({scroll})=>readScroll(scroll));readScroll(0);
