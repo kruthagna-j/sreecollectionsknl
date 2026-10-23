@@ -144,6 +144,33 @@ footer{background:var(--charcoal);border-top:1px solid var(--border);padding:3re
 @media(max-width:520px){.hero-premium{padding:7.5rem 1.15rem 3rem;gap:1.4rem}.hero-premium h1{font-size:clamp(3rem,13vw,4rem)}.hero-premium .hero-intro{font-size:.98rem}.hero-premium .btn-primary,.hero-premium .btn-outline{padding:.85rem 1rem;font-size:.75rem}.hero-proof{gap:.65rem;flex-direction:column}.hero-visual{height:340px}.hero-photo-main{inset:5% 10% 13% 5%}.hero-photo-small{width:37%;height:34%;right:0}.hero-photo-detail{width:39%;height:31%}.hero-note{right:0;bottom:5%;padding:.75rem}.hero-note small{max-width:150px}}
 @media(prefers-reduced-motion:reduce){.hero-premium .hero-copy>*,.hero-premium .hero-visual{animation:none!important}.hero-photo img{transition:none}}
 
+
+/* Smooth, restrained scroll motion: keep the content readable and the movement purposeful. */
+#bgCanvas{display:none}
+.hero-visual{transform-style:preserve-3d}
+.hero-photo{transition:box-shadow .45s ease,border-color .45s ease;box-shadow:0 26px 70px rgba(0,0,0,.32),0 0 0 1px rgba(200,169,107,.04)}
+.hero-visual::after{content:"";position:absolute;inset:5% 8% 8% 8%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse,rgba(200,169,107,.15),transparent 68%);opacity:var(--scroll-glow,.1);filter:blur(24px);transition:opacity .2s}
+.hero-photo-main img{transform:scale(1.02)}
+.hero-note{backdrop-filter:blur(14px)}
+.scroll-reveal-ready{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:var(--reveal-delay,0ms)}
+.scroll-reveal-ready.scroll-reveal-in{opacity:1;transform:translateY(0)}
+.collection-card,.why-card,.review-card{will-change:transform}
+.collection-card:hover{transform:translateY(-5px)}
+.section-title{margin-bottom:1rem}
+.section-subtitle{max-width:480px}
+@media(max-width:768px){
+  .hero-premium{min-height:auto;padding-bottom:3rem}
+  .hero-visual{perspective:700px}
+  .hero-photo-main{border-top-right-radius:42px}
+  .hero-note{font-size:.9rem}
+  .scroll-reveal-ready{transform:translateY(14px)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .scroll-reveal-ready,.scroll-reveal-ready.scroll-reveal-in{opacity:1;transform:none;transition:none}
+  .hero-photo{translate:none!important;rotate:none!important;scale:1!important}
+}
+
 </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J8KF1GD5ZB');</script>
@@ -248,16 +275,16 @@ OneSignalDeferred.push(async function(OneSignal){
   <div style="max-width:1200px;margin:0 auto">
     <div class="section-label">What We Offer</div>
     <h2 class="section-title">Browse Our Collections</h2>
-    <p class="section-subtitle">From heartfelt personal gifts to elegant corporate hampers — we have something for every occasion.</p>
+    <p class="section-subtitle">Find the right gift for every occasion.</p>
     <div class="collections-grid">
-      <a href="collections.html?category=Birthday" class="collection-card reveal-card"><div class="card-icon">🎂</div><div class="card-title">Birthday</div><div class="card-desc">Make their day unforgettable with personalised birthday hampers and surprise boxes.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Wedding" class="collection-card reveal-card"><div class="card-icon">💍</div><div class="card-title">Wedding</div><div class="card-desc">Elegant wedding gifts and return gift sets that leave a lasting impression.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Anniversary" class="collection-card reveal-card"><div class="card-icon">❤️</div><div class="card-title">Anniversary</div><div class="card-desc">Celebrate love milestones with premium anniversary gift boxes.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Corporate" class="collection-card reveal-card"><div class="card-icon">💼</div><div class="card-title">Corporate</div><div class="card-desc">Impress clients and employees with thoughtful corporate gift sets.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Festivals" class="collection-card reveal-card"><div class="card-icon">🪔</div><div class="card-title">Festivals</div><div class="card-desc">Festive hampers for Diwali, Ugadi, Sankranti and all Indian celebrations.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Baby+Shower" class="collection-card reveal-card"><div class="card-icon">👶</div><div class="card-title">Baby Shower</div><div class="card-desc">Adorable baby shower kits and newborn gift sets for the little one.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="collections.html?category=Retirement" class="collection-card reveal-card"><div class="card-icon">🏆</div><div class="card-title">Retirement</div><div class="card-desc">Honour a lifetime of work with meaningful retirement gifts.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
-      <a href="./collections.html" class="collection-card reveal-card"><div class="card-icon">🎁</div><div class="card-title">All Gifts</div><div class="card-desc">Browse our full catalogue — 500+ varieties for every budget and occasion.</div><div class="card-arrow">View All <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Birthday" class="collection-card reveal-card"><div class="card-icon">🎂</div><div class="card-title">Birthday</div><div class="card-desc">Birthday surprises and personalised gifts.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Wedding" class="collection-card reveal-card"><div class="card-icon">💍</div><div class="card-title">Wedding</div><div class="card-desc">Wedding gifts and return-gift sets.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Anniversary" class="collection-card reveal-card"><div class="card-icon">❤️</div><div class="card-title">Anniversary</div><div class="card-desc">Thoughtful gifts for every milestone.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Corporate" class="collection-card reveal-card"><div class="card-icon">💼</div><div class="card-title">Corporate</div><div class="card-desc">Gift sets for teams and clients.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Festivals" class="collection-card reveal-card"><div class="card-icon">🪔</div><div class="card-title">Festivals</div><div class="card-desc">Gifts for festivals and family celebrations.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Baby+Shower" class="collection-card reveal-card"><div class="card-icon">👶</div><div class="card-title">Baby Shower</div><div class="card-desc">Baby shower and newborn gifts.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="collections.html?category=Retirement" class="collection-card reveal-card"><div class="card-icon">🏆</div><div class="card-title">Retirement</div><div class="card-desc">Celebrate a well-earned milestone.</div><div class="card-arrow">Shop Now <i class="fas fa-arrow-right"></i></div></a>
+      <a href="./collections.html" class="collection-card reveal-card"><div class="card-icon">🎁</div><div class="card-title">All Gifts</div><div class="card-desc">Explore gifts for every budget and occasion.</div><div class="card-arrow">View All <i class="fas fa-arrow-right"></i></div></a>
     </div>
   </div>
 </section>
@@ -316,12 +343,12 @@ OneSignalDeferred.push(async function(OneSignal){
     <div class="section-label">Why Choose Us</div>
     <h2 class="section-title">Kurnool's Most Trusted Gift Store</h2>
     <div class="why-grid">
-      <div class="why-card reveal-card"><div class="why-num">01</div><div class="why-title">500+ Unique Varieties</div><div class="why-desc">The widest selection of premium gifts in Kurnool — all under one roof.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">02</div><div class="why-title">Custom Hampers</div><div class="why-desc">We personalise every hamper to your budget, occasion and recipient.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">03</div><div class="why-title">Premium Packaging</div><div class="why-desc">Luxurious gift-ready packaging that makes the unboxing moment magical.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">04</div><div class="why-title">Easy Enquiries</div><div class="why-desc">Browse online and send us an order request — we'll confirm every detail with you personally.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">05</div><div class="why-title">4.4★ on Google</div><div class="why-desc">66+ genuine reviews from happy customers across Kurnool.</div></div>
-      <div class="why-card reveal-card"><div class="why-num">06</div><div class="why-title">All Budgets Welcome</div><div class="why-desc">From ₹299 to premium ₹5000+ hampers — great gifts for every budget.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">01</div><div class="why-title">500+ Unique Varieties</div><div class="why-desc">A wide choice for every occasion.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">02</div><div class="why-title">Custom Hampers</div><div class="why-desc">Made to suit your occasion and budget.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">03</div><div class="why-title">Premium Packaging</div><div class="why-desc">Beautiful packaging, ready to gift.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">04</div><div class="why-title">Easy Enquiries</div><div class="why-desc">Browse online and confirm your order with us.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">05</div><div class="why-title">4.4★ on Google</div><div class="why-desc">Rated 4.4★ by local customers.</div></div>
+      <div class="why-card reveal-card"><div class="why-num">06</div><div class="why-title">All Budgets Welcome</div><div class="why-desc">Options for a range of budgets.</div></div>
     </div>
   </div>
 </section>
@@ -401,7 +428,7 @@ OneSignalDeferred.push(async function(OneSignal){
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="index.html" class="logo">Sree Collections</a>
-        <p>Kurnool's most loved gift store. Premium gifts for every occasion, every emotion, every person.</p>
+        <p>Thoughtful gifts for life's special moments.</p>
         <div style="display:flex;gap:1rem;margin-top:1rem">
           <a href="https://wa.me/917207186844" target="_blank" style="color:var(--muted);font-size:1.2rem"><i class="fab fa-whatsapp"></i></a>
           <a href="tel:+917207186844" style="color:var(--muted);font-size:1.2rem"><i class="fas fa-phone"></i></a>
@@ -689,19 +716,46 @@ window.addEventListener('storage',e=>{if(e.key==='theme')applyTheme();});
 <script>
 (function(){
   const visual=document.querySelector('.hero-visual');
-  if(!visual || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const revealItems=document.querySelectorAll('.collection-card,.why-card,.review-card,.contact-item,.map-box');
+  if(reduced){
+    revealItems.forEach(el=>el.classList.add('scroll-reveal-ready','scroll-reveal-in'));
+    return;
+  }
+  revealItems.forEach((el,i)=>{
+    el.classList.add('scroll-reveal-ready');
+    el.style.setProperty('--reveal-delay',Math.min(i%4,3)*70+'ms');
+  });
+  const revealObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('scroll-reveal-in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },{threshold:.12,rootMargin:'0px 0px -35px 0px'});
+  revealItems.forEach(el=>revealObserver.observe(el));
+
+  if(!visual) return;
   const photos=[...visual.querySelectorAll('.hero-photo')];
   let ticking=false;
   function update(){
     const rect=visual.getBoundingClientRect();
-    const progress=Math.max(-1,Math.min(1,(window.innerHeight*.5-(rect.top+rect.height*.5))/window.innerHeight));
+    const range=Math.max(1,window.innerHeight+rect.height);
+    const progress=Math.max(0,Math.min(1,(window.innerHeight-rect.top)/range));
+    const centered=progress-.5;
     photos.forEach((photo,i)=>{
-      const depth=[-9,13,18][i]||0;
-      photo.style.translate='0 '+(progress*depth)+'px';
+      const depth=[-34,48,62][i]||0;
+      const tilt=[-2.5,4,-4][i]||0;
+      photo.style.translate='0 '+(centered*depth)+'px';
+      photo.style.rotate=tilt*centered+'deg';
+      photo.style.scale=String(1-Math.abs(centered)*.035);
     });
+    visual.style.setProperty('--scroll-glow',String(.08+Math.abs(centered)*.13));
     ticking=false;
   }
   window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true;}},{passive:true});
+  window.addEventListener('resize',update,{passive:true});
   update();
 })();
 </script>
