@@ -117,8 +117,11 @@ const moteCount=260,positions=new Float32Array(moteCount*3);for(let i=0;i<moteCo
 let target=0,current=0;
 const curtainLayer=document.querySelector('#velvet-curtains');
 const lenis=new Lenis({lerp:.085,wheelMultiplier:.92,smoothWheel:true,syncTouch:false,anchors:true});
-function readScroll(value){const scroll=value??lenis.scroll;const max=document.documentElement.scrollHeight-innerHeight;target=max>0?scroll/max:0;curtainLayer?.classList.toggle('opened',scroll>80)}
-lenis.on('scroll',({scroll})=>readScroll(scroll));readScroll(0);
+function readScroll(value){const scroll=typeof value==='number'?value:(window.scrollY||lenis.scroll||0);const max=Math.max(document.documentElement.scrollHeight-innerHeight,1);target=clamp01(scroll/max);curtainLayer?.classList.toggle('opened',scroll>40)}
+lenis.on('scroll',({scroll})=>readScroll(scroll));
+addEventListener('scroll',()=>readScroll(window.scrollY),{passive:true});
+addEventListener('wheel',event=>{if(Math.abs(event.deltaY)>0){requestAnimationFrame(()=>readScroll(window.scrollY))}},{passive:true});
+readScroll(window.scrollY);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01=v=>Math.max(0,Math.min(1,v));
 function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*33.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,4.65,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-26.55,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staffMixers.forEach(mixer=>mixer.update(Math.min(characterClock.getDelta(),.05)));staff.forEach((p)=>{p.model.position.x=p.baseX+Math.sin(t*.18+p.phase)*.025;p.model.position.z=p.baseZ+Math.sin(t*.14+p.phase)*.025});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
