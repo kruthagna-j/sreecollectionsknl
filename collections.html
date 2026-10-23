@@ -1061,8 +1061,26 @@
       const cat = urlParams.get('category');
       if (cat) {
         document.getElementById('pageTitle').textContent = esc(cat) + ' Gifts';
-        document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent.includes(cat)) btn.classList.add('active'); });
-        renderProducts(allProducts.filter(p => p.category === cat));
+        const normalized = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const categoryMatches = (product) => {
+          const category = normalized(product.category);
+          const searchable = normalized([product.name, product.description, product.category].join(' '));
+          const aliases = {
+            'bouquets flowers': ['bouquet','flower','floral'],
+            'soft toys': ['soft toy','teddy','plush','stuffed animal'],
+            'celebrations': ['celebration','party','festival','wedding','birthday'],
+            'just because': ['surprise','gift','personalized','personalised']
+          };
+          const key = normalized(cat);
+          const terms = aliases[key] || [key];
+          return terms.some(term => category.includes(term) || searchable.includes(term));
+        };
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.classList.remove('active');
+          if (normalized(btn.textContent).includes(normalized(cat))) btn.classList.add('active');
+        });
+        currentCategory = cat;
+        renderProducts(allProducts.filter(categoryMatches));
       } else { renderProducts(products); }
       loadProductRatings();
     }
