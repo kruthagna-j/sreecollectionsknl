@@ -672,6 +672,55 @@
         padding: 1.5rem
       }
     }
+  
+    /* SREE COLLECTIONS: warm boutique storefront + horizontal product rail */
+    :root {
+      --gold:#a77a3f; --gold-light:#c6a56b; --dark:#f5ecdf;
+      --charcoal:#fff9f0; --card-bg:#fffdf8; --text:#34221e;
+      --muted:#806d60; --border:rgba(126,82,49,.22);
+      color-scheme:light;
+    }
+    body { background:#f5ecdf; color:#34221e; }
+    nav { background:rgba(255,249,240,.94)!important; border-bottom:1px solid #c6a56b66; box-shadow:0 8px 28px #4b2a1710; }
+    .logo { color:#713448; }
+    .page-header { background:radial-gradient(ellipse at 50% 0%,#fffdf8 0%,#f4e5d0 72%); border-bottom:1px solid #c6a56b66; }
+    .page-header h1 { color:#713448; letter-spacing:-.035em; }
+    .page-header p { color:#806d60; }
+    .filter-bar { background:#f5ecdf; border-bottom:1px solid #c6a56b44; overflow-x:auto; flex-wrap:nowrap; justify-content:flex-start; scrollbar-width:none; }
+    .filter-bar::-webkit-scrollbar { display:none; }
+    .filter-btn { flex:0 0 auto; border-radius:999px; color:#735f52; border-color:#c6a56b70; }
+    .filter-btn.active,.filter-btn:hover { color:#713448; border-color:#a77a3f; background:#ead8bd; }
+    .products-section { max-width:none; padding:2rem clamp(18px,5vw,76px) 4rem; }
+    .products-grid { display:flex; gap:1.15rem; overflow-x:auto; overflow-y:hidden; padding:8px 2px 24px; scroll-snap-type:x mandatory; scroll-behavior:smooth; overscroll-behavior-x:contain; scrollbar-width:none; }
+    .products-grid::-webkit-scrollbar { display:none; }
+    .product-card { flex:0 0 clamp(250px,26vw,330px); min-width:0; border:1px solid #c6a56b55; border-radius:5px; background:#fffaf2; color:#34221e; scroll-snap-align:start; box-shadow:0 12px 34px #5b38200d; transition:transform .28s,box-shadow .28s,border-color .28s; }
+    .product-card:hover { border-color:#a77a3f; transform:translateY(-4px); box-shadow:0 20px 42px #5b38201a; }
+    .product-img,.product-img-placeholder { height:clamp(190px,20vw,250px); }
+    .product-img-placeholder { background:linear-gradient(135deg,#f4e6d2,#e4c9a7); color:#8d6045; }
+    .product-body { padding:1.25rem; }
+    .product-category { color:#8b6338; }
+    .product-rail-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.8rem 0 .65rem; }
+    .product-rail-hint { color:#866a4d; font-size:.68rem; letter-spacing:.15em; }
+    #productRailPosition { display:inline-block; margin-left:1rem; color:#a38a72; letter-spacing:.02em; text-transform:none; }
+    .product-rail-arrows { display:flex; gap:.55rem; }
+    .product-rail-arrows button { width:40px;height:40px;border:1px solid #b99a68;border-radius:50%;background:#fff9f0;color:#713448;font-size:1.2rem;cursor:pointer;transition:background .2s,transform .2s; }
+    .product-rail-arrows button:hover { background:#ead8bd;transform:translateY(-2px); }
+    .skeleton-grid { background:transparent; }
+    .skeleton-card { background:#fff9f0; border-color:#c6a56b55; }
+    .skeleton-img,.skeleton-line { background:linear-gradient(90deg,#eee0cd 25%,#f8efdf 50%,#eee0cd 75%); background-size:200% 100%; }
+    .no-products { color:#735f52; }
+    .modal { background:#fff9f0!important; color:#34221e!important; border:1px solid #c6a56b88!important; }
+    input,select,textarea { background:#fffdf8!important; color:#34221e!important; border-color:#c6a56b88!important; }
+    @media(max-width:650px) {
+      nav { padding:.85rem 1rem; }
+      .page-header { padding:6rem 1.2rem 2rem; }
+      .filter-bar { padding:1rem; }
+      .product-card { flex-basis:82vw; }
+      .product-rail-hint { font-size:.58rem; }
+      #productRailPosition { display:block; margin:.35rem 0 0; }
+      .product-rail-arrows button { width:36px;height:36px; }
+    }
+
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8KF1GD5ZB"></script>
   <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-J8KF1GD5ZB');</script>
@@ -844,7 +893,14 @@
         </div>
       </div>
     </div>
-    <div class="products-grid" id="productsGrid"></div>
+    <div class="product-rail-toolbar" aria-label="Product carousel controls">
+      <span class="product-rail-hint">EXPLORE THE COLLECTION <span id="productRailPosition">Swipe to browse</span></span>
+      <div class="product-rail-arrows">
+        <button type="button" id="productRailPrev" aria-label="Previous products">←</button>
+        <button type="button" id="productRailNext" aria-label="Next products">→</button>
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid" tabindex="0" aria-label="Gift products"></div>
     <div class="no-products" id="noProducts" style="display:none">
       <i class="fas fa-box-open" style="font-size:3rem;color:var(--gold);display:block;margin-bottom:1rem"></i>
       No products found in this category yet.<br>
@@ -1336,7 +1392,37 @@ fetch(`https://wa.me/917207186844?text=${encodeURIComponent(waMsg)}`, {mode:'no-
       if (!lastOrder) return;
       const o = lastOrder;
       /* FIX: escape all data in summary */
-      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Order Summary – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>Sree Collections</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Order Request Summary</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="total-row"><span>Estimated Total</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>We'll contact you shortly to confirm this order. Thank you for choosing Sree Collections!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div></body></html>`;
+      const invoiceHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Order Summary – ${esc(o.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#222;max-width:700px;margin:0 auto}.header{background:#1A1A1A;color:#C8A96B;padding:30px;text-align:center;margin-bottom:30px}.header h1{font-size:28px;margin:0;letter-spacing:2px}.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f5f5f5}.label{color:#888}.value{font-weight:600;text-align:right}.total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:bold;border-top:2px solid #C8A96B;margin-top:8px}.total-row .value{color:#C8A96B}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;color:#888;font-size:12px}@media print{.no-print{display:none}}</style></head><body><div class="header"><h1>Sree Collections</h1><p style="color:#888;font-size:13px">Kurnool, Andhra Pradesh · +91 72071 86844</p></div><div style="text-align:center;margin-bottom:25px"><div style="display:inline-block;background:#C8A96B;color:#1A1A1A;padding:6px 16px;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">Order Request Summary</div><div style="font-size:13px;color:#888">Order ID: <strong style="color:#222">${esc(o.id)}</strong> | ${esc(o.date)} at ${esc(o.time)}</div></div><div style="margin-bottom:25px"><div class="row"><span class="label">Name</span><span class="value">${esc(o.name)}</span></div><div class="row"><span class="label">Phone</span><span class="value">${esc(o.phone)}</span></div>${o.email ? `<div class="row"><span class="label">Email</span><span class="value">${esc(o.email)}</span></div>` : ''} ${o.address ? `<div class="row"><span class="label">Address</span><span class="value">${esc(o.address)}</span></div>` : ''}</div><div><div class="row"><span class="label">Product</span><span class="value">${esc(o.product)}</span></div><div class="row"><span class="label">Quantity</span><span class="value">${esc(String(o.qty))}</span></div><div class="total-row"><span>Estimated Total</span><span class="value">₹${Number(o.total).toLocaleString('en-IN')}</span></div></div><div class="footer"><p>We'll contact you shortly to confirm this order. Thank you for choosing Sree Collections!</p></div><div class="no-print" style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#C8A96B;color:#1A1A1A;border:none;padding:12px 30px;font-size:14px;font-weight:bold;cursor:pointer">PRINT / SAVE PDF</button></div>
+  <script>
+    (() => {
+      const rail = document.getElementById('productsGrid');
+      const prev = document.getElementById('productRailPrev');
+      const next = document.getElementById('productRailNext');
+      const position = document.getElementById('productRailPosition');
+      if (!rail || !prev || !next) return;
+      const step = () => Math.max(rail.clientWidth * .78, 280);
+      prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: 'smooth' }));
+      next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: 'smooth' }));
+      const update = () => {
+        const max = Math.max(0, rail.scrollWidth - rail.clientWidth);
+        prev.disabled = rail.scrollLeft <= 2;
+        next.disabled = rail.scrollLeft >= max - 2;
+        if (position) position.textContent = max <= 2 ? 'All products' : `${Math.min(Math.floor(rail.scrollLeft / step()) + 1, Math.ceil(rail.scrollWidth / step()))} · Swipe or use arrows`;
+      };
+      rail.addEventListener('scroll', update, { passive: true });
+      rail.addEventListener('wheel', event => {
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) > 0) {
+          rail.scrollLeft += event.deltaX;
+        }
+      }, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      const observer = new MutationObserver(update);
+      observer.observe(rail, { childList: true });
+      update();
+    })();
+  </script>
+
+</body></html>`;
       const blob = new Blob([invoiceHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = `OrderSummary-${o.id}-SreeCollections.html`; a.click();
