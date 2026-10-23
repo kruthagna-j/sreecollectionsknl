@@ -58,28 +58,32 @@ for(const [x,z] of [[-5.9,4.7],[6.1,0.1],[-5.8,-5.2],[6.05,-9.8],[-5.9,-14.7],[6
  teddy(world,x,1.55,z,.72, z%2?'#c6a27f':'#9b7962');
  if(z<0) toy(world,x+(x<0?.75:-.75),1.55,z-.3,.85,z%3?'#c56d7a':'#8b9a6b');
 }
-// Real human photography replaces the toy-like procedural staff figures.
-// The image panels are positioned inside the boutique as photographic staff portraits.
+// Real human characters are loaded as rigged 3D GLB models (not photos or primitive toys).
+// Put licensed, textured human GLB assets in ./assets/people/ and set the matching URLs below.
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
 const staff=[];
-function addRealPersonPhoto(url,x,y,z,height=2.75,flip=false){
- const loader=new THREE.TextureLoader();
- loader.setCrossOrigin('anonymous');
- loader.load(url,texture=>{
-   texture.colorSpace=THREE.SRGBColorSpace;
-   const ratio=texture.image.width/texture.image.height;
-   const material=new THREE.MeshBasicMaterial({map:texture,transparent:false,side:THREE.DoubleSide});
-   const panel=new THREE.Mesh(new THREE.PlaneGeometry(height*ratio,height),material);
-   panel.position.set(x,y,z);panel.rotation.y=flip?Math.PI:0;
-   // soft brass frame, behind the photograph
-   const frame=box(world,height*ratio+.10,height+.10,.055,brass,x,y,z-.045,false);
-   frame.material=brass;
-   world.add(panel);
- });
+const staffMixers=[];
+const characterClock=new THREE.Clock();
+const personLoader=new GLTFLoader();
+const realPeople=[
+ {url:'./assets/people/shop-assistant.glb',x:-2.2,z:-2.4,scale:1},
+ {url:'./assets/people/customer.glb',x:2.25,z:-10.5,scale:1},
+ {url:'./assets/people/shop-assistant-2.glb',x:-2.1,z:-18.2,scale:1}
+];
+for(const person of realPeople){
+ personLoader.load(person.url,gltf=>{
+   const model=gltf.scene;
+   const bounds=new THREE.Box3().setFromObject(model);
+   const height=bounds.max.y-bounds.min.y;
+   if(height>0)model.scale.setScalar(1.78/height);
+   model.position.set(person.x,-.02,person.z);
+   model.rotation.y=person.x<0?-.18:Math.PI+.18;
+   model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+   world.add(model);
+   if(gltf.animations?.length){const mixer=new THREE.AnimationMixer(model);mixer.clipAction(gltf.animations[0]).play();staffMixers.push(mixer)}
+   staff.push({model,baseX:person.x,baseZ:person.z,phase:Math.random()*Math.PI*2});
+ },undefined,error=>console.warn('3D human model not loaded:',person.url,error));
 }
-// Genuine photographic people, not low-poly or primitive 3D characters.
-addRealPersonPhoto('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=85',-2.25,1.85,-2.4,2.55,false);
-addRealPersonPhoto('https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85',2.35,1.85,-10.5,2.55,true);
-addRealPersonPhoto('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85',-2.2,1.85,-18.2,2.55,false);
 
 const displays=[];
 for(const side of [-1,1])for(let row=0;row<6;row++){const z=5-row*4.8,x=side*6.1;box(world,3.2,.18,3.4,dark,x,1.15,z);for(const y of [2.65,4.1,5.55])box(world,3.2,.15,3.4,gold,x,y,z);box(world,.12,5.4,.12,gold,x-1.55,3.2,z-1.55);box(world,.12,5.4,.12,gold,x+1.55,3.2,z-1.55);const d=new THREE.Group();d.position.set(x,0,z);world.add(d);displays.push(d);
@@ -117,6 +121,6 @@ function readScroll(value){const scroll=value??lenis.scroll;const max=document.d
 lenis.on('scroll',({scroll})=>readScroll(scroll));readScroll(0);
 const clock=new THREE.Clock(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01=v=>Math.max(0,Math.min(1,v));
-function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*33.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,4.65,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-26.55,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staff.forEach((p,i)=>{const walk=t*1.7+p.phase;p.g.position.x=p.baseX+Math.sin(t*.22+p.phase)*.16;p.g.position.z=p.baseZ+Math.sin(t*.31+p.phase)*.22;p.legs.forEach((l,j)=>{l.rotation.x=Math.sin(walk+j*Math.PI)*.34});p.arms.forEach((a,j)=>{a.rotation.x=Math.sin(walk+j*Math.PI+Math.PI)*.22});p.g.position.y=Math.abs(Math.sin(walk*2))*.018});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
+function animate(time){requestAnimationFrame(animate);lenis.raf(time);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;current=reduced?target:current+(target-current)*Math.min(1,dt*14);const opening=THREE.MathUtils.smoothstep(current,.008,.13);leftHinge.rotation.y=-opening*1.12;rightHinge.rotation.y=opening*1.12;const travel=current*33.5;camera.position.x=Math.sin(current*Math.PI*2)*.34;camera.position.y=2.65;camera.position.z=13-travel;const finalBlend=THREE.MathUtils.smoothstep(current,.78,.96);const lookY=THREE.MathUtils.lerp(2.35,4.65,finalBlend);const lookZ=THREE.MathUtils.lerp(-7-travel*.38,-26.55,finalBlend);camera.lookAt(Math.sin(current*5)*.1*(1-finalBlend),lookY,lookZ);displays.forEach((d,i)=>{d.rotation.y=Math.sin(t*.38+i*.8)*.018});staffMixers.forEach(mixer=>mixer.update(Math.min(characterClock.getDelta(),.05)));staff.forEach((p)=>{p.model.position.x=p.baseX+Math.sin(t*.18+p.phase)*.025;p.model.position.z=p.baseZ+Math.sin(t*.14+p.phase)*.025});dust.rotation.y=Math.sin(t*.07)*.02;dust.position.y=Math.sin(t*.22)*.05;renderer.render(scene,camera)}
 requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<700?53:43;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6))});
