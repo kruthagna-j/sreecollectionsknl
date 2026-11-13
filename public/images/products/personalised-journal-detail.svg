@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="270 400 660 825" width="1200" height="1500" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#f4efe7"/>
+      <stop offset="1" stop-color="#e5dccc"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#fffaf0" stop-opacity="0.95"/>
+      <stop offset="0.65" stop-color="#fffaf0" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#fffaf0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c793"/>
+      <stop offset="0.45" stop-color="#b58b4a"/>
+      <stop offset="1" stop-color="#8f6a35"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#d9b878"/>
+      <stop offset="0.55" stop-color="#a9814c"/>
+      <stop offset="1" stop-color="#7f5d30"/>
+    </linearGradient>
+    <linearGradient id="velvet" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#81283a"/>
+      <stop offset="0.55" stop-color="#5c1826"/>
+      <stop offset="1" stop-color="#3f0f1a"/>
+    </linearGradient>
+    <linearGradient id="ivory" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#ecdfc9"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6a85c" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#c07a32" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#8a4e1e" stop-opacity="0.9"/>
+    </linearGradient>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.7" fill="#2d2923" opacity="0.05"/>
+      <circle cx="4" cy="4" r="0.55" fill="#2d2923" opacity="0.035"/>
+    </pattern>
+    <pattern id="linen" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M0 7H14M7 0V14" stroke="#2d2923" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)"/>
+  <ellipse cx="600" cy="660" rx="560" ry="520" fill="url(#glow)"/>
+  <path d="M250 1040V520c0-193 157-350 350-350s350 157 350 350v520" fill="none" stroke="url(#gold)" stroke-opacity="0.36" stroke-width="2"/>
+  <path d="M278 1060V528c0-180 144-324 322-324s322 144 322 324v532" fill="none" stroke="url(#gold)" stroke-opacity="0.18" stroke-width="1"/>
+  <ellipse cx="600" cy="1165" rx="320" ry="38" fill="#3a2a22" opacity="0.13"/>
+  <g>
+  <ellipse cx="600" cy="1100" rx="300" ry="40" fill="#3a2a22" opacity="0.18"/>
+  <g transform="translate(600 880) rotate(-4)">
+    <rect x="-250" y="-280" width="500" height="560" rx="10" fill="#d8c9ad"/>
+    <rect x="-268" y="-268" width="500" height="556" rx="10" fill="#e8dcc3"/>
+    <rect x="-232" y="-300" width="440" height="560" rx="8" fill="#6b2130"/>
+    <rect x="-232" y="-300" width="440" height="560" rx="8" fill="url(#linen)" opacity="0.3"/>
+    <rect x="-232" y="-300" width="38" height="560" fill="#521823"/>
+    <path d="M-212-250v460" stroke="#b58b4a" stroke-width="2" opacity="0.7"/>
+    <path d="M-170 0h290M-170 36h190" stroke="#e2c793" stroke-width="2" opacity="0.5"/>
+    <text x="-170" y="-90" font-family="Georgia, serif" font-size="42" letter-spacing="8" fill="#e6c98f">SREE</text>
+    <path d="M-250 250c160 30 330 30 470-10" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.18"/>
+  </g>
+  <g transform="translate(820 1010) rotate(18)">
+    <rect x="-160" y="-9" width="320" height="18" rx="9" fill="#2f2a24"/>
+    <path d="M-160 0h-34l12-8v16z" fill="url(#gold)"/>
+    <rect x="130" y="-11" width="52" height="22" rx="6" fill="url(#gold)"/>
+  </g>
+  <path d="M330 760c24-10 46-8 64 4" stroke="#5e6a50" stroke-width="3" fill="none" opacity="0.55"/>
+</g>
+  <rect width="1200" height="1500" fill="url(#grain)"/>
+  <rect x="34" y="34" width="1132" height="1432" fill="none" stroke="url(#gold)" stroke-opacity="0.22"/>
+</svg>

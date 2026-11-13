@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#eceee5"/>
+      <stop offset="1" stop-color="#d9dfd2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#f9fbef" stop-opacity="0.95"/>
+      <stop offset="0.65" stop-color="#f9fbef" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#f9fbef" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c793"/>
+      <stop offset="0.45" stop-color="#b58b4a"/>
+      <stop offset="1" stop-color="#8f6a35"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#d9b878"/>
+      <stop offset="0.55" stop-color="#a9814c"/>
+      <stop offset="1" stop-color="#7f5d30"/>
+    </linearGradient>
+    <linearGradient id="velvet" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#81283a"/>
+      <stop offset="0.55" stop-color="#5c1826"/>
+      <stop offset="1" stop-color="#3f0f1a"/>
+    </linearGradient>
+    <linearGradient id="ivory" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#ecdfc9"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6a85c" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#c07a32" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#8a4e1e" stop-opacity="0.9"/>
+    </linearGradient>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.7" fill="#28302a" opacity="0.05"/>
+      <circle cx="4" cy="4" r="0.55" fill="#28302a" opacity="0.035"/>
+    </pattern>
+    <pattern id="linen" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M0 7H14M7 0V14" stroke="#28302a" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)"/>
+  <ellipse cx="600" cy="660" rx="560" ry="520" fill="url(#glow)"/>
+  <path d="M250 1040V520c0-193 157-350 350-350s350 157 350 350v520" fill="none" stroke="url(#gold)" stroke-opacity="0.36" stroke-width="2"/>
+  <path d="M278 1060V528c0-180 144-324 322-324s322 144 322 324v532" fill="none" stroke="url(#gold)" stroke-opacity="0.18" stroke-width="1"/>
+  <ellipse cx="600" cy="1165" rx="320" ry="38" fill="#3a2a22" opacity="0.13"/>
+  <g>
+  <ellipse cx="600" cy="1090" rx="300" ry="42" fill="#3a2a22" opacity="0.18"/>
+  <g transform="translate(600 900)">
+    <ellipse cx="0" cy="170" rx="300" ry="44" fill="#b58b4a" opacity="0.2"/>
+    <g>
+      <path d="M-110 150c-30-10-48-38-48-70 0-24 16-46 38-54-6-70 44-120 110-120 64 0 116 48 112 116 30 12 46 38 42 64-6 42-44 72-86 72z" fill="url(#ivory)"/>
+      <path d="M-120-10c-40 0-64 28-64 56 0 34 26 60 62 60" fill="none" stroke="#e8dbc4" stroke-width="18"/>
+      <path d="M112-20c46 4 70 34 64 68-6 30-30 48-58 50" fill="none" stroke="#e8dbc4" stroke-width="18"/>
+      <ellipse cx="0" cy="-92" rx="46" ry="14" fill="#d9c7a8"/>
+      <circle cx="0" cy="-118" r="16" fill="#e8dbc4"/>
+      <path d="M-100 20c60 18 140 18 200 0" stroke="#d9c7a8" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(-185 200)">
+      <ellipse cx="0" cy="0" rx="88" ry="22" fill="#e8dcc3"/>
+      <path d="M-70 0c0 52 26 82 70 82s70-30 70-82" fill="url(#ivory)"/>
+      <path d="M70 10c34 0 42 42 8 46" fill="none" stroke="#e8dbc4" stroke-width="12"/>
+      <ellipse cx="0" cy="0" rx="56" ry="13" fill="#c9b692" opacity="0.6"/>
+    </g>
+    <g transform="translate(195 210) scale(0.86)">
+      <ellipse cx="0" cy="0" rx="88" ry="22" fill="#e8dcc3"/>
+      <path d="M-70 0c0 52 26 82 70 82s70-30 70-82" fill="url(#ivory)"/>
+      <path d="M70 10c34 0 42 42 8 46" fill="none" stroke="#e8dbc4" stroke-width="12"/>
+      <ellipse cx="0" cy="0" rx="56" ry="13" fill="#c9b692" opacity="0.6"/>
+    </g>
+  </g>
+  <path d="M322 760c34-14 62-10 86 6" stroke="#5e6a50" stroke-width="3" fill="none" opacity="0.5"/>
+</g>
+  <rect width="1200" height="1500" fill="url(#grain)"/>
+  <rect x="34" y="34" width="1132" height="1432" fill="none" stroke="url(#gold)" stroke-opacity="0.22"/>
+</svg>

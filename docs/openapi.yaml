@@ -1,0 +1,2130 @@
+openapi: 3.1.0
+info:
+  title: Sree Collections API
+  version: 0.1.0
+  description: |
+    Storefront, account and staff API for Sree Collections.
+
+    Base path: `/api/v1`. All responses are JSON except the invoice endpoint, which returns HTML.
+
+    **Authentication** uses the HttpOnly `sc_session` cookie created by `/auth/login`.
+    Guests receive an HttpOnly `sc_cart` cookie.
+
+    **CSRF**: every `POST`, `PATCH`, `PUT` and `DELETE` requires the `x-csrf-token` header to match
+    the `sc_csrf` cookie. Make any GET request first if the cookie does not exist yet. The `CsrfToken`
+    parameter is listed on every mutating operation.
+
+    **Origin**: mutating requests that send an `Origin` header must match the server's `APP_ORIGIN`.
+
+    **Money** is integer paise throughout (₹1,499.00 = `149900`). Timestamps are UTC ISO-8601.
+
+    This specification is a hand-maintained reference. The route handlers in `server/routes/` are
+    the source of truth; see `docs/API.md` for narrative details and role matrix.
+servers:
+  - url: /api/v1
+tags:
+  - name: Health
+  - name: Auth
+  - name: Catalogue
+  - name: Cart
+  - name: Checkout
+  - name: Account
+  - name: Content
+  - name: Admin
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Service and capability status
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: Database unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /auth/session:
+    get:
+      tags: [Auth]
+      summary: Current session user
+      responses:
+        '200':
+          description: Current user or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    oneOf:
+                      - $ref: '#/components/schemas/User'
+                      - type: 'null'
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Create a customer account and start a session
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: Account created; guest cart merged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in and merge the guest cart
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, maxLength: 160 }
+                password: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Destroy the current session
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '200':
+          description: Signed out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+
+  /auth/password:
+    post:
+      tags: [Auth]
+      summary: Change password (revokes other sessions)
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 10 }
+      responses:
+        '200':
+          description: Password changed
+        '400':
+          description: Current password invalid or new password too weak
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/password/forgot:
+    post:
+      tags: [Auth]
+      summary: Password recovery (not available)
+      description: Always returns 503 because no email provider is configured.
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '503':
+          description: Email provider not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /catalog/categories:
+    get:
+      tags: [Catalogue]
+      summary: Active categories with product counts
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+  /catalog/meta:
+    get:
+      tags: [Catalogue]
+      summary: Filter and sort metadata
+      responses:
+        '200':
+          description: Occasions, recipients, budgets, tags and sort options
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /catalog/products:
+    get:
+      tags: [Catalogue]
+      summary: List published products
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 80 } }
+        - { name: category, in: query, schema: { type: string } }
+        - { name: tag, in: query, schema: { type: string } }
+        - { name: minPrice, in: query, description: Rupees, schema: { type: number, minimum: 0 } }
+        - { name: maxPrice, in: query, description: Rupees, schema: { type: number, minimum: 0 } }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [featured, newest, price_asc, price_desc, rating, bestselling, discount]
+        - { name: personalizable, in: query, schema: { type: boolean } }
+        - { name: giftWrap, in: query, schema: { type: boolean } }
+        - { name: inStock, in: query, schema: { type: boolean } }
+        - { name: featured, in: query, schema: { type: boolean } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 48, default: 12 } }
+      responses:
+        '200':
+          description: Paged products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+
+  /catalog/products/{slug}:
+    get:
+      tags: [Catalogue]
+      summary: Product detail
+      parameters:
+        - $ref: '#/components/parameters/Slug'
+      responses:
+        '200':
+          description: Product with images, variants, reviews and related products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  product:
+                    $ref: '#/components/schemas/Product'
+                  related:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductSummary'
+                  returns:
+                    type: object
+                    additionalProperties: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /catalog/products/{slug}/reviews:
+    get:
+      tags: [Catalogue]
+      summary: Approved reviews for a product
+      parameters:
+        - $ref: '#/components/parameters/Slug'
+      responses:
+        '200':
+          description: Reviews and rating summary
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /catalog/gift-finder:
+    get:
+      tags: [Catalogue]
+      summary: Live-catalogue gift recommendations
+      parameters:
+        - { name: occasion, in: query, schema: { type: string } }
+        - { name: recipient, in: query, schema: { type: string } }
+        - { name: maxBudget, in: query, schema: { type: number, minimum: 0 } }
+        - { name: personalizable, in: query, schema: { type: boolean } }
+        - { name: giftWrap, in: query, schema: { type: boolean } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 48 } }
+      responses:
+        '200':
+          description: Recommendations with a note that they are not sponsored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+
+  /catalog/search/suggestions:
+    get:
+      tags: [Catalogue]
+      summary: Product and category suggestions
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 60 } }
+      responses:
+        '200':
+          description: Suggestions and popular queries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items: { type: string }
+                  popular:
+                    type: array
+                    items: { type: string }
+
+  /catalog/delivery/check:
+    get:
+      tags: [Catalogue]
+      summary: Serviceability and fee for a PIN code
+      parameters:
+        - { name: pincode, in: query, required: true, schema: { type: string, pattern: '^[1-9][0-9]{5}$' } }
+      responses:
+        '200':
+          description: Shipping quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingQuote'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Current cart with server quote
+      responses:
+        '200':
+          description: Cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+    delete:
+      tags: [Cart]
+      summary: Empty the cart
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '200':
+          description: Emptied cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add an item
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemInput'
+      responses:
+        '201':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /cart/items/{id}:
+    patch:
+      tags: [Cart]
+      summary: Update quantity, gift wrap or personalisation
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity: { type: integer, minimum: 1, maximum: 20 }
+                giftWrap: { type: boolean }
+                giftMessage: { type: string, maxLength: 180 }
+                personalization: { type: object, additionalProperties: { type: string } }
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+    delete:
+      tags: [Cart]
+      summary: Remove an item
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+  /cart/coupon:
+    post:
+      tags: [Cart]
+      summary: Apply a coupon
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, maxLength: 40 }
+      responses:
+        '200':
+          description: Cart with coupon result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+    delete:
+      tags: [Cart]
+      summary: Remove the coupon
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '200':
+          description: Cart without coupon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+  /cart/shipping:
+    post:
+      tags: [Cart]
+      summary: Set the delivery PIN and re-quote
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pincode]
+              properties:
+                pincode: { type: string, pattern: '^[1-9][0-9]{5}$' }
+      responses:
+        '200':
+          description: Cart with shipping quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /checkout:
+    post:
+      tags: [Checkout]
+      summary: Place an order from the current cart (COD)
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutInput'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/Order'
+                  idempotent: { type: boolean }
+                  notificationChannels:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channel: { type: string, enum: [email_customer, email_owner] }
+                        status: { type: string, enum: [queued, sent, failed, not_configured] }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Online payment or provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /orders/track:
+    get:
+      tags: [Checkout]
+      summary: Track an order by number and checkout email
+      description: Email may be omitted when signed in as the order owner.
+      parameters:
+        - { name: orderNumber, in: query, required: true, schema: { type: string } }
+        - { name: email, in: query, schema: { type: string, format: email } }
+      responses:
+        '200':
+          description: Order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderNumber}:
+    get:
+      tags: [Checkout]
+      summary: Order detail
+      parameters:
+        - $ref: '#/components/parameters/OrderNumber'
+        - { name: email, in: query, schema: { type: string, format: email } }
+      responses:
+        '200':
+          description: Order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderNumber}/invoice:
+    get:
+      tags: [Checkout]
+      summary: Printable invoice
+      parameters:
+        - $ref: '#/components/parameters/OrderNumber'
+        - { name: email, in: query, schema: { type: string, format: email } }
+      responses:
+        '200':
+          description: HTML invoice
+          content:
+            text/html:
+              schema: { type: string }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderNumber}/invoice.pdf:
+    get:
+      tags: [Checkout]
+      summary: Invoice PDF
+      parameters:
+        - $ref: '#/components/parameters/OrderNumber'
+        - { name: email, in: query, schema: { type: string, format: email } }
+      responses:
+        '200':
+          description: PDF invoice
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /account:
+    get:
+      tags: [Account]
+      summary: Profile and activity counts
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Profile and counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  counts:
+                    type: object
+                    additionalProperties: { type: integer }
+    patch:
+      tags: [Account]
+      summary: Update name and phone
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 80 }
+                phone:
+                  type: string
+                  pattern: '^[6-9][0-9]{9}$'
+                  description: Indian mobile number; +91 and separators are normalised
+      responses:
+        '200':
+          description: Updated profile
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /account/addresses:
+    get:
+      tags: [Account]
+      summary: List saved addresses
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Addresses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Address'
+    post:
+      tags: [Account]
+      summary: Create an address
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    $ref: '#/components/schemas/Address'
+
+  /account/addresses/{id}:
+    patch:
+      tags: [Account]
+      summary: Update an address
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [Account]
+      summary: Delete an address
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Deleted
+
+  /account/addresses/{id}/default:
+    post:
+      tags: [Account]
+      summary: Mark an address as default
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Default address updated
+
+  /account/orders:
+    get:
+      tags: [Account]
+      summary: Customer order history
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 20 } }
+      responses:
+        '200':
+          description: Paged orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  total: { type: integer }
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  pages: { type: integer }
+
+  /account/orders/{orderNumber}:
+    get:
+      tags: [Account]
+      summary: Own order detail
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/OrderNumber'
+      responses:
+        '200':
+          description: Order
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /account/orders/{orderNumber}/cancel:
+    post:
+      tags: [Account]
+      summary: Cancel a pending or confirmed order
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - $ref: '#/components/parameters/OrderNumber'
+      responses:
+        '200':
+          description: Cancelled order (stock restored)
+        '409':
+          description: Order can no longer be cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /account/wishlist:
+    get:
+      tags: [Account]
+      summary: Saved products
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Wishlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductSummary'
+
+  /account/wishlist/{productId}:
+    post:
+      tags: [Account]
+      summary: Add a product to the wishlist
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: productId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201':
+          description: Added
+    delete:
+      tags: [Account]
+      summary: Remove a product from the wishlist
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: productId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Removed
+
+  /account/reviews:
+    get:
+      tags: [Account]
+      summary: Own reviews
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    post:
+      tags: [Account]
+      summary: Submit a purchase-gated review for moderation
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewInput'
+      responses:
+        '202':
+          description: Awaiting moderation
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /account/returns:
+    get:
+      tags: [Account]
+      summary: Own return requests
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Return requests
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    post:
+      tags: [Account]
+      summary: Request a return for an order item
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnInput'
+      responses:
+        '201':
+          description: Return request recorded
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /content/site:
+    get:
+      tags: [Content]
+      summary: Store settings, attributed public listing, policies and capability labels
+      responses:
+        '200':
+          description: Site content
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /content/home:
+    get:
+      tags: [Content]
+      summary: Home page content and curated collections
+      responses:
+        '200':
+          description: Home content
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /content/support/tickets:
+    post:
+      tags: [Content]
+      summary: Save a contact message
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, subject, message]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 80 }
+                email: { type: string, format: email, maxLength: 160 }
+                subject: { type: string, minLength: 3, maxLength: 120 }
+                message: { type: string, minLength: 10, maxLength: 3000 }
+                orderNumber: { type: string, maxLength: 30 }
+      responses:
+        '201':
+          description: Ticket saved; no automated email is sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticketNumber: { type: string }
+                  message: { type: string }
+
+  /content/newsletter:
+    post:
+      tags: [Content]
+      summary: Record newsletter consent
+      description: Delivery is not configured; the response says so.
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, consent]
+              properties:
+                email: { type: string, format: email }
+                consent: { type: boolean }
+                source: { type: string, maxLength: 40 }
+      responses:
+        '201':
+          description: Consent recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  delivery: { type: string, const: not_configured }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Content]
+      summary: Unsubscribe an email
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: email, in: query, required: true, schema: { type: string, format: email } }
+      responses:
+        '200':
+          description: Unsubscribed
+
+  /admin/summary:
+    get:
+      tags: [Admin]
+      summary: Dashboard metrics (finance or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Metrics, recent orders and sales series
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/products:
+    get:
+      tags: [Admin]
+      summary: List all products (catalogue or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }
+      responses:
+        '200':
+          description: Paged products
+    post:
+      tags: [Admin]
+      summary: Create a product
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Created product
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /admin/products/{id}:
+    get:
+      tags: [Admin]
+      summary: Product detail for editing
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Product
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Admin]
+      summary: Update a product
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: Updated product
+
+  /admin/products/{id}/variants:
+    put:
+      tags: [Admin]
+      summary: Replace the product's variants
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [variants]
+              properties:
+                variants:
+                  type: array
+                  items:
+                    type: object
+                    required: [name, sku, stock]
+                    properties:
+                      name: { type: string, maxLength: 80 }
+                      sku: { type: string, maxLength: 60 }
+                      price: { type: [integer, 'null'], minimum: 0 }
+                      stock: { type: integer, minimum: 0, maximum: 1000000 }
+      responses:
+        '200':
+          description: Updated product
+
+  /admin/products/{id}/stock:
+    post:
+      tags: [Admin]
+      summary: Adjust stock with a reason
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [delta, reason]
+              properties:
+                variantId: { type: string }
+                delta: { type: integer, minimum: -100000, maximum: 100000, not: { const: 0 } }
+                reason: { type: string, minLength: 3, maxLength: 120 }
+      responses:
+        '200':
+          description: New stock value and movement recorded
+
+  /admin/categories:
+    get:
+      tags: [Admin]
+      summary: Categories with product counts
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Categories
+    post:
+      tags: [Admin]
+      summary: Create a category
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '201':
+          description: Created category
+
+  /admin/categories/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a category
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '200':
+          description: Updated category
+
+  /admin/orders:
+    get:
+      tags: [Admin]
+      summary: List orders (orders/finance or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: q, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }
+      responses:
+        '200':
+          description: Paged order summaries
+
+  /admin/orders/{id}:
+    get:
+      tags: [Admin]
+      summary: Order detail by id or order number
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Order
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /admin/orders/{id}/status:
+    post:
+      tags: [Admin]
+      summary: Change order status (orders or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, confirmed, packed, shipped, delivered, cancelled, returned]
+                note: { type: string, maxLength: 500 }
+                trackingNumber: { type: string, maxLength: 80 }
+                trackingUrl: { type: string, format: uri, pattern: '^https://' }
+      responses:
+        '200':
+          description: Updated order
+        '409':
+          description: Invalid transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{id}/note:
+    post:
+      tags: [Admin]
+      summary: Add an internal order note
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note: { type: string, minLength: 1, maxLength: 1000 }
+      responses:
+        '200':
+          description: Note added
+
+  /admin/orders/{id}/invoice:
+    get:
+      tags: [Admin]
+      summary: Invoice by id or order number
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: HTML invoice
+          content:
+            text/html:
+              schema: { type: string }
+
+  /admin/orders/{id}/invoice.pdf:
+    get:
+      tags: [Admin]
+      summary: Invoice PDF by id or order number
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: PDF invoice
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+
+  /admin/orders/{id}/notifications:
+    get:
+      tags: [Admin]
+      summary: Order message outbox (orders/finance/support or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Outbox rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channel: { type: string, enum: [email_customer, email_owner] }
+                        recipient: { type: string, format: email }
+                        status: { type: string, enum: [queued, sent, failed, not_configured] }
+                        error: { type: string }
+                        attempts: { type: integer }
+                        created_at: { type: string, format: date-time }
+                        sent_at: { type: string, format: date-time, nullable: true }
+
+  /admin/orders/{id}/notifications/resend:
+    post:
+      tags: [Admin]
+      summary: Resend a customer or owner order email (orders/support or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel]
+              properties:
+                channel: { type: string, enum: [email_customer, email_owner] }
+      responses:
+        '200':
+          description: Message sent
+        '503':
+          description: SMTP is not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/coupons:
+    get:
+      tags: [Admin]
+      summary: List coupons
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Coupons
+    post:
+      tags: [Admin]
+      summary: Create a coupon
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponInput'
+      responses:
+        '201':
+          description: Created coupon
+
+  /admin/coupons/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a coupon
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponInput'
+      responses:
+        '200':
+          description: Updated coupon
+
+  /admin/zones:
+    get:
+      tags: [Admin]
+      summary: List delivery zones
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Zones
+    post:
+      tags: [Admin]
+      summary: Create a delivery zone
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneInput'
+      responses:
+        '201':
+          description: Created zone
+
+  /admin/zones/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a delivery zone
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneInput'
+      responses:
+        '200':
+          description: Updated zone
+
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: Read settings (finance or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Settings and editable keys
+
+  /admin/settings/{key}:
+    put:
+      tags: [Admin]
+      summary: Update a setting
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [store, tax, giftWrap, cod, returns, operational, home, publicProfile, notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: {}
+      responses:
+        '200':
+          description: Updated setting
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /admin/reviews:
+    get:
+      tags: [Admin]
+      summary: Review moderation queue (support or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, approved, rejected] } }
+      responses:
+        '200':
+          description: Reviews
+
+  /admin/reviews/{id}/status:
+    post:
+      tags: [Admin]
+      summary: Approve or reject a review
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [approved, rejected] }
+      responses:
+        '200':
+          description: Updated review
+
+  /admin/tickets:
+    get:
+      tags: [Admin]
+      summary: Support inbox (support or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Tickets
+
+  /admin/tickets/{id}/status:
+    post:
+      tags: [Admin]
+      summary: Update ticket status
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [open, in_progress, closed] }
+      responses:
+        '200':
+          description: Updated ticket
+
+  /admin/returns:
+    get:
+      tags: [Admin]
+      summary: Return requests (orders/support or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Returns
+
+  /admin/returns/{id}/status:
+    post:
+      tags: [Admin]
+      summary: Advance a return request (orders or owner/admin)
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [requested, approved, rejected, received, refunded, closed]
+                adminNote: { type: string, maxLength: 1000 }
+      responses:
+        '200':
+          description: Updated return
+
+  /admin/customers:
+    get:
+      tags: [Admin]
+      summary: Customer list (orders/finance/support or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Customers
+
+  /admin/audit:
+    get:
+      tags: [Admin]
+      summary: Audit log (finance or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Audit entries
+
+  /admin/stock-movements:
+    get:
+      tags: [Admin]
+      summary: Stock movement history (catalogue/finance or owner/admin)
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Movements
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sc_session
+  parameters:
+    CsrfToken:
+      name: x-csrf-token
+      in: header
+      required: true
+      description: Must equal the `sc_csrf` cookie value.
+      schema: { type: string }
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string }
+    OrderNumber:
+      name: orderNumber
+      in: path
+      required: true
+      schema: { type: string, example: SC-20261024-ABC123 }
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Role or CSRF/origin check failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, example: VALIDATION_ERROR }
+            message: { type: string }
+            details:
+              oneOf:
+                - type: 'null'
+                - type: array
+                  items:
+                    type: object
+                    properties:
+                      field: { type: string }
+                      message: { type: string }
+    Health:
+      type: object
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        version: { type: string }
+        environment: { type: string }
+        database: { type: string, enum: [ok, error] }
+        uptimeSeconds: { type: number }
+        integrations:
+          type: object
+          properties:
+            onlinePayments: { type: string, enum: [not_configured, configured_unverified] }
+            email: { type: string, enum: [not_configured, configured_unverified] }
+            courier: { type: string, enum: [not_configured, configured_unverified] }
+            routeDistance: { type: string, enum: [not_configured, configured_unverified] }
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        phone: { type: [string, 'null'] }
+        role:
+          type: string
+          enum: [customer, owner, admin, catalogue, orders, support, finance]
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email, maxLength: 160 }
+        phone: { type: string, pattern: '^[6-9][0-9]{9}$' }
+        password: { type: string, minLength: 10 }
+    Category:
+      type: object
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        sort_order: { type: integer }
+        product_count: { type: integer }
+    ProductSummary:
+      type: object
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        sku: { type: string }
+        name: { type: string }
+        shortDescription: { type: string }
+        category:
+          type: object
+          properties:
+            slug: { type: string }
+            name: { type: string }
+        price: { type: integer }
+        compareAt: { type: [integer, 'null'] }
+        discountPercent: { type: integer }
+        image: { type: [string, 'null'] }
+        imageAlt: { type: string }
+        inStock: { type: boolean }
+        stock: { type: integer }
+        stockLabel: { type: string }
+        variantCount: { type: integer }
+        featured: { type: boolean }
+        personalizable: { type: boolean }
+        giftWrappable: { type: boolean }
+        rating:
+          type: object
+          properties:
+            average: { type: number }
+            count: { type: integer }
+        tags:
+          type: array
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
+    Product:
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - type: object
+          properties:
+            description: { type: string }
+            seoTitle: { type: string }
+            seoDescription: { type: string }
+            images:
+              type: array
+              items:
+                type: object
+                properties:
+                  url: { type: string }
+                  alt: { type: string }
+            variants:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string }
+                  name: { type: string }
+                  sku: { type: string }
+                  price: { type: integer }
+                  stock: { type: integer }
+                  inStock: { type: boolean }
+            specifications:
+              type: object
+              properties:
+                weightGrams: { type: integer }
+                dimensions:
+                  type: object
+                  properties:
+                    lengthMm: { type: integer }
+                    widthMm: { type: integer }
+                    heightMm: { type: integer }
+                hsnCode: { type: [string, 'null'] }
+                taxRateBps: { type: integer }
+                preparationDays: { type: integer }
+                returnEligible: { type: boolean }
+                fragile: { type: boolean }
+                giftWrappable: { type: boolean }
+                personalizable: { type: boolean }
+            ratingBreakdown:
+              type: array
+              items:
+                type: object
+                properties:
+                  stars: { type: integer }
+                  count: { type: integer }
+    ProductPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        pages: { type: integer }
+        explanation:
+          type: string
+          description: Present on gift-finder results only
+    ShippingQuote:
+      type: object
+      properties:
+        serviceable: { type: boolean }
+        pincode: { type: string }
+        zoneName: { type: [string, 'null'] }
+        fee: { type: integer }
+        freeAbove: { type: [integer, 'null'] }
+        freeApplied: { type: boolean }
+        etaDaysMin: { type: [integer, 'null'] }
+        etaDaysMax: { type: [integer, 'null'] }
+        message: { type: string }
+    CartItemInput:
+      type: object
+      required: [productId]
+      properties:
+        productId: { type: string }
+        variantId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 20, default: 1 }
+        giftWrap: { type: boolean, default: false }
+        giftMessage: { type: string, maxLength: 180 }
+        personalization:
+          type: object
+          additionalProperties: { type: string }
+    Cart:
+      type: object
+      properties:
+        cart:
+          $ref: '#/components/schemas/CartQuote'
+    CartQuote:
+      type: object
+      properties:
+        id: { type: string }
+        couponCode: { type: [string, 'null'] }
+        shippingPincode: { type: [string, 'null'] }
+        lines:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        itemCount: { type: integer }
+        uniqueItems: { type: integer }
+        subtotal: { type: integer }
+        discount: { type: integer }
+        giftWrapTotal: { type: integer }
+        shipping:
+          oneOf:
+            - $ref: '#/components/schemas/ShippingQuote'
+            - type: 'null'
+        shippingFee: { type: integer }
+        codFee: { type: integer }
+        taxIncluded: { type: integer }
+        taxExclusive: { type: integer }
+        taxMode: { type: string, enum: [inclusive, exclusive] }
+        total: { type: integer }
+        currency: { type: string, const: INR }
+        coupon:
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+        couponError: { type: [string, 'null'] }
+        issues:
+          type: array
+          items: { type: string }
+        requiresShipping: { type: boolean }
+        paymentMethods:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, enum: [cod, online] }
+              label: { type: string }
+              available: { type: boolean }
+              reason: { type: string }
+    AddressInput:
+      type: object
+      required: [recipient, phone, line1, city, state, pincode]
+      properties:
+        label: { type: string, maxLength: 30 }
+        recipient: { type: string, minLength: 2, maxLength: 80 }
+        phone: { type: string, pattern: '^[6-9][0-9]{9}$' }
+        line1: { type: string, minLength: 5, maxLength: 160 }
+        line2: { type: string, maxLength: 160 }
+        city: { type: string, minLength: 2, maxLength: 80 }
+        state: { type: string, minLength: 2, maxLength: 80 }
+        pincode: { type: string, pattern: '^[1-9][0-9]{5}$' }
+        isDefault: { type: boolean }
+    Address:
+      allOf:
+        - $ref: '#/components/schemas/AddressInput'
+        - type: object
+          properties:
+            id: { type: string }
+            createdAt: { type: string, format: date-time }
+    CheckoutInput:
+      type: object
+      required: [contact, shippingAddress, acceptTerms]
+      properties:
+        contact:
+          type: object
+          required: [name, email, phone]
+          properties:
+            name: { type: string, minLength: 2, maxLength: 80 }
+            email: { type: string, format: email, maxLength: 160 }
+            phone: { type: string, pattern: '^[6-9][0-9]{9}$' }
+        shippingAddress:
+          $ref: '#/components/schemas/AddressInput'
+        billingSameAsShipping: { type: boolean, default: true }
+        billingAddress:
+          $ref: '#/components/schemas/AddressInput'
+        couponCode: { type: string, maxLength: 40 }
+        paymentMethod: { type: string, enum: [cod, online], default: cod }
+        giftMessage: { type: string, maxLength: 180 }
+        customerNote: { type: string, maxLength: 500 }
+        idempotencyKey: { type: string, minLength: 8, maxLength: 100 }
+        acceptTerms: { type: boolean, const: true }
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        orderNumber: { type: string }
+        customer: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        status:
+          type: string
+          enum: [pending, confirmed, packed, shipped, delivered, cancelled, returned]
+        paymentMethod: { type: string, enum: [cod, online] }
+        paymentStatus: { type: string, enum: [cod_pending, paid, failed, refunded] }
+        subtotal: { type: integer }
+        discount: { type: integer }
+        giftWrapTotal: { type: integer }
+        shippingFee: { type: integer }
+        taxIncluded: { type: integer }
+        taxExclusive: { type: integer }
+        total: { type: integer }
+        currency: { type: string }
+        couponCode: { type: [string, 'null'] }
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        trackingNumber: { type: [string, 'null'] }
+        trackingUrl: { type: [string, 'null'] }
+        delivery:
+          type: object
+          properties:
+            pincode: { type: string }
+            zone: { type: [string, 'null'] }
+            etaDaysMin: { type: [integer, 'null'] }
+            etaDaysMax: { type: [integer, 'null'] }
+        createdAt: { type: string, format: date-time }
+        notifications:
+          type: object
+          properties:
+            email: { type: string, enum: [not_configured, configured, queued, sent, failed] }
+            sms: { type: string, const: not_configured }
+            whatsapp: { type: string, enum: [not_configured, click_to_chat] }
+            whatsappNumber: { type: string }
+            whatsappAutoOpen: { type: boolean }
+    ReviewInput:
+      type: object
+      required: [orderNumber, productId, rating, body]
+      properties:
+        orderNumber: { type: string }
+        productId: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        title: { type: string, maxLength: 80 }
+        body: { type: string, minLength: 10, maxLength: 1500 }
+    ReturnInput:
+      type: object
+      required: [orderNumber, orderItemId, reason]
+      properties:
+        orderNumber: { type: string }
+        orderItemId: { type: string }
+        reason:
+          type: string
+          enum: [damaged, wrong_item, not_as_described, changed_mind, other]
+        detail: { type: string, maxLength: 1000 }
+    ProductInput:
+      type: object
+      required: [name, sku, categoryId, price]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 140 }
+        slug:
+          type: string
+          maxLength: 80
+          pattern: '^[a-z0-9-]+$'
+          description: Optional; generated from the name when absent
+        sku: { type: string, minLength: 2, maxLength: 60 }
+        categoryId: { type: string }
+        shortDescription: { type: string, maxLength: 300, default: '' }
+        description: { type: string, maxLength: 6000, default: '' }
+        price: { type: integer, minimum: 1 }
+        salePrice: { type: [integer, 'null'], minimum: 0 }
+        mrp: { type: [integer, 'null'], minimum: 0 }
+        costPrice: { type: [integer, 'null'], minimum: 0 }
+        taxRateBps: { type: integer, minimum: 0, maximum: 2800, default: 500 }
+        hsnCode: { type: string, maxLength: 20 }
+        stockQuantity: { type: integer, minimum: 0, maximum: 1000000, default: 0 }
+        lowStockThreshold: { type: integer, minimum: 0, maximum: 10000, default: 5 }
+        weightG: { type: integer, minimum: 0, maximum: 100000, default: 400 }
+        status:
+          type: string
+          enum: [draft, scheduled, published, unpublished, archived, discontinued]
+          default: draft
+        featured: { type: boolean, default: false }
+        giftWrappable: { type: boolean, default: true }
+        personalizable: { type: boolean, default: false }
+        returnEligible: { type: boolean, default: true }
+        fragile: { type: boolean, default: false }
+        tags:
+          type: array
+          maxItems: 30
+          items: { type: string, maxLength: 30 }
+        imageAlt: { type: string, maxLength: 200 }
+        seoTitle: { type: string, maxLength: 160 }
+        seoDescription: { type: string, maxLength: 300 }
+        searchKeywords: { type: string, maxLength: 500 }
+        lengthMm: { type: integer, minimum: 0, maximum: 100000, default: 0 }
+        widthMm: { type: integer, minimum: 0, maximum: 100000, default: 0 }
+        heightMm: { type: integer, minimum: 0, maximum: 100000, default: 0 }
+        preparationDays: { type: integer, minimum: 0, maximum: 90, default: 1 }
+        images:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            required: [url, alt]
+            properties:
+              url:
+                type: string
+                maxLength: 500
+                pattern: '^(/|https://)'
+              alt: { type: string, minLength: 1, maxLength: 200 }
+        variants:
+          type: array
+          maxItems: 30
+          items:
+            type: object
+            required: [name, sku, stock]
+            properties:
+              name: { type: string, maxLength: 80 }
+              sku: { type: string, maxLength: 60 }
+              price: { type: [integer, 'null'], minimum: 0 }
+              stock: { type: integer, minimum: 0, maximum: 1000000 }
+    ProductUpdate:
+      type: object
+      additionalProperties: true
+      description: Any subset of ProductInput fields; the server validates the provided fields.
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        slug: { type: string, maxLength: 80 }
+        description: { type: string, maxLength: 300 }
+        sortOrder: { type: integer }
+        isActive: { type: boolean }
+    CouponInput:
+      type: object
+      required: [code, kind, value]
+      properties:
+        code: { type: string, maxLength: 40 }
+        kind: { type: string, enum: [percent, fixed, free_shipping] }
+        value: { type: integer, minimum: 0, description: Percent (1000 = 10%) or paise for fixed }
+        minSubtotal: { type: integer, minimum: 0 }
+        maxDiscount: { type: [integer, 'null'], minimum: 0 }
+        startsAt: { type: [string, 'null'], format: date-time }
+        endsAt: { type: [string, 'null'], format: date-time }
+        usageLimit: { type: [integer, 'null'], minimum: 1 }
+        perEmailLimit: { type: integer, minimum: 1, default: 1 }
+        firstOrderOnly: { type: boolean }
+        isActive: { type: boolean }
+    ZoneInput:
+      type: object
+      required: [name, pincodes, fee]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        pincodes:
+          type: string
+          description: Comma/space separated 6-digit PINs and `start-end` ranges
+        fee: { type: integer, minimum: 0 }
+        freeAbove: { type: [integer, 'null'], minimum: 0 }
+        etaDaysMin: { type: integer, minimum: 0 }
+        etaDaysMax: { type: integer, minimum: 0 }
+        isActive: { type: boolean }
+        sortOrder: { type: integer }

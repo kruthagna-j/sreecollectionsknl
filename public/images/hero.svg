@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200" role="img">
+  <defs>
+    <linearGradient id="hbg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#f3e9db"/>
+      <stop offset="0.55" stop-color="#ead7c9"/>
+      <stop offset="1" stop-color="#d9bdb4"/>
+    </linearGradient>
+    <radialGradient id="hglow" cx="0.6" cy="0.35" r="0.6">
+      <stop offset="0" stop-color="#fff8ea" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#fff8ea" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hgold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c793"/>
+      <stop offset="0.5" stop-color="#b58b4a"/>
+      <stop offset="1" stop-color="#8f6a35"/>
+    </linearGradient>
+    <linearGradient id="hvelvet" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#81283a"/>
+      <stop offset="0.55" stop-color="#5c1826"/>
+      <stop offset="1" stop-color="#3f0f1a"/>
+    </linearGradient>
+    <linearGradient id="hivory" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#e9d9bf"/>
+    </linearGradient>
+    <pattern id="hgrain" width="7" height="7" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.8" fill="#3a2a22" opacity="0.045"/>
+      <circle cx="5" cy="5" r="0.6" fill="#3a2a22" opacity="0.035"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#hbg)"/>
+  <ellipse cx="900" cy="480" rx="760" ry="640" fill="url(#hglow)"/>
+  <path d="M690 1030V420c0-210 170-380 380-380s380 170 380 380v610" fill="#f6eddc" opacity="0.45"/>
+  <path d="M710 1030V428c0-198 160-358 358-358s358 160 358 358v602" fill="none" stroke="url(#hgold)" stroke-opacity="0.5" stroke-width="2"/>
+  <path d="M300 1020h1100" stroke="url(#hgold)" stroke-opacity="0.35" stroke-width="2"/>
+  <ellipse cx="960" cy="1025" rx="470" ry="50" fill="#4a2f26" opacity="0.12"/>
+
+  <g transform="translate(960 780)">
+    <path d="M-330-80 0-220 330-80v300L0 380-330 220z" fill="url(#hvelvet)"/>
+    <path d="M-330-80 0 60v320L-330 220z" fill="#4a1220"/>
+    <path d="M330-80 0 60v320l330-160z" fill="#6b1f2e"/>
+    <path d="M-330-80 0-220 330-80 0 60z" fill="#8a2e40"/>
+    <path d="M0-220v-52M0 60v320" stroke="url(#hgold)" stroke-width="26"/>
+    <path d="M-330-80 0 60 330-80" fill="none" stroke="url(#hgold)" stroke-width="18" stroke-linejoin="round"/>
+    <g transform="translate(0 -252) scale(1.15)">
+      <path d="M0 8C-36 -14 -74 -8 -78 12c-4 23 32 34 78 12" fill="url(#hgold)"/>
+      <path d="M0 8C36 -14 74 -8 78 12c4 23-32 34-78 12" fill="url(#hgold)"/>
+      <rect x="-13" y="-2" width="26" height="24" rx="7" fill="#a9814c"/>
+    </g>
+    <path d="M-240 190c70-46 150-52 220-14" fill="none" stroke="#d4ae72" stroke-width="2" opacity="0.45"/>
+  </g>
+
+  <g transform="translate(450 880)">
+    <ellipse cx="0" cy="150" rx="170" ry="24" fill="#3a2a22" opacity="0.12"/>
+    <rect x="-92" y="-40" width="184" height="200" rx="10" fill="url(#hivory)"/>
+    <rect x="-92" y="-40" width="184" height="34" fill="#dbc6a4"/>
+    <path d="M-92 30h184" stroke="#c7ae87" stroke-width="2" opacity="0.7"/>
+    <ellipse cx="-46" cy="-70" rx="44" ry="16" fill="#e8d3b2"/>
+    <path d="M-46-78v-22" stroke="#4a3524" stroke-width="4"/>
+    <path d="M-46-120c-10-12 0-26 8-34 6 12 10 24-3 34z" fill="#efb05c"/>
+    <ellipse cx="52" cy="-58" rx="36" ry="42" fill="#b98e5f"/>
+    <path d="M28-68h48M34-48h36" stroke="#8a5f38" stroke-width="3" opacity="0.6"/>
+    <g transform="translate(0 120) scale(0.7)">
+      <path d="M0 8C-36 -14 -74 -8 -78 12c-4 23 32 34 78 12" fill="url(#hgold)"/>
+      <path d="M0 8C36 -14 74 -8 78 12c4 23-32 34-78 12" fill="url(#hgold)"/>
+      <rect x="-13" y="-2" width="26" height="24" rx="7" fill="#a9814c"/>
+    </g>
+  </g>
+
+  <g transform="translate(1320 900)">
+    <ellipse cx="0" cy="120" rx="120" ry="20" fill="#3a2a22" opacity="0.12"/>
+    <rect x="-58" y="-60" width="116" height="180" rx="14" fill="#c07a32" opacity="0.9"/>
+    <ellipse cx="0" cy="-60" rx="58" ry="15" fill="#f4d9b4"/>
+    <ellipse cx="0" cy="-60" rx="48" ry="10" fill="#a87543"/>
+    <path d="M0-72v-22" stroke="#4a3524" stroke-width="4"/>
+    <path d="M0-118c-10-12 0-26 8-34 6 12 10 24-3 34z" fill="#efb05c"/>
+    <rect x="-40" y="-16" width="80" height="48" rx="4" fill="#f7eddc" opacity="0.9"/>
+    <path d="M-24 0h48M-24 12h30" stroke="#8a7259" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  </g>
+
+  <g transform="translate(250 990) scale(1.1)">
+    <circle r="46" fill="#8f3445"/>
+    <path d="M-40-10c6-30 32-46 58-40 30 7 44 34 34 58-9 22-34 36-58 28-22-8-34-26-34-46z" fill="#9d4353" opacity="0.75"/>
+    <path d="M-26-6c4-18 21-28 38-24 19 4 28 21 22 36-6 14-21 22-36 17-14-5-21-16-24-29z" fill="#c37786"/>
+    <path d="M-44 22c-12 10-22 22-28 34" stroke="#5f6a4f" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(1440 760) scale(0.8)">
+    <circle r="46" fill="#9d4353"/>
+    <path d="M-26-6c4-18 21-28 38-24 19 4 28 21 22 36-6 14-21 22-36 17-14-5-21-16-24-29z" fill="#c37786"/>
+  </g>
+  <rect width="1600" height="1200" fill="url(#hgrain)"/>
+  <rect x="28" y="28" width="1544" height="1144" fill="none" stroke="url(#hgold)" stroke-opacity="0.25"/>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="270 400 660 825" width="1200" height="1500" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#f2e6df"/>
+      <stop offset="1" stop-color="#e5d1c9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#fff3ea" stop-opacity="0.95"/>
+      <stop offset="0.65" stop-color="#fff3ea" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#fff3ea" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c793"/>
+      <stop offset="0.45" stop-color="#b58b4a"/>
+      <stop offset="1" stop-color="#8f6a35"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#d9b878"/>
+      <stop offset="0.55" stop-color="#a9814c"/>
+      <stop offset="1" stop-color="#7f5d30"/>
+    </linearGradient>
+    <linearGradient id="velvet" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#81283a"/>
+      <stop offset="0.55" stop-color="#5c1826"/>
+      <stop offset="1" stop-color="#3f0f1a"/>
+    </linearGradient>
+    <linearGradient id="ivory" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#ecdfc9"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6a85c" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#c07a32" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#8a4e1e" stop-opacity="0.9"/>
+    </linearGradient>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.7" fill="#3a2525" opacity="0.05"/>
+      <circle cx="4" cy="4" r="0.55" fill="#3a2525" opacity="0.035"/>
+    </pattern>
+    <pattern id="linen" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M0 7H14M7 0V14" stroke="#3a2525" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)"/>
+  <ellipse cx="600" cy="660" rx="560" ry="520" fill="url(#glow)"/>
+  <path d="M250 1040V520c0-193 157-350 350-350s350 157 350 350v520" fill="none" stroke="url(#gold)" stroke-opacity="0.36" stroke-width="2"/>
+  <path d="M278 1060V528c0-180 144-324 322-324s322 144 322 324v532" fill="none" stroke="url(#gold)" stroke-opacity="0.18" stroke-width="1"/>
+  <ellipse cx="600" cy="1165" rx="320" ry="38" fill="#3a2a22" opacity="0.13"/>
+  <g>
+  <ellipse cx="600" cy="1140" rx="250" ry="36" fill="#3a2a22" opacity="0.16"/>
+  <g transform="translate(600 880)">
+    <path d="M-240-40c40-160 140-230 240-230S440-200 480-40" fill="none" stroke="url(#gold)" stroke-width="4" stroke-dasharray="2 8" opacity="0.75"/>
+    <path d="M-170-330c-90 60-140 170-120 300 10 70 42 120 0 150-40 30-100-20-80-100 20-90 90-260 200-350z" fill="#7e2a3a" opacity="0.25"/>
+    <circle cx="0" cy="-70" r="210" fill="url(#gold)"/>
+    <circle cx="0" cy="-70" r="186" fill="#ecd7ae"/>
+    <circle cx="0" cy="-70" r="160" fill="url(#gold)"/>
+    <circle cx="0" cy="-70" r="130" fill="#7a2434"/>
+    <circle cx="0" cy="-70" r="108" fill="#f1dfbe"/>
+    <path d="M-40-100c0-22 18-40 40-40s40 18 40 40c0 18-12 32-28 38v30h-24v-30c-16-6-28-20-28-38z" fill="#97515d" opacity="0.5"/>
+    <path d="M-54-10h108M-36 20h72M-22 48h44" stroke="#8f6a35" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
+    <circle cx="0" cy="-276" r="20" fill="none" stroke="url(#gold)" stroke-width="9"/>
+    <path d="M0-70c-70 220-30 380 0 430 30-50 70-210 0-430z" fill="#a67c46" opacity="0.22"/>
+  </g>
+  <path d="M330 1000c60-20 110-8 150 30" stroke="#c9a46c" stroke-width="2" fill="none" opacity="0.6"/>
+  <g transform="translate(880 1030) scale(0.66)">
+    <circle r="46" fill="#8f3445"/>
+    <path d="M-40-10c6-30 32-46 58-40 30 7 44 34 34 58-9 22-34 36-58 28-22-8-34-26-34-46z" fill="#8f3445" opacity="0.7"/>
+    <path d="M-26-6c4-18 21-28 38-24 19 4 28 21 22 36-6 14-21 22-36 17-14-5-21-16-24-29z" fill="#c37786" opacity="0.85"/>
+    <path d="M-12-4c3-9 11-14 20-12 9 2 14 10 11 18-3 7-10 11-18 9-7-2-11-8-13-15z" fill="#7d2d3d"/>
+    <path d="M-44 22c-12 10-22 22-28 34" stroke="#5f6a4f" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M-58 42c-14-2-24-10-30-20 13-4 25-1 34 8" fill="#6d7758"/>
+  </g>
+</g>
+  <rect width="1200" height="1500" fill="url(#grain)"/>
+  <rect x="34" y="34" width="1132" height="1432" fill="none" stroke="url(#gold)" stroke-opacity="0.22"/>
+</svg>
